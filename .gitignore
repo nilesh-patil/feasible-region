@@ -1,0 +1,25 @@
+# pixi
+.pixi/
+pixi.lock
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+.pytest_cache/
+.venv/
+
+# rust
+target/
+Cargo.lock
+
+# wasm build intermediates (final wasm in docs/wasm/ IS committed for Pages)
+crates/feasible-core/pkg/
+
+# local tooling
+.claude/
+
+# os / editor
+.DS_Store
+*.swp

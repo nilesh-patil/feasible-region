@@ -1,0 +1,24 @@
+[workspace]
+name = "feasible-region"
+description = "A visual field guide to linear programming: one simplex core in Rust, bound to Python, animated in the browser"
+authors = ["Nilesh Patil <4813079+nilesh-patil@users.noreply.github.com>"]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64"]
+
+[dependencies]
+python = "3.11.*"
+rust = ">=1.67"
+maturin = ">=0.14"
+pytest = ">=7.2"
+numpy = ">=1.24"
+scipy = ">=1.10"
+
+[tasks]
+# -- develop --
+test-py = { cmd = "pytest tests/ -v", description = "Python reference implementation tests" }
+test-rs = { cmd = "cargo test --manifest-path crates/feasible-core/Cargo.toml", description = "Rust core tests" }
+test = { depends-on = ["test-py", "test-rs"], description = "Full test suite" }
+
+# -- site --
+traces = { cmd = "python -m feasible_region.traces --out traces/", description = "Regenerate precomputed pivot traces (site fallback + test fixtures)" }
+serve = { cmd = "python -m http.server 8137 -d docs", description = "Serve the site locally at http://localhost:8137" }
