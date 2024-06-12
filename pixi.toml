@@ -12,6 +12,8 @@ maturin = ">=0.14"
 pytest = ">=7.2"
 numpy = ">=1.24"
 scipy = ">=1.10"
+wasm-pack = ">=0.10"
+rust-std-wasm32-unknown-unknown = "*"
 
 [tasks]
 # -- develop --
@@ -20,5 +22,6 @@ test-rs = { cmd = "cargo test --manifest-path crates/feasible-core/Cargo.toml", 
 test = { depends-on = ["test-py", "test-rs"], description = "Full test suite" }
 
 # -- site --
+build-wasm = { cmd = "wasm-pack build crates/feasible-wasm --release --target web --out-dir ../../docs/wasm --out-name feasible_core", description = "Build the solver to WASM into docs/wasm/ (release only)" }
 traces = { cmd = "python -m feasible_region.traces --out traces/", description = "Regenerate precomputed pivot traces (site fallback + test fixtures)" }
 serve = { cmd = "python -m http.server 8137 -d docs", description = "Serve the site locally at http://localhost:8137" }
