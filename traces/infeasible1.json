@@ -1,0 +1,129 @@
+{
+  "schema": "feasible-trace/v1",
+  "problem": {
+    "direction": "maximize",
+    "objective": [
+      1.0,
+      1.0
+    ],
+    "constraints": [
+      {
+        "coeffs": [
+          1.0,
+          1.0
+        ],
+        "op": "le",
+        "rhs": 2.0
+      },
+      {
+        "coeffs": [
+          1.0,
+          1.0
+        ],
+        "op": "ge",
+        "rhs": 6.0
+      }
+    ],
+    "var_names": [
+      "x1",
+      "x2"
+    ]
+  },
+  "steps": [
+    {
+      "iter": 0,
+      "phase": 1,
+      "tableau": [
+        [
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        [
+          1.0,
+          1.0,
+          0.0,
+          -1.0,
+          1.0,
+          6.0
+        ],
+        [
+          1.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          6.0
+        ]
+      ],
+      "basis": [
+        2,
+        4
+      ],
+      "vertex": [
+        0.0,
+        0.0
+      ],
+      "entering": 0,
+      "leaving": 2,
+      "objective_value": 0.0,
+      "rule": "dantzig"
+    },
+    {
+      "iter": 1,
+      "phase": 1,
+      "tableau": [
+        [
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          -1.0,
+          1.0,
+          4.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          -1.0,
+          0.0,
+          4.0
+        ]
+      ],
+      "basis": [
+        0,
+        4
+      ],
+      "vertex": [
+        2.0,
+        0.0
+      ],
+      "entering": null,
+      "leaving": null,
+      "objective_value": 2.0,
+      "rule": "dantzig"
+    }
+  ],
+  "result": {
+    "status": "infeasible",
+    "x": [],
+    "objective_value": 0.0,
+    "duals": null
+  },
+  "geometry": {
+    "vertices": [],
+    "edges": [],
+    "bounded": true
+  }
+}

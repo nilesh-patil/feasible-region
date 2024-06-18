@@ -23,5 +23,6 @@ test = { depends-on = ["test-py", "test-rs"], description = "Full test suite" }
 
 # -- site --
 build-wasm = { cmd = "wasm-pack build crates/feasible-wasm --release --target web --out-dir ../../docs/wasm --out-name feasible_core", description = "Build the solver to WASM into docs/wasm/ (release only)" }
-traces = { cmd = "python -m feasible_region.traces --out traces/", description = "Regenerate precomputed pivot traces (site fallback + test fixtures)" }
+traces = { cmd = "python -m feasible_region.traces --out traces/ --central-path", env = { PYTHONPATH = "python" }, description = "Regenerate precomputed pivot traces (site fallback + test fixtures)" }
+traces-check = { cmd = "python -m feasible_region.traces --check --out traces/", env = { PYTHONPATH = "python" }, description = "Fail if committed traces drift from the current solver" }
 serve = { cmd = "python -m http.server 8137 -d docs", description = "Serve the site locally at http://localhost:8137" }
