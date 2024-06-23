@@ -26,3 +26,4 @@ build-wasm = { cmd = "wasm-pack build crates/feasible-wasm --release --target we
 traces = { cmd = "python -m feasible_region.traces --out traces/ --central-path", env = { PYTHONPATH = "python" }, description = "Regenerate precomputed pivot traces (site fallback + test fixtures)" }
 traces-check = { cmd = "python -m feasible_region.traces --check --out traces/", env = { PYTHONPATH = "python" }, description = "Fail if committed traces drift from the current solver" }
 serve = { cmd = "python -m http.server 8137 -d docs", description = "Serve the site locally at http://localhost:8137" }
+sync-site-data = { cmd = "mkdir -p docs/traces && cp traces/*.json docs/traces/", description = "Copy golden traces into docs/ (GitHub Pages serves docs/ only)" }
