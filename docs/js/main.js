@@ -20,6 +20,10 @@
 const FIGURE_MODULES = {
   hero: () => import("./figures/hero.js"),
   dualview: () => import("./figures/dualview.js"),
+  formulation: () => import("./figures/formulation.js"), // s2, data-figure="formulation"
+  duality: () => import("./figures/duality.js"),         // s4, data-figure="duality"
+  kleeminty: () => import("./figures/kleeminty.js"),     // s5, data-figure="kleeminty"
+  maxflow: () => import("./figures/maxflow.js"),         // s6, data-figure="maxflow"
 };
 
 const prefersReducedMotion = window.matchMedia(

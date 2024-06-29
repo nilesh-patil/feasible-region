@@ -16,6 +16,7 @@
 // ==========================================================================
 
 import { fmt } from "../lp2d.js";
+import { linkFigure } from "../sync.js";
 
 const SVGNS = "http://www.w3.org/2000/svg";
 const COS30 = Math.cos(Math.PI / 6);
@@ -175,7 +176,12 @@ export default async function mount(box, ctx) {
   // ---- controls: native range scrubber + prev / next / play ------------
   const prevBtn = htmlEl("button", { type: "button", class: "btn dv-step-btn" }, "Prev");
   const nextBtn = htmlEl("button", { type: "button", class: "btn dv-step-btn" }, "Next");
-  const playBtn = htmlEl("button", { type: "button", class: "btn dv-play", "aria-pressed": "false" }, "Play");
+  // Autoplay is a motion affordance: under prefers-reduced-motion there is no
+  // play button at all (nothing pulses), only the scrubber and prev / next. Every
+  // reference below is guarded with `playBtn &&` so the null case is inert.
+  const playBtn = ctx.prefersReducedMotion
+    ? null
+    : htmlEl("button", { type: "button", class: "btn dv-play", "aria-pressed": "false" }, "Play");
   const range = htmlEl("input", {
     type: "range", class: "scrubber", min: "0", max: String(nSteps - 1), step: "1",
     "aria-label": "Simplex iteration",
@@ -230,20 +236,37 @@ export default async function mount(box, ctx) {
     if (p[0] > PANEL_W - 70) currentLabel.setAttribute("x", p[0] - 10);
     currentLabel.textContent = `(${fmt(v[0])}, ${fmt(v[1])}, ${fmt(v[2])})`;
 
-    // shared data-key ties the lit vertex to the lit pivot column
-    const key = `pivot-${cur}`;
-    current.setAttribute("data-key", key);
-
     renderTableau(step);
-    if (step.entering != null && step.entering < nVars) {
+
+    // Shared data-key ties one pivot step into a single group so hovering or
+    // focusing any member lights the rest across both panels (contract section 3):
+    // the current vertex, the trail edge that led into it, the entering column
+    // header, and the leaving row head. On the optimal step there is no entering
+    // column, so the vertex pairs with the z-row head instead. The key is cleared
+    // from every candidate first, so only this step's group is ever lit.
+    const key = `pivot:${cur}`;
+    current.setAttribute("data-key", key);
+    trailEls.forEach((line) => line.removeAttribute("data-key"));
+    if (cur > 0) trailEls[cur - 1].setAttribute("data-key", key);
+    headCells.forEach((th) => th.removeAttribute("data-key"));
+    bodyRows.forEach(({ rowHead }) => rowHead.removeAttribute("data-key"));
+    const leaveRow = step.leaving == null ? -1 : step.basis.indexOf(step.leaving);
+    if (step.entering != null && step.entering >= 0 && step.entering < nVars) {
       headCells[step.entering].setAttribute("data-key", key);
+      if (leaveRow >= 0) bodyRows[leaveRow].rowHead.setAttribute("data-key", key);
+    } else {
+      bodyRows[nRows - 1].rowHead.setAttribute("data-key", key); // z-row head
     }
-    headCells.forEach((th, c) => {
-      if (step.entering == null || c !== step.entering) th.removeAttribute("data-key");
-    });
 
     // controls
     range.value = String(cur);
+    // Announce the step with its real vertex, not a bare number, and keep
+    // aria-valuenow matched to it (A3).
+    range.setAttribute("aria-valuenow", String(cur));
+    range.setAttribute(
+      "aria-valuetext",
+      `Step ${cur} of ${nSteps - 1}, vertex (${fmt(v[0])}, ${fmt(v[1])}, ${fmt(v[2])})`
+    );
     stepTag.textContent = `step ${cur} of ${nSteps - 1}`;
     prevBtn.disabled = cur === 0;
     nextBtn.disabled = cur === nSteps - 1;
@@ -277,10 +300,13 @@ export default async function mount(box, ctx) {
       clearInterval(timer);
       timer = null;
     }
-    playBtn.setAttribute("aria-pressed", "false");
-    playBtn.textContent = "Play";
+    if (playBtn) {
+      playBtn.setAttribute("aria-pressed", "false");
+      playBtn.textContent = "Play";
+    }
   }
   function startPlay() {
+    if (!playBtn) return; // no autoplay under reduced motion
     if (cur === nSteps - 1) setStep(0); // replay from the start
     playBtn.setAttribute("aria-pressed", "true");
     playBtn.textContent = "Pause";
@@ -290,7 +316,7 @@ export default async function mount(box, ctx) {
         return;
       }
       setStep(cur + 1);
-    }, ctx.prefersReducedMotion ? 1400 : 900);
+    }, 900);
   }
 
   prevBtn.addEventListener("click", () => {
@@ -301,7 +327,8 @@ export default async function mount(box, ctx) {
     stopPlay();
     setStep(cur + 1);
   });
-  playBtn.addEventListener("click", () => (timer ? stopPlay() : startPlay()));
+  playBtn &&
+    playBtn.addEventListener("click", () => (timer ? stopPlay() : startPlay()));
   range.addEventListener("input", () => {
     stopPlay();
     setStep(parseInt(range.value, 10) || 0);
@@ -323,7 +350,7 @@ export default async function mount(box, ctx) {
   // ---- mount: swap the authored stills for the live views --------------
   if (controls) {
     controls.textContent = "";
-    controls.append(prevBtn, range, nextBtn, playBtn, stepTag);
+    controls.append(prevBtn, range, nextBtn, ...(playBtn ? [playBtn] : []), stepTag);
   }
   if (tableauPanel) {
     const wrap = htmlEl("div", { class: "tableau-scroll" });
@@ -336,5 +363,12 @@ export default async function mount(box, ctx) {
   else box.appendChild(svg);
 
   render();
+
+  // Wire linked brushing across the whole figure: one delegated pointer + focus
+  // listener set so hovering or focusing any keyed element (a vertex, a trail
+  // edge, an entering column, a leaving row) lights every element sharing its
+  // pivot key across both panels. Idempotent, so a re-hydrate never double-wires.
+  linkFigure(box.closest("figure"));
+
   ctx.setEngine("trace"); // every number here is replayed from topic21.json
 }
