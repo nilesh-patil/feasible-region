@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Feasible Region - a visual field guide to linear programming</title>
-  <meta name="description" content="A distill-style interactive field guide to linear programming: drag the constraints, walk the corners, and read the simplex tableau, from a hand-cranked 1939 diet to a starship's fabricator bay.">
+  <meta name="description" content="Drag the constraints, walk the corners a solver walks, and read the simplex tableau, from a hand-cranked 1939 diet to a starship's fabricator bay.">
 
   <!-- Inline SVG favicon (a feasible region with its best corner marked), so the
        browser's automatic icon request is served, not a 404. Self-contained data
@@ -191,7 +191,7 @@
   <header class="site-header">
     <div class="l-body">
       <div class="header-top">
-        <p class="eyebrow">A visual field guide</p>
+        <p class="eyebrow">Linear programming, made visible</p>
         <button type="button" class="theme-toggle" data-role="theme-toggle"
                 aria-pressed="false" aria-label="Switch to dark theme" title="Switch to dark theme">
           <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
@@ -202,10 +202,11 @@
         </button>
       </div>
       <h1>Feasible Region</h1>
-      <p class="dek">Linear programming, told as pictures you can touch. Drag the
-        constraints, watch the shaded region flex, walk the corners a solver
-        walks, and read the tableau that walks with them.</p>
-      <p class="byline">One simplex core in Rust, bound to Python, replayed in the
+      <p class="dek">The best way to divide a limited budget is almost never a
+        comfortable middle; it sits on a corner where two limits meet. Drag the
+        constraints to reshape what is possible, walk the corners a solver walks,
+        and read the tableau that walks with them.</p>
+      <p class="byline">One simplex solver, traced step by step and replayed in the
         browser. Every number is checked against an independent solver.</p>
     </div>
   </header>
@@ -241,7 +242,7 @@
           General Systems Vehicle Marginal Utility provisions itself every few
           milliseconds: what to fabricate, what to spend, what to keep in reserve,
           against limits that shift by the second. It settles Stigler's question,
-          and harder ones, before the thought finishes. This is a field guide to how.</p>
+          and harder ones, before the thought finishes. Here is how it does that.</p>
       </div>
     </section>
 
@@ -255,7 +256,7 @@
       <div class="l-page">
         <figure>
           <p class="notice">What to notice: the best point is never in the middle.
-            It sits on a corner where two limits meet.</p>
+            It is forced onto a corner where two limits cross.</p>
 
           <!-- Hydration island. With no JavaScript this still SVG stands alone;
                main.js hands the mount to ./js/figures/hero.js on scroll, which
@@ -342,17 +343,17 @@
             <span class="engine-badge" data-engine="trace" data-role="hero-engine">replaying trace</span>
             <span class="fig-sub" data-role="hero-provenance">The badge is a promise, not
               decoration: with scripts off, the corner shown at rest is replayed from a
-              trace the Rust core recorded, then checked against an independent solver.</span>
+              trace our reference solver recorded, then checked against an independent solver.</span>
           </div>
 
           <figcaption>
-            The one thing this figure proves: the best mix is never in the middle,
-            it sits on a corner where two limits meet. The program is maximize
+            The program is maximize
             <b>3 x1 + 2 x2</b> subject to <b>x1 + x2 &le; 4</b> and
             <b>x1 + 3 x2 &le; 6</b>, both variables at least zero. Slide either line,
             or turn the objective, and the shaded region and its best corner re-solve
             on every move. The resting answer is the corner at <b>(4, 0)</b>, where
-            the objective reaches <b>12</b>.
+            the objective reaches <b>12</b>, hard against both budgets rather than
+            tucked inside them.
             <ul class="legend" aria-hidden="true">
               <li><span class="swatch" data-c="1"></span> x1 + x2 limit</li>
               <li><span class="swatch" data-c="2"></span> x1 + 3 x2 limit</li>
@@ -375,7 +376,7 @@
         <p>Underneath, two variables: maximize <b>3 x1 + 2 x2</b> subject to
           <b>x1 + x2 &le; 4</b> and <b>x1 + 3 x2 &le; 6</b>, both nonnegative. We
           might expect the best mix to sit inside those limits; instead it lands on a
-          corner where two meet. Drag a line and the region re-shapes.</p>
+          corner where two bind. Drag a line and the region re-shapes.</p>
         <aside class="margin-note">My first cut of this figure re-solved on every
           pixel of the drag, and the region flickered like a bad weld. Letting it
           settle once the line stops moving fixed it; the arithmetic was never the
@@ -392,36 +393,160 @@
 
       <div class="l-page">
         <figure>
-          <p class="notice">What to notice: each plain-English limit becomes one
-            inequality, then gains a slack that turns it into an exact ledger.</p>
-          <div class="figure-box is-reserved" data-figure="formulation" data-fixture="statquest"
-               role="img" aria-label="Reserved space for the formulation pipeline widget: sentences morph into inequalities, each inequality gains a slack variable, and the equalities stack into the first tableau."
-               style="--fig-ar: 16 / 9;">
-            <div class="coming-soon">
-              Formulation pipeline<br>words, then slacks, then the tableau<br>
-              arrives in milestone B
+          <p class="notice">Click a limit to carve it into the region; each one adds a
+            row and a slack that names the room left over.</p>
+
+          <!-- Two panels: the feasible region on the left, the story-line cards and
+               growing standard form on the right. The still below stands alone with
+               no JS: the both-limit region with its best corner (4, 0), and the full
+               standard form the trace recorded. On scroll, formulation.js swaps the
+               still region for a live one and turns the briefs into clickable cards
+               that re-clip the region and grow the standard form on every toggle. -->
+          <div class="fm-grid">
+            <div class="figure-box" data-figure="formulation" data-fixture="statquest"
+                 style="--fig-ar: 16 / 9;">
+              <svg class="fig-svg" viewBox="0 0 640 360" preserveAspectRatio="xMidYMid meet"
+                   role="img" aria-label="Feasible region for the fab-bay mix. Two limits carve a polygon with four corners; the best corner is (4, 0), objective 12.">
+                <defs>
+                  <marker id="s2-arrow-axis" viewBox="0 0 10 10" refX="8" refY="5"
+                          markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                    <path d="M0,1 L9,5 L0,9 Z" style="fill: var(--hairline-strong);"></path>
+                  </marker>
+                  <marker id="s2-arrow-obj" viewBox="0 0 10 10" refX="8" refY="5"
+                          markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                    <path d="M0,1 L9,5 L0,9 Z" style="fill: var(--objective);"></path>
+                  </marker>
+                </defs>
+
+                <!-- gridlines -->
+                <g style="stroke: var(--hairline); stroke-width: 1;">
+                  <line x1="139.69" y1="18" x2="139.69" y2="318"></line>
+                  <line x1="227.38" y1="18" x2="227.38" y2="318"></line>
+                  <line x1="315.08" y1="18" x2="315.08" y2="318"></line>
+                  <line x1="402.77" y1="18" x2="402.77" y2="318"></line>
+                  <line x1="490.46" y1="18" x2="490.46" y2="318"></line>
+                  <line x1="578.15" y1="18" x2="578.15" y2="318"></line>
+                  <line x1="52" y1="251.33" x2="622" y2="251.33"></line>
+                  <line x1="52" y1="184.67" x2="622" y2="184.67"></line>
+                  <line x1="52" y1="118.00" x2="622" y2="118.00"></line>
+                  <line x1="52" y1="51.33" x2="622" y2="51.33"></line>
+                </g>
+
+                <!-- shaded feasible region: both limits active -->
+                <polygon points="52,318 402.77,318 315.08,251.33 52,184.67"
+                         style="fill: var(--wash); stroke: var(--trail); stroke-width: 1.5; stroke-linejoin: round;"></polygon>
+
+                <!-- corners -->
+                <g style="fill: var(--trail);">
+                  <circle cx="52" cy="318" r="3.2"></circle>
+                  <circle cx="402.77" cy="318" r="3.2"></circle>
+                  <circle cx="315.08" cy="251.33" r="3.2"></circle>
+                  <circle cx="52" cy="184.67" r="3.2"></circle>
+                </g>
+
+                <!-- constraint lines -->
+                <line x1="52" y1="51.33" x2="402.77" y2="318" style="stroke: var(--constraint-1); stroke-width: 2.5;"></line>
+                <text x="233.38" y="178.67" style="font-size: 12px; fill: var(--constraint-1);">x1 + x2 = 4</text>
+                <line x1="52" y1="184.67" x2="578.15" y2="318" style="stroke: var(--constraint-2); stroke-width: 2.5;"></line>
+                <text x="321.08" y="245.33" style="font-size: 12px; fill: var(--constraint-2);">x1 + 3 x2 = 6</text>
+
+                <!-- objective direction (3, 2) -->
+                <line x1="157.23" y1="284.67" x2="259.40" y2="232.90"
+                      style="stroke: var(--objective); stroke-width: 2.5;" marker-end="url(#s2-arrow-obj)"></line>
+                <text x="265.40" y="226.90" style="font-size: 12px; fill: var(--objective);">objective</text>
+
+                <!-- axes on top -->
+                <g style="stroke: var(--hairline-strong); stroke-width: 1.5;">
+                  <line x1="52" y1="318" x2="628" y2="318" marker-end="url(#s2-arrow-axis)"></line>
+                  <line x1="52" y1="318" x2="52" y2="12" marker-end="url(#s2-arrow-axis)"></line>
+                </g>
+
+                <!-- tick + axis labels -->
+                <g style="font-size: 13px;">
+                  <text x="139.69" y="336" text-anchor="middle">1</text>
+                  <text x="227.38" y="336" text-anchor="middle">2</text>
+                  <text x="315.08" y="336" text-anchor="middle">3</text>
+                  <text x="402.77" y="336" text-anchor="middle">4</text>
+                  <text x="490.46" y="336" text-anchor="middle">5</text>
+                  <text x="578.15" y="336" text-anchor="middle">6</text>
+                  <text x="44" y="255.33" text-anchor="end">1</text>
+                  <text x="44" y="188.67" text-anchor="end">2</text>
+                  <text x="44" y="122.00" text-anchor="end">3</text>
+                  <text x="44" y="55.33" text-anchor="end">4</text>
+                  <text x="622" y="336" text-anchor="end">x1</text>
+                  <text x="38" y="22">x2</text>
+                </g>
+
+                <!-- best corner (4, 0) -->
+                <circle cx="402.77" cy="318" r="10" fill="none" style="stroke: var(--objective); stroke-width: 2;" opacity="0.6"></circle>
+                <circle cx="402.77" cy="318" r="6.5" style="fill: var(--objective); stroke: var(--surface); stroke-width: 2;"></circle>
+                <text x="412.77" y="306" text-anchor="start" style="font-size: 12px; font-weight: 650; fill: var(--objective);">best corner (4, 0)</text>
+              </svg>
+            </div>
+
+            <div class="fm-side">
+              <div class="fm-storyline" data-role="fm-storyline">
+                <p class="fm-brief"><b>Feedstock budget.</b> field-tile and shear-foam
+                  each draw one unit of feedstock; four units are on hand.
+                  <span style="color: var(--constraint-1);">x1 + x2 &le; 4</span></p>
+                <p class="fm-brief"><b>Press time.</b> field-tile needs one press pass,
+                  shear-foam needs three; six passes fit the shift.
+                  <span style="color: var(--constraint-2);">x1 + 3 x2 &le; 6</span></p>
+              </div>
+
+              <div class="fm-stdform" data-role="fm-stdform">
+                <div class="fm-row fm-obj">maximize z = 3 x1 + 2 x2</div>
+                <div class="fm-row fm-con" data-key="con:1" style="--fm-hue: var(--constraint-1);">
+                  <span>x1 + x2 + </span><span class="fm-slack">s1</span><span> = 4</span>
+                  <span class="fm-slack-tag">spare feedstock</span>
+                </div>
+                <div class="fm-row fm-con" data-key="con:2" style="--fm-hue: var(--constraint-2);">
+                  <span>x1 + 3 x2 + </span><span class="fm-slack">s2</span><span> = 6</span>
+                  <span class="fm-slack-tag">spare press time</span>
+                </div>
+                <div class="fm-row fm-nonneg">x1, x2, s1, s2 &ge; 0</div>
+              </div>
+
+              <div class="fm-controls" data-role="fm-controls"></div>
             </div>
           </div>
+
+          <div class="badge-row">
+            <span class="engine-badge" data-engine="trace">replaying trace</span>
+            <span class="fig-sub" data-role="fm-provenance">With scripts off, the standard
+              form and its best corner hold steady: our reference solver recorded them for
+              this mix, and an independent check agrees on the optimum.</span>
+          </div>
+
           <figcaption>
-            A three stage widget on the brewery problem: sentences become
-            inequalities, each <b>&le;</b> gains a slack labelled spare capacity,
-            and the equalities stack into the first simplex tableau. One widget,
-            three stages, driven by prev and next.
+            Three stages turn the fab-bay mix into a tableau: sentences become inequalities, each
+            <b>&le;</b> gains a slack named for the room it leaves, and the equalities
+            stack into the first simplex tableau. Click a limit to carve it into the
+            region; the standard form grows a row beside it, and the best corner re-solves
+            on every move.
+            <ul class="legend" aria-hidden="true">
+              <li><span class="swatch" data-c="1"></span> feedstock limit</li>
+              <li><span class="swatch" data-c="2"></span> press-time limit</li>
+              <li><span class="swatch" data-c="obj"></span> objective</li>
+              <li><span class="swatch" data-c="trail"></span> corners</li>
+            </ul>
           </figcaption>
+
+          <p class="readout" aria-live="polite" data-role="fm-readout">
+            Both limits active. Best corner (4, 0), objective 12.
+          </p>
         </figure>
       </div>
 
       <div class="l-body">
-        <p class="vignette">The Mind writes its budgets down in plain words, then does
-          the thing a careful ledger clerk would: it gives the leftover a name. Every
-          limit earns a second line for the room it still has to spare.</p>
-        <p>The brewery mix stays maximize <b>3 x1 + 2 x2</b>, but each at-most limit
-          turns into an exact equation once a slack is added: <b>x1 + x2 + s1 = 4</b>
-          and <b>x1 + 3 x2 + s2 = 6</b>, where s1 and s2 hold the spare capacity left on
-          each resource. Those equalities are the first rows of the tableau.</p>
-        <p class="later-note">What sits above is the still frame the trace draws. Milestone B
-          animates the three stages under a prev and next control, and the box is already sized
-          to their footprint so this paragraph never jumps.</p>
+        <p class="vignette">The Mind stops pouring long enough to keep books. Beside every
+          budget it writes a second figure, the amount still unspent, so no scrap of capacity
+          goes uncounted. A limit written as an exact balance is easier to solve than a limit
+          written as a warning.</p>
+        <p>The fab-bay mix stays maximize <b>3 x1 + 2 x2</b>, but each at-most limit becomes
+          an exact equation once a slack is added: <b>x1 + x2 + s1 = 4</b> and
+          <b>x1 + 3 x2 + s2 = 6</b>, where s1 and s2 hold the feedstock and press time still
+          to spare. Those equalities are the first rows of the tableau.</p>
       </div>
     </section>
 
@@ -434,8 +559,8 @@
 
       <div class="l-page">
         <figure>
-          <p class="notice">What to notice: one scrubber moves both views. The corner
-            that lights up on the left is the same pivot highlighted on the right.</p>
+          <p class="notice">One scrubber moves both views. The corner that lights up on
+            the left is the same pivot highlighted on the right.</p>
 
           <!-- Synchronized dual view. The still below stands alone with no JS: it is
                the finished walk and the tableau at the optimum, replayed from the
@@ -488,7 +613,7 @@
                 <circle class="dv-vertex is-visited" cx="155.36" cy="210.0" r="3.5" data-vertex="11"></circle>
               </g>
               <circle class="dv-current-ring" cx="155.36" cy="110.0" r="10"></circle>
-              <circle class="dv-current" cx="155.36" cy="110.0" r="6" data-key="pivot-4"></circle>
+              <circle class="dv-current" cx="155.36" cy="110.0" r="6" data-key="pivot:4"></circle>
               <text class="dv-current-label" x="165.36" y="100.0" text-anchor="start">(9, 9, 4)</text>
               </svg>
             </div>
@@ -542,7 +667,7 @@
                   <td data-var="6">0</td><td data-var="7">1</td><td data-var="8">4</td>
                 </tr>
                 <tr class="dv-obj-row">
-                  <th scope="row" class="dv-row-head" style="color:var(--faint);">z</th>
+                  <th scope="row" class="dv-row-head" style="color:var(--faint);" data-key="pivot:4">z</th>
                   <td data-var="0">0</td><td data-var="1">0</td><td data-var="2">0</td>
                   <td data-var="3">0</td><td data-var="4">-0.14</td><td data-var="5">-0.43</td>
                   <td data-var="6">0</td><td data-var="7">-1</td><td data-var="8">-22</td>
@@ -557,9 +682,9 @@
 
           <div class="badge-row">
             <span class="engine-badge" data-engine="trace" data-role="dualview-engine">replaying trace</span>
-            <span class="fig-sub">Every number in both panels is replayed from the topic21
-              trace the Rust core recorded, then checked against an independent solver. The
-              scrubber only chooses which recorded step to show.</span>
+            <span class="fig-sub">Every number in both panels replays the topic21 trace our
+              reference solver wrote, step for step; scipy's HiGHS confirms the same optimum.
+              The scrubber only chooses which recorded step to show.</span>
           </div>
 
           <p class="readout" aria-live="polite" data-role="dualview-readout">
@@ -568,7 +693,7 @@
           </p>
 
           <figcaption>
-            The centrepiece. Corner Case walks the cargo polytope <b>(0,0,0)</b> to
+            Corner Case walks the cargo polytope <b>(0,0,0)</b> to
             <b>(8,0,0)</b> to <b>(12,3,0)</b> to <b>(12,3,4)</b> to <b>(9,9,4)</b> while the
             tableau mirrors every hop, and the objective climbs <b>0, 8, 15, 19, 22</b>. Move
             the scrubber and the vertex lit on the left is the same entering column and leaving
@@ -586,8 +711,12 @@
           sits at <b>(9, 9, 4)</b> with objective <b>22</b>. Every pivot on that walk is
           Gaussian elimination on the tableau: the entering column and the leaving row that
           light up together are one step of row reduction.</p>
-        <p class="later-note">Stepping the walk is live now. The deeper zoom that unfolds a
-          single pivot into its full row reduction is the next thing to land in this frame.</p>
+        <p>Trust the picture only this far. In two or three dimensions you can see the
+          corners; past three there is nothing left to see, the number of corners can climb
+          faster than any screen could hold, and several corners can pile onto a single point,
+          so the drone seems to pivot without moving. None of that reaches the tableau. The
+          row reduction on the right is the same operation in three dimensions or three
+          hundred, which is why the algebra, not the geometry, is what a solver actually runs.</p>
         <div class="offramp">
           If you stop here, you can already read a tableau: the corners of a region,
           walked one pivot at a time, with the objective climbing at each hop.
@@ -604,39 +733,119 @@
 
       <div class="l-page">
         <figure>
-          <p class="notice">What to notice: raising a limit by one unit raises the
-            best objective by exactly its shadow price, until the corner changes.</p>
-          <div class="figure-box is-reserved" data-figure="duality" data-fixture="topic21"
-               role="img" aria-label="Reserved space for the duality figure: the primal and dual programs side by side, where dragging a constraint's right hand side updates the shadow price, the worth of one more unit."
-               style="--fig-ar: 16 / 8;">
-            <div class="coming-soon">
-              Primal and dual, side by side<br>
-              drag a limit to read its shadow price<br>
-              arrives in milestone B
+          <p class="notice">What is one more unit worth? Hover or focus a resource to read
+            its shadow price.</p>
+
+          <!-- S4 duality. Two panels share one figure: the primal resource limits on the
+               left (which bind, which have room to spare), the dual shadow prices on the
+               right. With no JS the inline-SVG bars below stand alone and state the resting
+               prices; on scroll duality.js swaps them for focusable bar buttons and links
+               the brushing so lighting a resource lights its limit and its price together. -->
+          <div class="s4-grid">
+            <div class="s4-panel">
+              <p class="s4-head">The resource limits (primal)</p>
+              <ul class="s4-list" aria-label="The five resource limits at the optimum, which bind and which have room to spare.">
+                <li class="s4-cx" data-key="con:1" style="--h: var(--constraint-1);">
+                  <span class="s4-cx-name">antimatter budget</span>
+                  <span class="s4-cx-ineq">-x1 + x2 &le; 5</span>
+                  <span class="s4-tag s4-slack">slack, worth 0</span>
+                </li>
+                <li class="s4-cx" data-key="con:2" style="--h: var(--constraint-2);">
+                  <span class="s4-cx-name">chargrid hours</span>
+                  <span class="s4-cx-ineq">x1 + 4 x2 &le; 45</span>
+                  <span class="s4-tag s4-bind">binding, worth 1/7</span>
+                </li>
+                <li class="s4-cx" data-key="con:3" style="--h: var(--constraint-3);">
+                  <span class="s4-cx-name">hull-frame stock</span>
+                  <span class="s4-cx-ineq">2 x1 + x2 &le; 27</span>
+                  <span class="s4-tag s4-bind">binding, worth 3/7</span>
+                </li>
+                <li class="s4-cx" data-key="con:4" style="--h: var(--constraint-4);">
+                  <span class="s4-cx-name">stabilizer mass</span>
+                  <span class="s4-cx-ineq">3 x1 - 4 x2 &le; 24</span>
+                  <span class="s4-tag s4-slack">slack, worth 0</span>
+                </li>
+                <li class="s4-cx" data-key="con:5" style="--h: var(--constraint-5);">
+                  <span class="s4-cx-name">crystal chamber cap</span>
+                  <span class="s4-cx-ineq">x3 &le; 4</span>
+                  <span class="s4-tag s4-bind">binding, worth 1</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="s4-panel s4-dual">
+              <p class="s4-head">What one more unit is worth (dual)</p>
+              <div class="figure-box" data-figure="duality" data-fixture="topic21"
+                   style="--fig-ar: 360 / 250;">
+              <svg class="fig-svg s4-still" viewBox="0 0 360 250" preserveAspectRatio="xMidYMid meet"
+                   role="img" style="font-family: var(--font-sans);"
+                   aria-label="Shadow prices at the optimum. One more unit of chargrid hours is worth one seventh, hull-frame stock three sevenths, the crystal chamber cap one; the antimatter budget and stabilizer mass have room to spare and are worth zero. Priced out, the five resources are worth 22, the same as the primal optimum.">
+                <!-- antimatter budget: 0 -->
+                <text x="8" y="36" style="font-size: 12px; fill: var(--constraint-1);">antimatter budget</text>
+                <text x="352" y="36" text-anchor="end" style="font-size: 12px; font-weight: 700; fill: var(--constraint-1);">0</text>
+                <rect x="8" y="41" width="344" height="10" rx="5" style="fill: var(--surface-2); stroke: var(--hairline);"></rect>
+                <!-- chargrid hours: 1/7 -->
+                <text x="8" y="78" style="font-size: 12px; fill: var(--constraint-2);">chargrid hours</text>
+                <text x="352" y="78" text-anchor="end" style="font-size: 12px; font-weight: 700; fill: var(--constraint-2);">1/7</text>
+                <rect x="8" y="83" width="344" height="10" rx="5" style="fill: var(--surface-2); stroke: var(--hairline);"></rect>
+                <rect x="8" y="83" width="49.1" height="10" rx="5" style="fill: var(--constraint-2);"></rect>
+                <!-- hull-frame stock: 3/7 -->
+                <text x="8" y="120" style="font-size: 12px; fill: var(--constraint-3);">hull-frame stock</text>
+                <text x="352" y="120" text-anchor="end" style="font-size: 12px; font-weight: 700; fill: var(--constraint-3);">3/7</text>
+                <rect x="8" y="125" width="344" height="10" rx="5" style="fill: var(--surface-2); stroke: var(--hairline);"></rect>
+                <rect x="8" y="125" width="147.4" height="10" rx="5" style="fill: var(--constraint-3);"></rect>
+                <!-- stabilizer mass: 0 -->
+                <text x="8" y="162" style="font-size: 12px; fill: var(--constraint-4);">stabilizer mass</text>
+                <text x="352" y="162" text-anchor="end" style="font-size: 12px; font-weight: 700; fill: var(--constraint-4);">0</text>
+                <rect x="8" y="167" width="344" height="10" rx="5" style="fill: var(--surface-2); stroke: var(--hairline);"></rect>
+                <!-- crystal chamber cap: 1 -->
+                <text x="8" y="204" style="font-size: 12px; fill: var(--constraint-5);">crystal chamber cap</text>
+                <text x="352" y="204" text-anchor="end" style="font-size: 12px; font-weight: 700; fill: var(--constraint-5);">1</text>
+                <rect x="8" y="209" width="344" height="10" rx="5" style="fill: var(--surface-2); stroke: var(--hairline);"></rect>
+                <rect x="8" y="209" width="344" height="10" rx="5" style="fill: var(--constraint-5);"></rect>
+                <text x="8" y="240" style="font-size: 11px; fill: var(--ink);">priced out, the resources are worth 22, the primal optimum</text>
+              </svg>
+              </div>
             </div>
           </div>
+
+          <p class="readout" data-role="duality-readout">
+            Strong duality, an equality you can check: price each binding limit by its
+            shadow price and add them up, <b>(1/7)(45) + (3/7)(27) + (1)(4) = 22</b>, the
+            very objective the primal walk reached at <b>(9, 9, 4)</b>. Maximum profit
+            equals the total worth of the resources.
+          </p>
+
+          <div class="badge-row">
+            <span class="engine-badge" data-engine="trace" data-role="duality-engine">replaying trace</span>
+            <span class="fig-sub">The shadow prices are read straight off the trace our
+              reference solver produced; an independent solver lands on the same values.</span>
+          </div>
+
           <figcaption>
-            The ship earns its name here: a shadow price is a marginal utility, what
-            one more gram of antimatter is worth to the objective. Drag a limit and
-            the dual value updates in step.
+            Each resource carries a shadow price, what one
+            more unit of it is worth to the objective. The two binding limits, chargrid
+            hours and hull-frame stock, are worth <b>1/7</b> and <b>3/7</b>; the crystal
+            chamber cap is worth <b>1</b>; the antimatter budget and stabilizer mass have
+            room to spare, so one more unit of either is worth <b>0</b>. Hover or focus a
+            resource to light the limit and its price together.
           </figcaption>
         </figure>
       </div>
 
       <div class="l-body">
-        <p class="vignette">The Mind runs the numbers backward. It stops asking how to
-          fill the hold and asks instead what a single extra gram of any resource would
-          buy, and whether that gram is worth requisitioning at all.</p>
-        <p>That worth is the constraint's shadow price. At this optimum one more unit of
-          crystal chamber capacity lifts the best objective by exactly <b>1</b>, its dual
-          value, while a limit with room to spare, like the antimatter budget, is worth
-          <b>0</b> more. The ship earns its name here: a shadow price is a marginal utility.</p>
-        <p class="later-note">Milestone B makes this pair move together: drag a limit on the
-          left and its shadow price on the right updates in step. The frame is blocked out at
-          full size now, which is why nothing here shifts when it loads.</p>
+        <p class="vignette">At the best corner the Mind turns the question inside out. It
+          stops asking how to fill the hold and asks instead what one more gram of each
+          resource would buy if it could be had, and which resources are already worth nothing
+          at the margin.</p>
+        <p>Each resource answers with its shadow price, its dual value: at this optimum one
+          more chargrid hour is worth <b>1/7</b>, one more unit of hull-frame stock is worth
+          <b>3/7</b>, and one more crystal-chamber slot is worth a full <b>1</b>, while the
+          antimatter budget and stabilizer mass, both with room to spare, are worth <b>0</b>.
+          The ship earns its name here: a shadow price is a marginal utility.</p>
         <div class="offramp">
-          If you stop here, you can read a shadow price: the worth of one more unit
-          of a resource is the dual value sitting on that constraint.
+          Stop here and you can already price a constraint: its shadow price, the dual value
+          sitting on it, is exactly what one more unit of that resource is worth.
         </div>
       </div>
     </section>
@@ -650,38 +859,158 @@
 
       <div class="l-page">
         <figure>
-          <p class="notice">What to notice: place your bet on how many corners the
-            solver visits before you run it. The cube is rigged to trap it.</p>
-          <div class="figure-box is-reserved" data-figure="kleeminty" data-fixture="kleeminty3"
-               role="img" aria-label="Reserved space for the Klee Minty playground: predict how many corners simplex visits on a skewed cube, toggle Dantzig or Bland, slide the dimension n, then reveal the guess against the actual count."
-               style="--fig-ar: 16 / 9;">
-            <div class="coming-soon">
-              Klee Minty cube, place your bets<br>
-              Dantzig or Bland, slide n, then reveal<br>
-              arrives in milestone B
+          <p class="notice">On a log scale the worst case is a straight climb, doubling with
+            every dimension; the little cube on the right is one rung of it.</p>
+
+          <div class="km-grid">
+            <!-- LEFT: the log scale cost chart. The still shows the resting climb and its
+                 marker at n = 3; on scroll kleeminty.js swaps in the slider driven version. -->
+            <div class="km-panel">
+              <div class="figure-box km-box" data-figure="kleeminty" data-fixture="kleeminty3"
+                   style="--fig-ar: 380 / 300;">
+                <svg class="fig-svg km-chart-svg" viewBox="0 0 380 300"
+                     preserveAspectRatio="xMidYMid meet" role="img"
+                     aria-label="A log scale chart of corners visited against dimension n. The worst case 2 to the n climbs as a straight line to about 10 to the 60 at n = 200, far above a shallow n cubed reference.">
+                  <g class="km-grid-lines">
+                    <line class="km-gridline" x1="46" y1="260" x2="362" y2="260"></line>
+                    <line class="km-gridline" x1="46" y1="181.31" x2="362" y2="181.31"></line>
+                    <line class="km-gridline" x1="46" y1="102.62" x2="362" y2="102.62"></line>
+                    <line class="km-gridline" x1="46" y1="23.93" x2="362" y2="23.93"></line>
+                    <text class="km-tick-label km-tick-y" x="40" y="263.5">1</text>
+                    <text class="km-tick-label km-tick-y" x="40" y="184.81">10<tspan baseline-shift="super" font-size="0.72em">20</tspan></text>
+                    <text class="km-tick-label km-tick-y" x="40" y="106.12">10<tspan baseline-shift="super" font-size="0.72em">40</tspan></text>
+                    <text class="km-tick-label km-tick-y" x="40" y="27.43">10<tspan baseline-shift="super" font-size="0.72em">60</tspan></text>
+                  </g>
+                  <g class="km-axis">
+                    <line class="km-axis-line" x1="46" y1="20" x2="46" y2="260"></line>
+                    <line class="km-axis-line" x1="46" y1="260" x2="362" y2="260"></line>
+                  </g>
+                  <g class="km-ticks-x">
+                    <line class="km-tick-mark" x1="46" y1="260" x2="46" y2="264"></line>
+                    <text class="km-tick-label km-tick-x" x="46" y="276">3</text>
+                    <line class="km-tick-mark" x1="121.39" y1="260" x2="121.39" y2="264"></line>
+                    <text class="km-tick-label km-tick-x" x="121.39" y="276">50</text>
+                    <line class="km-tick-mark" x1="201.59" y1="260" x2="201.59" y2="264"></line>
+                    <text class="km-tick-label km-tick-x" x="201.59" y="276">100</text>
+                    <line class="km-tick-mark" x1="281.8" y1="260" x2="281.8" y2="264"></line>
+                    <text class="km-tick-label km-tick-x" x="281.8" y="276">150</text>
+                    <line class="km-tick-mark" x1="362" y1="260" x2="362" y2="264"></line>
+                    <text class="km-tick-label km-tick-x" x="362" y="276">200</text>
+                  </g>
+                  <text class="km-axis-title" x="204" y="296">dimension n</text>
+                  <text class="km-axis-title" x="12" y="140" transform="rotate(-90 12 140)">corners visited (log scale)</text>
+                  <polyline class="km-ref" points="46,254.37 50.81,250.82 57.23,248.2 66.85,245.79 79.69,243.71 98.93,241.63 124.6,239.75 159.89,237.94 208.01,236.19 272.17,234.52 362,232.84"></polyline>
+                  <polyline class="km-worst" points="46,256.45 362,23.12"></polyline>
+                  <text class="km-curve-label km-worst-label" x="281.8" y="74.34">worst case, 2ⁿ corners</text>
+                  <text class="km-curve-label km-ref-label" x="137.4" y="233.02">polynomial, for scale, not a bound</text>
+                  <line class="km-guide" x1="46" y1="256.45" x2="46" y2="260"></line>
+                  <circle class="km-marker" cx="46" cy="256.45" r="5"></circle>
+                </svg>
+              </div>
+              <div class="scrubber-row km-slider-row" data-role="km-chart-controls">
+                <input type="range" class="scrubber km-slider" min="3" max="200" step="1" value="3"
+                       aria-label="Dimension n" aria-valuetext="n = 3, worst case 8 corners" disabled>
+                <span class="km-big" aria-hidden="true">n = <b>3</b> &rarr; <b>8</b> corners</span>
+              </div>
+              <p class="readout km-readout" aria-live="polite" data-role="km-chart-readout">
+                At n = <b>3</b>, worst-case Dantzig visits <b>8</b> corners; at n = 200 that is
+                <b>1.606938e60</b>, a number with 61 digits.
+              </p>
+            </div>
+
+            <!-- RIGHT: the n = 3 cube walk, resting at the finished tour, optimum ringed. -->
+            <div class="km-panel">
+              <div class="figure-box km-box" data-role="km-cube-box" style="--fig-ar: 380 / 300;">
+                <svg class="fig-svg km-cube-svg" viewBox="0 0 380 300"
+                     preserveAspectRatio="xMidYMid meet" role="img"
+                     aria-label="An isometric wireframe of the 3D Klee Minty cube. The greedy walk touches all 8 corners in order and ends at the ringed corner (0, 0, 10000), objective 10000.">
+                  <g class="km-edges">
+                    <line class="km-edge" x1="210.06" y1="134.95" x2="210.06" y2="40"></line>
+                    <line class="km-edge" x1="210.06" y1="134.95" x2="290.28" y2="199.79"></line>
+                    <line class="km-edge" x1="210.06" y1="134.95" x2="89.72" y2="178.95"></line>
+                    <line class="km-edge" x1="210.06" y1="40" x2="290.28" y2="86.32"></line>
+                    <line class="km-edge" x1="210.06" y1="40" x2="89.72" y2="86.32"></line>
+                    <line class="km-edge" x1="290.28" y1="199.79" x2="290.28" y2="86.32"></line>
+                    <line class="km-edge" x1="290.28" y1="199.79" x2="190" y2="260"></line>
+                    <line class="km-edge" x1="290.28" y1="86.32" x2="190" y2="144.21"></line>
+                    <line class="km-edge" x1="89.72" y1="178.95" x2="89.72" y2="86.32"></line>
+                    <line class="km-edge" x1="89.72" y1="178.95" x2="190" y2="260"></line>
+                    <line class="km-edge" x1="89.72" y1="86.32" x2="190" y2="144.21"></line>
+                    <line class="km-edge" x1="190" y1="260" x2="190" y2="144.21"></line>
+                  </g>
+                  <g class="km-trails">
+                    <line class="km-trail is-on" x1="190" y1="144.21" x2="290.28" y2="86.32"></line>
+                    <line class="km-trail is-on" x1="290.28" y1="86.32" x2="210.06" y2="40"></line>
+                    <line class="km-trail is-on" x1="210.06" y1="40" x2="89.72" y2="86.32"></line>
+                    <line class="km-trail is-on" x1="89.72" y1="86.32" x2="89.72" y2="178.95"></line>
+                    <line class="km-trail is-on" x1="89.72" y1="178.95" x2="210.06" y2="134.95"></line>
+                    <line class="km-trail is-on" x1="210.06" y1="134.95" x2="290.28" y2="199.79"></line>
+                    <line class="km-trail is-on" x1="290.28" y1="199.79" x2="190" y2="260"></line>
+                  </g>
+                  <g class="km-verts">
+                    <circle class="km-vertex is-visited" cx="210.06" cy="134.95" r="3.5"></circle>
+                    <circle class="km-vertex is-visited" cx="210.06" cy="40" r="3.5"></circle>
+                    <circle class="km-vertex is-visited" cx="290.28" cy="199.79" r="3.5"></circle>
+                    <circle class="km-vertex is-visited" cx="290.28" cy="86.32" r="3.5"></circle>
+                    <circle class="km-vertex is-visited" cx="89.72" cy="178.95" r="3.5"></circle>
+                    <circle class="km-vertex is-visited" cx="89.72" cy="86.32" r="3.5"></circle>
+                    <circle class="km-vertex is-visited" cx="190" cy="260" r="3.5"></circle>
+                    <circle class="km-vertex is-visited" cx="190" cy="144.21" r="3.5"></circle>
+                  </g>
+                  <circle class="km-current-ring" cx="190" cy="260" r="10"></circle>
+                  <circle class="km-current" cx="190" cy="260" r="6"></circle>
+                  <text class="km-current-label" x="200" y="250" text-anchor="start">(0, 0, 10000)</text>
+                </svg>
+              </div>
+              <div class="scrubber-row km-cube-row" data-role="km-cube-controls">
+                <input type="range" class="scrubber km-scrub" min="0" max="7" step="1" value="7"
+                       aria-label="Corner of the cube walk"
+                       aria-valuetext="All 8 corners visited; optimum (0, 0, 10000), objective 10000." disabled>
+                <span class="dv-step-tag" aria-hidden="true">corner 7 of 7</span>
+              </div>
+              <p class="readout km-readout" aria-live="polite" data-role="km-cube-readout">
+                All 8 corners visited; optimum (0, 0, 10000), objective 10000.
+              </p>
+              <div class="km-bet" data-role="km-bet">
+                <p class="km-bet-q">Place your bet: how many of the cube's 8 corners does the greedy rule touch before it exits?</p>
+                <p class="km-bet-msg">The greedy rule is rigged to touch all 8 corners, every one, before it exits at (0, 0, 10000).</p>
+              </div>
             </div>
           </div>
+
+          <div class="badge-row">
+            <span class="engine-badge" data-engine="trace" data-role="km-engine">replaying trace</span>
+            <span class="fig-sub">Both panels come from the kleeminty3 trace, corner for corner
+              as our reference solver logged it, and an independent solver reached the same optimum. The
+              slider only chooses which dimension to price, the scrubber only chooses which
+              recorded corner to show.</span>
+          </div>
+
+          <p class="readout km-resting-line" data-role="km-resting">
+            Dantzig visits all <b>8</b> corners of the 3D cube; the same construction at
+            <b>n = 200</b> forces about <b>2<sup>200</sup></b> pivots.
+          </p>
+
           <figcaption>
-            A hostile cargo manifold, rigged so the solver visits every corner. For
-            the three variable cube that is all <b>8</b> vertices. Extend the same
-            trick to <b>n = 200</b> and the count reaches about <b>2 to the 200</b>
-            pivots, every last corner visited before the exit.
+            A hostile cargo manifold, rigged so the greedy rule tours every corner. For the
+            three variable cube that is all <b>8</b>, and the objective creeps
+            <b>0, 100, 900, 1000, 9000, 9100, 9900, 10000</b> before it exits at
+            <b>(0, 0, 10000)</b>. Extend the same trick to <b>n = 200</b> and the count reaches
+            about <b>2<sup>200</sup></b>, a number with 61 digits.
           </figcaption>
         </figure>
       </div>
 
       <div class="l-body">
-        <p class="vignette">Somebody built this cargo manifold to be cruel. Its walls
-          are skewed just enough that Corner Case, following its usual greedy instinct,
-          is lured into touching every last corner before it stumbles on the exit.</p>
+        <p class="vignette">Corner Case was built to visit corners. Someone, it seems, has
+          now built the corners for it: this cargo manifold is skewed just enough that the
+          drone's own greedy instinct drags it across every last vertex before the exit shows
+          itself.</p>
         <p>The manifold is maximize <b>100 x1 + 10 x2 + x3</b> under three tilted limits,
           and Dantzig's rule marches through all <b>2&#179; = 8</b> corners before it
           lands at <b>(0, 0, 10000)</b>. Stretch the same construction to <b>n = 200</b>
           and the tour runs to about <b>2 to the 200</b> pivots. The worst case is not
           rare, it is constructed.</p>
-        <p class="later-note">The place-your-bets slider and the reveal are milestone B work.
-          For now the dotted frame just holds the seat, so the count you read above is the
-          whole of this pass.</p>
       </div>
     </section>
 
@@ -694,30 +1023,125 @@
 
       <div class="l-page">
         <figure>
-          <p class="notice">What to notice: the same corner-walking machine plans a
-            route and routes a flow. Then two solvers race across one polytope.</p>
-          <div class="gallery-grid">
-            <div class="figure-box is-reserved" data-figure="shortestpath" data-fixture="shortestpath"
-                 role="img" aria-label="Reserved space for the shortest path card: a four node graph with the optimal path overlaid, framed as a linear program over node potentials."
-                 style="--fig-ar: 4 / 3;">
-              <div class="coming-soon">Shortest path<br>as an LP<br>milestone B</div>
+          <p class="notice">A network flow and a linear program are the same eight numbers;
+            hover or focus an edge to light its column in the matrix.</p>
+
+          <!-- Max flow as an LP. The still below stands alone with no JS: the finished flow
+               on the network, the same eight numbers as a matrix, and the resting result,
+               all replayed from the maxflow trace. On scroll, maxflow.js swaps the network
+               still for a live one, rebuilds the matrix, and wires the shared brush so an arc
+               and its column light together from pointer or keyboard. -->
+          <div class="mf-grid">
+            <div class="figure-box" data-figure="maxflow" data-fixture="maxflow"
+                 style="--fig-ar: 480 / 320;">
+              <svg class="fig-svg mf-net" viewBox="0 0 480 320" preserveAspectRatio="xMidYMid meet"
+                   role="img"
+                   aria-label="Source to sink network at maximum flow 8. Arcs: s to a 6 of 8, s to b 2 of 2 at capacity, a to c 6 of 6 at capacity, d to a 0 of 3, b to d 4 of 5, c to b 2 of 2 at capacity, c to t 4 of 4 at capacity, d to t 4 of 5. The minimum cut of 8 crosses s to b and a to c.">
+                <defs>
+                  <marker id="mf-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4"
+                          orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0,0 L8,4 L0,8 Z" fill="context-stroke"></path>
+                  </marker>
+                </defs>
+                <path class="mf-cut" d="M 250,25 C 250,90 200,110 175,140 C 150,175 140,210 120,300"></path>
+                <text class="mf-cut-label" x="268" y="34">min cut 8</text>
+
+                <g class="mf-edge"><line class="mf-line" x1="62.48" y1="150.29" x2="162.52" y2="94.71" marker-end="url(#mf-arrow)"></line><text class="mf-flabel" x="108" y="108" text-anchor="middle">6/8</text></g>
+                <g class="mf-edge is-saturated"><line class="mf-line" x1="62.48" y1="169.71" x2="162.52" y2="225.29" marker-end="url(#mf-arrow)"></line><text class="mf-flabel" x="108" y="214" text-anchor="middle">2/2</text></g>
+                <g class="mf-edge is-saturated"><line class="mf-line" x1="200" y1="85" x2="295" y2="85" marker-end="url(#mf-arrow)"></line><text class="mf-flabel" x="247" y="72" text-anchor="middle">6/6</text></g>
+                <g class="mf-edge is-empty"><line class="mf-line" x1="301.62" y1="220.13" x2="193.38" y2="99.87" marker-end="url(#mf-arrow)"></line><text class="mf-flabel" x="272" y="150" text-anchor="middle">0/3</text></g>
+                <g class="mf-edge"><line class="mf-line" x1="200" y1="235" x2="295" y2="235" marker-end="url(#mf-arrow)"></line><text class="mf-flabel" x="247" y="252" text-anchor="middle">4/5</text></g>
+                <g class="mf-edge is-saturated"><line class="mf-line" x1="301.62" y1="99.87" x2="193.38" y2="220.13" marker-end="url(#mf-arrow)"></line><text class="mf-flabel" x="222" y="168" text-anchor="middle">2/2</text></g>
+                <g class="mf-edge is-saturated"><line class="mf-line" x1="331.96" y1="95.60" x2="418.04" y2="149.40" marker-end="url(#mf-arrow)"></line><text class="mf-flabel" x="388" y="108" text-anchor="middle">4/4</text></g>
+                <g class="mf-edge"><line class="mf-line" x1="331.96" y1="224.40" x2="418.04" y2="170.60" marker-end="url(#mf-arrow)"></line><text class="mf-flabel" x="388" y="214" text-anchor="middle">4/5</text></g>
+
+                <g class="mf-node is-terminal"><circle cx="45" cy="160" r="20"></circle><text x="45" y="165" text-anchor="middle">s</text><text class="mf-node-cap" x="45" y="196" text-anchor="middle">source</text></g>
+                <g class="mf-node"><circle cx="180" cy="85" r="20"></circle><text x="180" y="90" text-anchor="middle">a</text></g>
+                <g class="mf-node"><circle cx="180" cy="235" r="20"></circle><text x="180" y="240" text-anchor="middle">b</text></g>
+                <g class="mf-node"><circle cx="315" cy="85" r="20"></circle><text x="315" y="90" text-anchor="middle">c</text></g>
+                <g class="mf-node"><circle cx="315" cy="235" r="20"></circle><text x="315" y="240" text-anchor="middle">d</text></g>
+                <g class="mf-node is-terminal"><circle cx="435" cy="160" r="20"></circle><text x="435" y="165" text-anchor="middle">t</text><text class="mf-node-cap" x="435" y="196" text-anchor="middle">sink</text></g>
+              </svg>
             </div>
-            <div class="figure-box is-reserved" data-figure="maxflow" data-fixture="maxflow"
-                 role="img" aria-label="Reserved space for the max flow card: a four node source to sink network with the optimal flow overlaid, value 8."
-                 style="--fig-ar: 4 / 3;">
-              <div class="coming-soon">Max flow<br>value 8<br>milestone B</div>
+
+            <div class="mf-matrix-panel" data-role="maxflow-matrix">
+              <div class="mf-matrix-scroll">
+                <table class="mf-matrix">
+                  <caption class="mf-matrix-cap">The same eight numbers, as a linear program</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col" class="mf-rowhead"></th>
+                      <th scope="col" class="mf-col-head"><span class="mf-col-name">fsa</span></th>
+                      <th scope="col" class="mf-col-head is-cut"><span class="mf-col-name">fsb</span><span class="mf-cut-tag">cut</span></th>
+                      <th scope="col" class="mf-col-head is-cut"><span class="mf-col-name">fac</span><span class="mf-cut-tag">cut</span></th>
+                      <th scope="col" class="mf-col-head"><span class="mf-col-name">fda</span></th>
+                      <th scope="col" class="mf-col-head"><span class="mf-col-name">fbd</span></th>
+                      <th scope="col" class="mf-col-head"><span class="mf-col-name">fcb</span></th>
+                      <th scope="col" class="mf-col-head"><span class="mf-col-name">fct</span></th>
+                      <th scope="col" class="mf-col-head"><span class="mf-col-name">fdt</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="mf-flow-row">
+                      <th scope="row" class="mf-rowhead">flow</th>
+                      <td>6</td><td class="is-saturated">2</td><td class="is-saturated">6</td><td>0</td><td>4</td><td class="is-saturated">2</td><td class="is-saturated">4</td><td>4</td>
+                    </tr>
+                    <tr class="mf-cap-row">
+                      <th scope="row" class="mf-rowhead">cap</th>
+                      <td>8</td><td class="is-saturated">2</td><td class="is-saturated">6</td><td>3</td><td>5</td><td class="is-saturated">2</td><td class="is-saturated">4</td><td>5</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" class="mf-rowhead">net a</th>
+                      <td>1</td><td>0</td><td>-1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" class="mf-rowhead">net b</th>
+                      <td>0</td><td>1</td><td>0</td><td>0</td><td>-1</td><td>1</td><td>0</td><td>0</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" class="mf-rowhead">net c</th>
+                      <td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>-1</td><td>-1</td><td>0</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" class="mf-rowhead">net d</th>
+                      <td>0</td><td>0</td><td>0</td><td>-1</td><td>1</td><td>0</td><td>0</td><td>-1</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
+
+          <div class="badge-row">
+            <span class="engine-badge" data-engine="trace" data-role="maxflow-engine">replaying trace</span>
+            <span class="fig-sub">The maxflow trace our reference solver wrote fixes every flow
+              and capacity here, and an independent solver agrees on the total. The arc
+              directions come from the variable names and the cut from the capacity duals.</span>
+          </div>
+
+          <p class="readout" aria-live="polite" data-role="maxflow-readout">
+            Maximum flow s to t is <b>8</b> units, equal to the minimum cut. The cut crosses
+            <b>s to b</b> and <b>a to c</b>. Saturated arcs: s to b, a to c, c to b, c to t.
+          </p>
+
+          <div class="figure-box is-reserved" data-figure="shortestpath" data-fixture="shortestpath"
+               role="img" aria-label="Reserved space for the shortest path card: the same graph read as node potentials, best route dt = 4."
+               style="--fig-ar: 16 / 5;">
+            <div class="coming-soon">Shortest path as an LP<br>best dt = 4<br>milestone B</div>
+          </div>
+
           <figcaption>
-            A caption-only gallery: shortest path as node potentials (best
-            <b>dt = 4</b>) and a source to sink network at max flow (<b>8</b>). The
-            figures carry it, not the prose.
+            A source to sink network at its maximum flow of <b>8</b>. Each arrow reads flow over
+            capacity, four arcs run full, and the minimum cut, <b>s to b</b> and <b>a to c</b>,
+            sums to <b>8</b> as well. The matrix beside it is the very same eight numbers written
+            as a linear program. Shortest path over the same graph, read as node potentials with
+            best <b>dt = 4</b>, lands in a later pass.
           </figcaption>
         </figure>
 
         <figure>
-          <p class="notice">The climax: Corner Case walks the boundary while
-            Strictly Feasible cuts through the interior. Same polytope, one replay.</p>
+          <p class="notice">The climax, still to come: the boundary walk of Corner Case set
+            against the interior path of Strictly Feasible, on one shared polytope.</p>
           <div class="figure-box is-reserved" data-figure="race" data-fixture="centralpath-topic21"
                role="img" aria-label="Reserved space for the race: the simplex boundary walk replayed against the interior point central path on one shared polytope."
                style="--fig-ar: 21 / 9;">
@@ -727,25 +1151,23 @@
             </div>
           </div>
           <figcaption>
-            One shared polytope, two strategies replayed: the boundary walk of
-            simplex against the central path of an interior point method. Interior
-            points are strictly feasible points, which is how the rival gets its name.
+            This panel is reserved for the race: simplex along the boundary against the
+            interior-point central path on one shared polytope, arriving in a later pass.
+            Interior points are strictly feasible points, which is how the rival earns its name.
           </figcaption>
         </figure>
       </div>
 
       <div class="l-body">
-        <p class="vignette">The same drone that walked the hold now plots shuttle courses
-          and balances relay traffic across the fleet. Then a rival vessel, Strictly
-          Feasible, lines up for a race it insists on running straight down the middle.</p>
-        <p>Both networks are linear programs in disguise: read as node potentials the
-          graph gives a shortest route of <b>dt = 4</b>, read as capacities it pushes a
-          maximum flow of <b>8</b>. The race then replays simplex along the boundary
-          against the interior-point central path across one shared polytope, and interior
-          points are strictly feasible points, which is how the rival earns its name.</p>
-        <p class="later-note">Both the two-card gallery and the race land in milestone B.
-          Their frames are drawn at final size already, so the figures will slot in without
-          nudging a single line of this text.</p>
+        <p class="vignette">The same drone that walked the cargo hold is loaned to the fleet,
+          first to plot shuttle courses, then to balance relay traffic across a dozen ships. A
+          sleeker vessel watches it work. Strictly Feasible has never once touched a wall, and
+          it means to prove the long way round the boundary was never necessary.</p>
+        <p>Both jobs are linear programs wearing network clothes: read as node potentials the
+          graph returns a shortest route of <b>dt = 4</b>, and read as arc capacities the same
+          shape pushes a maximum flow of <b>8</b>. The race then replays simplex along the
+          boundary against the interior-point central path across one shared polytope, and
+          interior points are strictly feasible points, which is how the rival earns its name.</p>
       </div>
     </section>
 
@@ -761,9 +1183,8 @@
         </p>
         <p>Every fixture optimum on this page is cross-checked against scipy's HiGHS solver
           (<span class="code-inline">scipy.optimize.linprog(method="highs")</span>,
-          which minimizes, so we negate the objective to maximize). The oracle badge is a
-          trust marker, not decoration: it links to exactly how the check runs, so no number
-          here asks to be taken on faith.</p>
+          which minimizes, so we negate the objective to maximize). The oracle badge links to
+          exactly how that check runs, so no number here asks to be taken on faith.</p>
 
         <h3>Sources</h3>
         <ul class="source-list">
@@ -781,7 +1202,7 @@
             <a href="https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/">MIT Press</a>.
           </li>
           <li>
-            <span class="src-tag">StatQuest.</span> The brewery style story problem
+            <span class="src-tag">StatQuest.</span> The resource-allocation story problem
             follows Josh Starmer's StatQuest explanations.
             <a href="https://www.youtube.com/@statquest">StatQuest on YouTube</a>.
           </li>
