@@ -1,0 +1,27 @@
+# feasible-core: the hand-written dense-tableau two-phase simplex.
+#
+# The single source of truth every consumer echoes. serde only (no serde_json in
+# the library — that lives in feasible-py / feasible-wasm and in this crate's
+# dev-dependencies for the golden-parity + determinism tests). Kept PyO3-free so
+# the wasm32 build links it cleanly. publish = false: the wheel stays local and
+# nothing publishes to crates.io.
+
+[package]
+name = "feasible-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Hand-written dense-tableau two-phase simplex, the single source of truth for feasible-region."
+publish = false
+
+[lib]
+name = "feasible_core"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }

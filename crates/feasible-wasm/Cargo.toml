@@ -1,0 +1,25 @@
+# feasible-wasm — browser build. Stub for now.
+#
+# In M3 this crate links `feasible-core` and exposes the single
+# `#[wasm_bindgen]` entry point `solve_json(lp_json, options_json) -> String`,
+# built to `docs/wasm/feasible_core.js` by `pixi run build-wasm`. For M2 it
+# depends on nothing but wasm-bindgen and exports only its version, so the
+# wasm-pack -> JS-glue pipeline compiles and imports end-to-end before the
+# solver lands. Verify it builds with `pixi run build-wasm-check` (scratch
+# out-dir; the live M1 site under docs/ is never touched in M2).
+
+[package]
+name = "feasible-wasm"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "WASM binding for feasible-core: exports the crate version; solve_json wired in later."
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = { workspace = true }

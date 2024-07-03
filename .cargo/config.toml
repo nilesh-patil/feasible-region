@@ -1,0 +1,15 @@
+# Link flags for building the PyO3 extension (feasible-py) with a bare
+# `cargo build` / `cargo test` on macOS — e.g. the workspace MSRV check on
+# 1.67.1 or a plain `cargo build --workspace`. `extension-module` deliberately
+# leaves the CPython symbols unresolved at link time; on Apple targets the
+# linker needs `dynamic_lookup` to permit that (maturin injects the same flags
+# for its own builds, so `pixi run build-py` does not depend on this file).
+#
+# Harmless for the rlib core (no link step) and for the wasm32 target (this
+# stanza is Apple-only); a normal binary simply never uses the flag.
+
+[target.x86_64-apple-darwin]
+rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]
+
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]

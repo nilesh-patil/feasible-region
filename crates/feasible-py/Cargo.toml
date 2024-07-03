@@ -1,0 +1,32 @@
+# feasible-py — PyO3 0.18 binding, built into a local wheel by maturin.
+#
+# Produces the `feasible_region._core` extension module. The
+# stable ABI (`abi3-py311`) means one wheel covers CPython 3.11+ per platform.
+# `extension-module` leaves the CPython symbols to be resolved by the host
+# interpreter at load time (no libpython linked into the wheel).
+#
+# `test = false` keeps `cargo test --workspace` from trying to build/run an
+# (empty) test harness for a cdylib that has no interpreter to resolve its
+# symbols against; the binding is exercised through pytest, not
+# `cargo test`. publish = false guards against `cargo publish`.
+
+[package]
+name = "feasible-py"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "PyO3 binding exposing the feasible-core simplex solver to Python (feasible_region._core)."
+publish = false
+
+[lib]
+name = "_core"
+crate-type = ["cdylib"]
+test = false
+doctest = false
+
+[dependencies]
+feasible-core = { path = "../feasible-core" }
+pyo3 = { workspace = true, features = ["extension-module", "abi3-py311"] }
+serde_json = { workspace = true }

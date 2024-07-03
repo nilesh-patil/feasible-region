@@ -1,0 +1,37 @@
+# feasible-region Cargo workspace.
+#
+# One simplex core, three consumers: `feasible-core` (pure Rust solver, serde
+# only), `feasible-py` (PyO3 0.18 + maturin native backend), `feasible-wasm`
+# (wasm-bindgen 0.2.84 browser build).
+#
+# The workspace version is the single source of truth;
+# `feasible_region.__version__` and the wasm package version are mirrored to it
+# by hand at release time.
+#
+# Pins are exact (`=`) so `cargo build` resolves the DIRECT dependencies to
+# the same releases everywhere and nothing newer sneaks into a build
+# (see the Cargo.lock note in .gitignore). rust-version "1.67" is the MSRV; the
+# code is additionally compiler-verified on real Rust 1.67.1 (`pixi run msrv`).
+
+[workspace]
+resolver = "2"
+members = [
+    "crates/feasible-core",
+    "crates/feasible-py",
+    "crates/feasible-wasm",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.67"
+license = "MIT"
+authors = ["Nilesh Patil <4813079+nilesh-patil@users.noreply.github.com>"]
+description = "A visual field guide to linear programming: one simplex core in Rust, bound to Python, animated in the browser"
+repository = "https://github.com/nilesh-patil/feasible-region"
+
+[workspace.dependencies]
+serde = { version = "=1.0.152", features = ["derive"] }
+serde_json = "=1.0.91"
+pyo3 = "=0.18.3"
+wasm-bindgen = "=0.2.84"

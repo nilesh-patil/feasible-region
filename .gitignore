@@ -12,7 +12,18 @@ dist/
 
 # rust
 target/
-Cargo.lock
+# NOTE: Cargo.lock IS committed (unlike pixi.lock). Cargo has no MSRV-aware
+# resolver, so the lock is the only way to pin the transitive proc-macro tree
+# (proc-macro2, quote, syn, unicode-ident, ...) to versions that are known to
+# build on the MSRV toolchain 1.67.1. A fresh resolve can pull a newer
+# proc-macro tree that needs a newer rustc and break the 1.67.1 build.
+# Keep it curated with `cargo update --precise` if a pin ever needs to move.
+
+# maturin / native extension (local builds only, never published)
+*.whl
+wheels/
+python/feasible_region/_core*.so
+python/feasible_region/_core*.pyd
 
 # wasm build intermediates (final wasm in docs/wasm/ IS committed for Pages)
 crates/feasible-core/pkg/
