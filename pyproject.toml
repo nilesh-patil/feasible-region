@@ -1,0 +1,46 @@
+# feasible-region — Python packaging.
+#
+# Mixed maturin layout: the pure-Python package (reference solver, fixtures,
+# geometry, central path, traces CLI) lives under `python/`, and the native
+# `feasible_region._core` extension is built from `crates/feasible-py`. One
+# distribution `feasible-region`, importable as `feasible_region`.
+#
+# The version is `dynamic` so maturin reads it from the crate (which inherits
+# the workspace version), the single source of truth; only
+# `feasible_region.__version__` and the wasm package version are hand-mirrored.
+#
+# Local builds only: `pixi run build-py` (maturin develop)
+# for the dev/test install, `pixi run build-wheel` for a distributable
+# artifact. Nothing gets published to PyPI.
+
+[build-system]
+requires = ["maturin>=0.14"]
+build-backend = "maturin"
+
+[project]
+name = "feasible-region"
+description = "A visual field guide to linear programming — a two-phase simplex core with a pure-Python reference and an optional native (Rust/PyO3) backend."
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Nilesh Patil" }]
+readme = "README.md"
+dynamic = ["version"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Rust",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+
+# No mandatory runtime dependencies — the reference backend is pure stdlib and
+# the hot path never touches numpy.
+[project.optional-dependencies]
+test = ["numpy>=1.24", "scipy>=1.10", "pytest>=7.2"]
+
+[project.urls]
+Homepage = "https://github.com/nilesh-patil/feasible-region"
+
+[tool.maturin]
+python-source = "python"
+module-name = "feasible_region._core"
+manifest-path = "crates/feasible-py/Cargo.toml"
