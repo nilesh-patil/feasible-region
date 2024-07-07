@@ -315,5 +315,10 @@ def test_top_level_solve_uses_reference_fallback():
 
 
 def test_backend_native_without_extension_raises():
+    # this asserts the missing-extension raise path, so it only
+    # applies when the native _core is NOT importable. Skip (never fail) once the
+    # wheel is built, so `pixi run test-native` stays green after build-py.
+    if fr.backend() == "native":
+        pytest.skip("native _core is built; the missing-extension raise path is not exercised")
     with pytest.raises(Exception):
         fr.solve(build_lp("topic21"), SolveOptions(), backend="native")

@@ -171,9 +171,13 @@ def test_submodules_importable():
 
 
 def test_backend_reports_reference_without_native():
-    # Native extension is not built in this env -> reference is the active backend.
+    # this pins the reference-only scenario, so it only applies when
+    # the native _core is NOT importable. Skip (never fail) once the wheel is built,
+    # so `pixi run test-native` stays green after build-py.
     b = fr.backend()
     assert b in ("native", "reference")
+    if b == "native":
+        pytest.skip("native _core is built; the reference-default path is not exercised")
     assert b == "reference"
 
 
