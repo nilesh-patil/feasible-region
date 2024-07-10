@@ -32,7 +32,10 @@ def central_path(lp: LinearProgram, steps: int = 24) -> dict:
     rhs = [float(con.rhs) for con in lp.constraints]
 
     x = _interior_start(rows, rhs, n)
-    mu = 1.0
+    # Start high enough that the barrier dominates the objective at the first
+    # iterate (analytic centre), scaled to the fixture: a fixed mu=1 is already
+    # negligible against an objective in the thousands.
+    mu = max(1.0, max(abs(b) for b in rhs))
     points: list[list[float]] = []
     mu_values: list[float] = []
     for _ in range(steps):
@@ -81,7 +84,7 @@ def _center(c, rows, rhs, x, mu, iters=40):
         for k in range(len(rows)):
             inv = mu / slack[k]
             for i in range(n):
-                grad[i] += inv * rows[k][i]
+                grad[i] -= inv * rows[k][i]
         hess = [[0.0] * n for _ in range(n)]
         for i in range(n):
             hess[i][i] += mu / (x[i] * x[i])
