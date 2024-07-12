@@ -35,3 +35,17 @@ serde = { version = "=1.0.152", features = ["derive"] }
 serde_json = "=1.0.91"
 pyo3 = "=0.18.3"
 wasm-bindgen = "=0.2.84"
+
+# Release profile tuned for the WASM binary budget (< 500 KB). This
+# is a whole-workspace profile: Cargo forces `panic = "unwind"` back on for the
+# test / bench / build-script / proc-macro units regardless, so `cargo test`
+# (dev AND --release) is unaffected; the reach into feasible-py's maturin release
+# is accepted (py is local-only behind a total validate() boundary, contract
+# Decision 1). opt-level="z" + LTO + one codegen unit minimize code size;
+# panic="abort" drops the unwind tables; strip removes symbols.
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

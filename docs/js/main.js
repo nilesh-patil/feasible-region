@@ -1,18 +1,12 @@
-// ==========================================================================
 // Feasible Region . main.js . the page entry point
-// Buildless ES module. No bundler, no CDN. Deferred (type="module"), so it
-// never blocks first paint.
-//
-// Responsibilities:
-//   1. Detect each figure by its data-figure attribute.
-//   2. Lazy-hydrate figures on IntersectionObserver, so heavy figure code and
-//      the WASM solver load only as a figure nears view.
-//   3. Hand the S1 mount to ./figures/hero.js; no-op gracefully for the S2..S6
-//      shells that have no module yet, and for a module that fails to load.
-//   4. Wire the per-figure engine badge to tell the truth about the live
-//      engine: trace replay by default until a live WASM solve reports in.
-//   5. Light table-of-contents scroll-spy, honouring reduced motion.
-// ==========================================================================
+// Buildless ES module, deferred, so it never blocks first paint. It detects
+// figures by data-figure, lazy-hydrates them on an IntersectionObserver (heavy
+// figure code and the WASM solver load only as a figure nears view),
+// hands each mount its ctx, wires the per-figure engine badge, and runs a
+// table-of-contents scroll-spy. Missing modules no-op gracefully, keeping the
+// authored still on screen.
+
+import { loadEngine, fillOptions } from "./engine.js";
 
 // A figure name maps to a lazy module loader ONLY when a module exists. Names
 // absent from this registry (the milestone shells) are detected and no-op, so
@@ -24,7 +18,14 @@ const FIGURE_MODULES = {
   duality: () => import("./figures/duality.js"),         // s4, data-figure="duality"
   kleeminty: () => import("./figures/kleeminty.js"),     // s5, data-figure="kleeminty"
   maxflow: () => import("./figures/maxflow.js"),         // s6, data-figure="maxflow"
+  shortestpath: () => import("./figures/shortestpath.js"), // s6, data-figure="shortestpath"
+  race: () => import("./figures/race.js"),               // s6, data-figure="race"
 };
+
+// Live-capable figures warm the WASM engine as they near view. Every other
+// figure (formulation, duality, maxflow, shortestpath, race) is trace/geometry
+// only and NEVER fetches WASM.
+const LIVE_CAPABLE = new Set(["hero", "dualview", "kleeminty"]);
 
 const prefersReducedMotion = window.matchMedia(
   "(prefers-reduced-motion: reduce)"
@@ -49,6 +50,65 @@ function setEngine(figureEl, state) {
   badge.textContent = ENGINE_LABEL[next];
 }
 
+// ---- live WASM engine surface -------
+// Three memoized helpers form the whole ctx engine API; each NEVER throws, so a
+// figure can always await them and fall back cleanly on null.
+let engineModule = null; // loaded wasm module, or null (never loaded / failed)
+let engineReady = null;  // memoized Promise<boolean>
+
+// Trigger (or reuse) the lazy load; resolve true iff the engine is usable. For
+// the initial badge and to enable the S3 slider WITHOUT forcing a solve.
+function ensureEngine() {
+  if (engineReady) return engineReady;
+  engineReady = loadEngine().then(
+    (mod) => { engineModule = mod; return mod !== null; },
+    () => { engineModule = null; return false; }
+  );
+  return engineReady;
+}
+
+// Per-interaction workhorse: solve the current view, or null on ANY failure
+// (engine absent, solve_json missing, {"error":...}, malformed, unknown schema).
+// Wraps the SYNCHRONOUS solve_json and lowercases Solution.status.
+async function solve(problem, options) {
+  try {
+    const ready = await ensureEngine();
+    if (!ready || !engineModule || typeof engineModule.solve_json !== "function") return null;
+    const raw = engineModule.solve_json(JSON.stringify(problem), JSON.stringify(fillOptions(options)));
+    let sol;
+    try { sol = JSON.parse(raw); } catch (e) { return null; }
+    if (!sol || typeof sol !== "object" || sol.error) return null;
+    if (typeof sol.status !== "string") return null;
+    sol.status = sol.status.toLowerCase();
+    if (sol.trace && sol.trace.schema !== "feasible-trace/v1") return null;
+    return sol;
+  } catch (err) {
+    if (window.console && console.debug) console.debug("live solve failed:", err && err.message);
+    return null;
+  }
+}
+
+// The shared honesty gate: run ONE verify solve of the CURRENT view
+// (problem may be a thunk, re-read after warm-up so a mid-drag change is not a
+// false mismatch). Flip the badge to live ONLY if verify(sol) is true and hold
+// is unset. Return the engine on success, or null (NO flip) on engine-null /
+// solve-fail / verify-false.
+async function upgradeToLive(figureEl, args) {
+  const opts = args || {};
+  const ready = await ensureEngine();
+  if (!ready || !engineModule) return null;
+  const view = typeof opts.problem === "function" ? opts.problem() : opts.problem;
+  const sol = await solve(view, opts.options);
+  if (!sol) return null;
+  if (typeof opts.verify === "function") {
+    let ok = false;
+    try { ok = opts.verify(sol) === true; } catch (e) { ok = false; }
+    if (!ok) return null;
+  }
+  if (!opts.hold) setEngine(figureEl, "live");
+  return engineModule;
+}
+
 // ---- trace loading (source-agnostic fallback) --------
 // Fetches a golden trace mirrored into docs/traces/. Root-relative to the
 // served document so it resolves the same on GitHub Pages and locally.
@@ -68,12 +128,21 @@ function makeContext(figureEl) {
     prefersReducedMotion,
     loadTrace,
     setEngine: (state) => setEngine(figureEl, state),
+    ensureEngine,
+    solve,
+    upgradeToLive: (args) => upgradeToLive(figureEl, args),
   };
 }
 
 // ---- lazy figure hydration ----------------------------------------------
 async function hydrateFigure(figureEl) {
   const name = figureEl.dataset.figure;
+
+  // Warm-start the WASM engine as a live-capable figure nears view:
+  // fire-and-forget on THIS IntersectionObserver (no second observer). The
+  // wasm binary loads once, only now, and never blocks first paint.
+  if (name && LIVE_CAPABLE.has(name)) ensureEngine();
+
   const loader = name && FIGURE_MODULES[name];
 
   // A shell with no registered module: mark it hydrated and leave the

@@ -1,12 +1,11 @@
-# feasible-wasm — browser build. Stub for now.
+# feasible-wasm: browser build.
 #
-# In M3 this crate links `feasible-core` and exposes the single
-# `#[wasm_bindgen]` entry point `solve_json(lp_json, options_json) -> String`,
-# built to `docs/wasm/feasible_core.js` by `pixi run build-wasm`. For M2 it
-# depends on nothing but wasm-bindgen and exports only its version, so the
-# wasm-pack -> JS-glue pipeline compiles and imports end-to-end before the
-# solver lands. Verify it builds with `pixi run build-wasm-check` (scratch
-# out-dir; the live M1 site under docs/ is never touched in M2).
+# Links `feasible-core` and exposes the single `#[wasm_bindgen]` entry point
+# `solve_json(lp_json, options_json) -> String` (plus `version()`), built to
+# `docs/wasm/feasible_core.{js,_bg.wasm}` by `pixi run build-wasm`. serde_json
+# lives here (not in the library) so the core stays serde-only; default features
+# only — float_roundtrip / arbitrary_precision are deliberately NOT enabled (they
+# only grow the binary). Verify with `pixi run build-wasm-check` (scratch out-dir).
 
 [package]
 name = "feasible-wasm"
@@ -15,7 +14,7 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
-description = "WASM binding for feasible-core: exports the crate version; solve_json wired in later."
+description = "WASM binding for feasible-core: solve_json + version."
 publish = false
 
 [lib]
@@ -23,3 +22,13 @@ crate-type = ["cdylib"]
 
 [dependencies]
 wasm-bindgen = { workspace = true }
+feasible-core = { path = "../feasible-core" }
+serde_json = { workspace = true }
+
+# Hermetic build: skip the binaryen `wasm-opt` post-pass (it is a
+# separate toolchain download). The release profile (root Cargo.toml:
+# opt-level="z", lto, codegen-units=1, panic="abort", strip) already produces a
+# small binary; ENGINE measures and only flips this to true if the .wasm exceeds
+# the 400 KB escalation trigger (contract Decision 1).
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false

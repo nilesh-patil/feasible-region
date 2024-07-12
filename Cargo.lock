@@ -47,6 +47,8 @@ dependencies = [
 name = "feasible-wasm"
 version = "0.1.0"
 dependencies = [
+ "feasible-core",
+ "serde_json",
  "wasm-bindgen",
 ]
 
