@@ -1,13 +1,10 @@
-// ==========================================================================
 // Feasible Region . figures/duality.js . S4 shadow prices (duality)
 //
-// The reframe: instead of "how do we fill the hold", ask "what is one more
-// unit of each resource worth". That worth is the constraint's dual value, its
-// shadow price. This figure shows the five resource limits (the primal side)
-// next to the five shadow prices (the dual side) as labelled bars. Hover or
-// keyboard-focus a resource on either side and it lights on both, tied by a
-// shared con: data-key through sync.js, so the reader sees a limit and its
-// price are the same thing seen twice.
+// The reframe: instead of "how do we fill the hold", ask "what is one more unit
+// of each resource worth" -- the constraint's dual value, its shadow price. Five
+// resource limits (primal) sit beside their five shadow prices (dual) as bars;
+// hover or focus a resource on either side and it lights on both via a shared
+// con: data-key (sync.js), so a limit and its price read as one thing seen twice.
 //
 // Every number is replayed from ./traces/topic21.json (engine badge: replaying
 // trace). The dual values live at trace.result.duals = [0, 1/7, 3/7, 0, 1]; the

@@ -1,16 +1,11 @@
-// ==========================================================================
 // Feasible Region . lp2d.js . 2D linear-program geometry, computed client-side
 //
 // A tiny, dependency-free toolkit the hero figure uses to build a feasible
-// polygon by half-plane intersection and to read the optimum straight off the
-// corners. In two variables the optimum of a linear objective always sits at a
-// vertex, so enumerating corners is exact: no solver, no trace needed.
-//
-// Convention: every constraint is written a*x + b*y <= c (a half-plane). A
-// ">=" constraint is negated into that form by the caller. Nonnegativity is
-// handled by starting from the first-quadrant plotting box, so 0 <= x <= xMax
-// and 0 <= y <= yMax hold for free.
-// ==========================================================================
+// polygon by half-plane intersection and read the optimum off the corners. In
+// two variables the optimum always sits at a vertex, so enumerating corners is
+// exact: no solver, no trace needed. Convention: every constraint is a*x + b*y
+// <= c; a ">=" row is negated by the caller. Nonnegativity comes from starting at
+// the first-quadrant box, so 0 <= x <= xMax and 0 <= y <= yMax hold for free.
 
 const EPS = 1e-9;
 

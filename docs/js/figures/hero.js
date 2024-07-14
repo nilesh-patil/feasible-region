@@ -1,21 +1,12 @@
-// ==========================================================================
 // Feasible Region . figures/hero.js . S1 interactive 2D LP playground
 //
-// Mounted by main.js on the #s1 figure box (data-figure="hero",
-// data-fixture="statquest"). Seeds from ./traces/statquest.json (its problem
-// block) and lets the reader:
-//   - drag either constraint line to translate its right-hand side,
-//   - rotate the objective arrow,
-// while the shaded feasible polygon is re-clipped from the live half-planes on
-// every frame and the optimum corner is re-read by evaluating the objective at
-// each vertex. In two variables that vertex enumeration is EXACT, so the badge
-// reads "geometric": no solver, no trace replay for the answer. The trace's
-// geometry seeds only the static no-JS still in index.html.
-//
-// d3 (v7) is loaded as a classic-script window global (it is a UMD build, not
-// an ES module). If d3 or the trace fails to load we throw, and main.js keeps
-// the authored no-JS still on screen: the box is never blanked.
-// ==========================================================================
+// Mounts on #s1 (data-fixture="statquest"), seeding from the trace problem block.
+// Drag a constraint or rotate the objective; the feasible polygon re-clips from
+// the live half-planes and the optimum is re-read by evaluating the objective at
+// each vertex. In two variables that enumeration is EXACT, so the badge reads
+// "geometric". A live WASM solve runs alongside and flips the badge to "solving
+// live" only when it reproduces the shown corner. d3 (v7) is a UMD window
+// global; if it or the trace fails to load we throw and main.js keeps the still.
 
 import {
   feasibleRegion,
@@ -105,13 +96,10 @@ function readConstraints(problem) {
     const a = flip * row.coeffs[0];
     const b = flip * row.coeffs[1];
     const c = flip * row.rhs;
-    // Fully relaxing a limit (End key, or dragging to the far edge) must still
-    // leave a VISIBLE chord inside the plot. Setting the bound to the single far
-    // corner makes lineThroughBox() return null, which used to drop the drawn
-    // line, hide the focusable handle, and strand keyboard focus. Pull the
-    // maximum right-hand side just inside that corner so two box edges always
-    // stay crossed. Axis-aligned lines (a or b near zero) never hit the corner
-    // degeneracy, so the reduction is skipped for them.
+    // Fully relaxing a limit must still leave a VISIBLE chord: the far corner
+    // makes lineThroughBox() return null, dropping the line and stranding keyboard
+    // focus. Pull the max rhs just inside that corner so two box edges stay
+    // crossed. Axis-aligned lines never hit the corner, so they skip the reduction.
     const corner = a * X_MAX + b * Y_MAX;
     const inset = 0.5 * Math.min(Math.abs(a) * X_MAX, Math.abs(b) * Y_MAX);
     const cMax = Math.max(2, corner - inset);
@@ -317,7 +305,42 @@ export default async function mount(el, ctx) {
   const badge = scope.querySelector('.engine-badge[data-role="hero-engine"], .engine-badge');
   if (badge) {
     badge.title =
-      "In two dimensions the optimum always sits at a corner, so evaluating the objective at every vertex is exact. This figure needs no solver.";
+      "The badge names the engine behind this corner: exact vertex enumeration when drawn from geometry, or the same simplex core compiled to WebAssembly when solving live.";
+  }
+
+  const xname = problem.var_names?.[0] || "x1";
+  const yname = problem.var_names?.[1] || "x2";
+
+  // Two honest provenance sentences, swapped in lockstep with the badge:
+  // the WASM variant when a live solve produced the shown number, the geometry
+  // variant otherwise. STORY owns the words; the implementer selects by state.
+  const PROV_GEOM =
+    "The badge is a promise, not decoration: live, this corner is found by " +
+    "testing the objective at every vertex, exact in two dimensions, and it " +
+    "matches what an independent solver verified for this problem.";
+  const PROV_LIVE =
+    "The badge is a promise, not decoration: this corner was just re-solved by " +
+    "the same simplex core compiled to WebAssembly, and it lands exactly where " +
+    "the exact two dimensional vertex test says it must.";
+  function setProvenance(isLive) {
+    if (provenance) provenance.textContent = isLive ? PROV_LIVE : PROV_GEOM;
+  }
+
+  // Write the readout + aria-label from a point/value pair, whatever its source
+  // (the geometric argmax, or a live solve when the badge is live). The corner
+  // count is a geometric property, so it always comes from the polygon.
+  function writeReadout(point, value, n) {
+    const px = fmt(point[0]);
+    const py = fmt(point[1]);
+    const val = fmt(value);
+    svg.attr(
+      "aria-label",
+      `Feasible region with ${n} corners. The objective points ${dirWord(state.theta)}. Its best corner is ${xname} = ${px}, ${yname} = ${py}, where the objective value is ${val}.`
+    );
+    if (readout) {
+      readout.innerHTML =
+        `x* = <b>(${px}, ${py})</b>. Objective value <b>${val}</b>. Feasible region has <b>${n}</b> corners.`;
+    }
   }
 
   function updateReadout(poly, opt) {
@@ -327,18 +350,7 @@ export default async function mount(el, ctx) {
       if (readout) readout.textContent = msg;
       return;
     }
-    const n = poly.length;
-    const px = fmt(opt.point[0]);
-    const py = fmt(opt.point[1]);
-    const val = fmt(opt.value);
-    svg.attr(
-      "aria-label",
-      `Feasible region with ${n} corners. The objective points ${dirWord(state.theta)}. Its best corner is ${problem.var_names?.[0] || "x1"} = ${px}, ${problem.var_names?.[1] || "x2"} = ${py}, where the objective value is ${val}.`
-    );
-    if (readout) {
-      readout.innerHTML =
-        `x* = <b>(${px}, ${py})</b>. Objective value <b>${val}</b>. Feasible region has <b>${n}</b> corners.`;
-    }
+    writeReadout(opt.point, opt.value, poly.length);
   }
 
   // ---- draw (recompute polygon + optimum, reposition everything) -------
@@ -425,6 +437,102 @@ export default async function mount(el, ctx) {
     });
   }
 
+  // ---- live WASM solve (S1) ------
+  // The region and its corner are always drawn from exact 2D geometry (instant).
+  // Separately, debounced, the live WASM core re-solves the CURRENT view:
+  // when it returns "optimal" AND agrees with the shown corner, the badge flips
+  // to "solving live (WASM)" and the readout comes from that solve. On any
+  // disagreement or when WASM is blocked (ctx.solve null), we keep the geometric
+  // answer and the honest "drawn from geometry" badge, exactly as today.
+  const SOLVE_OPTS = { pivot_rule: "dantzig", max_iterations: 10000, record_trace: false };
+  const SOLVE_DEBOUNCE_MS = 24;
+  let live = false;       // is the badge currently "solving live (WASM)"?
+  let liveWarned = false; // one-shot guard for the disagreement console.warn
+  let engineUp = false;   // did ensureEngine report a usable WASM engine?
+  let solveToken = 0;     // drops any solve superseded by a newer interaction
+  let solveTimer = null;
+
+  ctx.ensureEngine().then(
+    (ok) => { engineUp = ok === true; },
+    () => { engineUp = false; }
+  );
+
+  // Reconcile one solve result against the geometry snapshot it was solved for.
+  function applyLive(sol, snap) {
+    const g = snap.g;
+    const matched =
+      sol &&
+      sol.status === "optimal" &&
+      g &&
+      Array.isArray(sol.x) &&
+      sol.x.length >= 2 &&
+      Math.abs(sol.x[0] - g.point[0]) < 1e-6 &&
+      Math.abs(sol.x[1] - g.point[1]) < 1e-6;
+    if (matched) {
+      // The shown number now came from solve_json this frame.
+      writeReadout(sol.x, sol.objective_value, snap.n);
+      if (!live) {
+        live = true;
+        ctx.setEngine("live");
+        setProvenance(true);
+      }
+      return;
+    }
+    if (live) {
+      live = false;
+      ctx.setEngine("geometric");
+      setProvenance(false);
+    }
+    // Warn once, only when the engine RAN and truly disagreed (the box-artifact
+    // case). A null solve with no engine is the honest WASM-blocked fallback, so
+    // it stays silent (zero console errors).
+    const enginePresent = sol != null || engineUp;
+    if (enginePresent && g && !liveWarned) {
+      liveWarned = true;
+      if (window.console && console.warn) {
+        console.warn(
+          "hero: the live solve and the box-clipped geometry disagree here; showing the geometric corner."
+        );
+      }
+    }
+  }
+
+  function runSolve() {
+    const token = ++solveToken;
+    // Snapshot the geometry for the EXACT state we hand the solver, so a drag
+    // between dispatch and resolution is not a false mismatch; the token drops
+    // any solve a newer interaction has superseded.
+    const cx = state.objMag * Math.cos(state.theta);
+    const cy = state.objMag * Math.sin(state.theta);
+    const poly = feasibleRegion(constraints, X_MAX, Y_MAX);
+    const g = objectiveArgmax(poly, cx, cy);
+    const lp = {
+      direction: "maximize",
+      objective: [cx, cy],
+      constraints: constraints.map((k) => ({ coeffs: [k.a, k.b], op: "le", rhs: k.c })),
+      var_names: problem.var_names || null,
+    };
+    ctx.solve(lp, SOLVE_OPTS).then((sol) => {
+      if (token !== solveToken) return;
+      applyLive(sol, { g, n: poly.length });
+    });
+  }
+
+  function scheduleSolve() {
+    if (solveTimer) clearTimeout(solveTimer);
+    solveTimer = setTimeout(() => {
+      solveTimer = null;
+      runSolve();
+    }, SOLVE_DEBOUNCE_MS);
+  }
+
+  // Every interaction redraws the geometry immediately (rAF) and asks for a live
+  // re-solve on its own debounce (the two schedulers are independent).
+  function bump() {
+    scheduleDraw();
+    scheduleSolve();
+  }
+
   // ---- pointer coordinates in data space -------------------------------
   const dataAt = (event) => {
     const [px, py] = d3.pointer(event, svgNode);
@@ -441,7 +549,7 @@ export default async function mount(el, ctx) {
     .on("drag", function (event, k) {
       const p = dataAt(event);
       k.c = clamp(k.a * p.x + k.b * p.y, k.cMin, k.cMax);
-      scheduleDraw();
+      bump();
     })
     .on("end", function () {
       this.style.cursor = "grab";
@@ -459,7 +567,7 @@ export default async function mount(el, ctx) {
       const dy = p.y - OBJ_BASE.y;
       if (Math.hypot(dx, dy) < 1e-6) return;
       state.theta = Math.atan2(dy, dx);
-      scheduleDraw();
+      bump();
     })
     .on("end", function () {
       this.style.cursor = "grab";
@@ -497,7 +605,7 @@ export default async function mount(el, ctx) {
       }
       if (handled) {
         event.preventDefault();
-        scheduleDraw();
+        bump();
       }
     });
   });
@@ -525,7 +633,7 @@ export default async function mount(el, ctx) {
     }
     if (handled) {
       event.preventDefault();
-      scheduleDraw();
+      bump();
     }
   });
 
@@ -538,15 +646,14 @@ export default async function mount(el, ctx) {
   if (still) still.replaceWith(svgNode);
   else el.appendChild(svgNode);
 
-  ctx.setEngine("geometric"); // exact vertex enumeration, not a solver or trace
+  // At rest, before any live solve reports in, the honest state is the exact
+  // geometric read: vertex enumeration, not a solver or a trace replay.
+  ctx.setEngine("geometric");
+  setProvenance(false);
 
-  // Keep the provenance sentence honest against the live badge:
-  // once hydrated the corner is no longer a trace replay, it is recomputed here
-  // by exact vertex enumeration, so say so instead of claiming a trace.
-  if (provenance) {
-    provenance.textContent =
-      "The badge is a promise, not decoration: live, this corner is found by " +
-      "testing the objective at every vertex, exact in two dimensions, and at " +
-      "rest it matches what an independent solver verified for this problem.";
-  }
+  // Kick one live solve of the resting view. If the WASM engine is available it
+  // reproduces this corner and the badge flips to "solving live (WASM)"
+  // if WASM is blocked ctx.solve resolves null
+  // and the figure stays exactly as it renders today: geometric badge, no noise.
+  scheduleSolve();
 }

@@ -1,16 +1,10 @@
-// ==========================================================================
 // Feasible Region . iso3d.js . pure isometric projection helpers
 //
-// Milestone B shared plumbing. A dependency-free ES module of PURE functions:
-// no DOM, no d3, no rotation, no hull faces, no interaction. Any 3D figure
-// (S5's Klee-Minty cube) projects through here so it lands with byte-identical
-// math to the S3 tableau walk, which keeps the whole site's isometric look
-// consistent. Every export is console unit-checkable.
-//
-// The projection is fixed (no turntable): a static isometric plane. See the
-// integration contract section 1 for the frozen API. Rotation, depth sort, and
-// camera state were adjudicated OUT of Milestone B on purpose.
-// ==========================================================================
+// Dependency-free ES module of PURE functions: no DOM, no d3, no rotation, no
+// hull faces. Any 3D figure (S5's Klee-Minty cube, the race) projects through
+// here so it lands with byte-identical math to the S3 tableau walk, keeping the
+// site's isometric look consistent. The projection is a fixed isometric plane
+// (no turntable). Every export is console unit-checkable.
 
 // cos(30 degrees). The x and y axes fan out at +/- 30 degrees from horizontal,
 // so a unit step in x1 or x2 moves this far sideways. Frozen to the same value

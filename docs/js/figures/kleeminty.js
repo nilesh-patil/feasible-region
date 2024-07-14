@@ -1,25 +1,13 @@
-// ==========================================================================
 // Feasible Region . figures/kleeminty.js . S5 the worst case, built on purpose
 //
-// Two panels sharing one section, both replayed from ./traces/kleeminty3.json
-// (engine badge: replaying trace):
-//
-//   LEFT  a log scale cost chart. The worst case corner count is 2^n, an EXACT
-//         BigInt, so on a log axis it is a straight climb, doubling with every
-//         added dimension. A gentle n^3 reference sits underneath, labelled
-//         honestly as scale and not a bound. A native range slider walks n from
-//         3 to 200; at n = 200 the count is 1.606938e60, a number with 61 digits.
-//
-//   RIGHT the n = 3 Klee-Minty cube. Dantzig's greedy rule is lured through all
-//         eight corners in order before it reaches the exit at (0, 0, 10000),
-//         objective 10000. The cube is projected through the shared iso3d helper
-//         (same isometric look as the S3 polytope) and drawn as a wireframe, no
-//         hull faces. A native scrubber steps the walk; there is no autoplay.
-//
-// The numbers are the recorded trace, so with scripts off the authored still
-// already states the resting result and with scripts on the arithmetic is the
-// same. Only iso3d is imported; no d3, no solver, no KaTeX.
-// ==========================================================================
+// LEFT a log-scale cost chart: the worst-case corner count is 2^n, an EXACT
+// BigInt (n from 3 to 200; at 200 it is 1.606938e60, 61 digits) over an n^3
+// reference labelled as scale, not a bound. RIGHT the n = 3 Klee-Minty cube:
+// Dantzig's greedy rule is lured through all eight corners to the exit at
+// (0, 0, 10000). A pivot-rule selector re-solves the cube live via the WASM
+// core, so Bland's lowest-index rule can be raced against Dantzig on the same
+// polytope; with WASM blocked the cube replays the recorded Dantzig walk. The
+// big-n chart is exact arithmetic and never drives the engine badge.
 
 import { makeProjector, walkIndices } from "../iso3d.js";
 
@@ -96,10 +84,11 @@ function powerLabel(x, y, exp) {
 
 export default async function mount(box, ctx) {
   const trace = await ctx.loadTrace(ctx.fixture || "kleeminty3");
-  const steps = trace.steps;
+  const committedSteps = trace.steps; // the recorded Dantzig walk, the fallback
+  // steps / lastStep are reassigned when a live pivot-rule re-solve lands.
+  let steps = committedSteps;
   const geom = trace.geometry;
-  const nSteps = steps.length; // 8 corners of the n = 3 cube
-  const lastStep = nSteps - 1;
+  let lastStep = steps.length - 1;
 
   const scope = box.closest("figure, section") || document;
   const cubeBox = scope.querySelector('[data-role="km-cube-box"]');
@@ -231,7 +220,9 @@ export default async function mount(box, ctx) {
     normalize: true, // axis maxes 1, 100, 10000 render as a true cube
   });
   const screen = geom.vertices.map((v) => proj.project(v));
-  const walk = walkIndices(geom, steps); // [7,3,1,5,4,0,2,6], all 8 corners
+  // Geometry-vertex index the walk lands on, in step order. Reassigned by a live
+  // pivot-rule re-solve; [7,3,1,5,4,0,2,6] (all 8 corners) for the recorded Dantzig walk.
+  let walk = walkIndices(geom, steps);
 
   const cube = svgEl("svg", {
     class: "fig-svg km-cube-svg",
@@ -247,21 +238,28 @@ export default async function mount(box, ctx) {
     );
   });
 
-  // one trail segment per hop, revealed up to the current step
-  const trailEls = [];
-  for (let k = 0; k < walk.length - 1; k++) {
-    const a = screen[walk[k]];
-    const b = screen[walk[k + 1]];
-    const seg = svgEl("line", { class: "km-trail", x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
-    trailEls.push(seg);
-    cube.appendChild(seg);
-  }
-
+  // vertices (created before the trail so trail segments insert just beneath them)
   const vertEls = geom.vertices.map((v, idx) => {
     const c = svgEl("circle", { class: "km-vertex", cx: screen[idx][0], cy: screen[idx][1], r: 3.5 });
     cube.appendChild(c);
     return c;
   });
+
+  // one trail segment per hop, revealed up to the current step. Rebuilt whenever
+  // the walk changes (a live pivot-rule re-solve gives Bland a different path).
+  let trailEls = [];
+  function buildTrail(w) {
+    trailEls.forEach((s) => s.remove());
+    trailEls = [];
+    for (let k = 0; k < w.length - 1; k++) {
+      const a = screen[w[k]];
+      const b = screen[w[k + 1]];
+      const seg = svgEl("line", { class: "km-trail", x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
+      cube.insertBefore(seg, vertEls[0]);
+      trailEls.push(seg);
+    }
+  }
+  buildTrail(walk);
 
   const ring = svgEl("circle", { class: "km-current-ring", r: 10 });
   const current = svgEl("circle", { class: "km-current", r: 6 });
@@ -316,7 +314,7 @@ export default async function mount(box, ctx) {
     const val = num(steps[cur].objective_value);
     let msg;
     if (cur === lastStep) {
-      msg = `All 8 corners visited; optimum (${vtx(v)}), objective ${val}.`;
+      msg = `All ${lastStep + 1} corners visited; optimum (${vtx(v)}), objective ${val}.`;
     } else {
       const j = cur + 1;
       msg = `Corner ${cur} of ${lastStep} at (${vtx(v)}); objective ${val}; ${j} corner${j === 1 ? "" : "s"} visited.`;
@@ -394,6 +392,90 @@ export default async function mount(box, ctx) {
   betWrap.appendChild(betRow);
   betWrap.appendChild(betMsg);
 
+  // ---- pivot-rule selector: re-solve the cube live (Dantzig vs Bland) --------
+  // Same LP, same corners; only the WALK differs by rule. Dantzig is the recorded
+  // fallback; a live WASM re-solve swaps in the selected rule's path and flips the
+  // badge to live. WASM blocked -> Bland disabled, the cube keeps the Dantzig trace.
+  const provEl = scope.querySelector('[data-role="km-provenance"]');
+  const PROV_TRACE =
+    "Both panels replay the kleeminty3 trace, corner for corner as our reference " +
+    "solver logged it; an independent solver reached the same optimum.";
+  const PROV_LIVE =
+    "The cube on the right is re-solving live in your browser, the same simplex core " +
+    "compiled to WebAssembly; the pivot-rule buttons race Dantzig against Bland on the " +
+    "same cube. The cost chart on the left stays exact arithmetic.";
+  const setProv = (live) => { if (provEl) provEl.textContent = live ? PROV_LIVE : PROV_TRACE; };
+
+  const ruleWrap = htmlEl("div", { class: "km-rules" });
+  const ruleRow = htmlEl("div", { class: "km-rule-row", role: "group", "aria-label": "Pivot rule" });
+  ruleRow.appendChild(htmlEl("span", { class: "km-rules-label" }, "Pivot rule"));
+  const dzBtn = htmlEl("button", { type: "button", class: "btn km-rule-btn", "aria-pressed": "true" }, "Dantzig");
+  const blBtn = htmlEl("button", { type: "button", class: "btn km-rule-btn", "aria-pressed": "false" }, "Bland");
+  blBtn.disabled = true;
+  blBtn.title = "Live re-solve needs the WebAssembly engine; showing the recorded walk";
+  ruleRow.append(dzBtn, blBtn);
+  const ruleMsgEl = htmlEl("p", { class: "km-rule-msg", "aria-live": "polite" });
+  ruleWrap.append(ruleRow, ruleMsgEl);
+
+  let engineOK = false;
+  let ruleToken = 0;
+
+  // Reassign the walk to a new step list (a live re-solve), rebuild the trail, and
+  // re-render at the finished corner. Returns false (keeping the current walk) if
+  // any step vertex fails to line up with a geometry corner.
+  function applyWalk(newSteps) {
+    if (!Array.isArray(newSteps) || newSteps.length === 0) return false;
+    const w = walkIndices(geom, newSteps);
+    if (w.some((i) => i < 0)) return false;
+    steps = newSteps;
+    walk = w;
+    lastStep = steps.length - 1;
+    buildTrail(walk);
+    scrub.max = String(lastStep);
+    cur = lastStep;
+    renderCube();
+    return true;
+  }
+
+  function ruleMsg(rule, n, live) {
+    const src = live ? "solved live" : "recorded";
+    if (rule === "bland") {
+      ruleMsgEl.textContent =
+        n < 8
+          ? `Bland's lowest-index rule reaches the exit in ${n} corner${n === 1 ? "" : "s"} (${src}), a shorter path across the same cube.`
+          : `Bland's lowest-index rule also tours all ${n} corners here (${src}); this cube fools both rules.`;
+    } else {
+      ruleMsgEl.textContent = `Dantzig's greedy rule tours all ${n} corners before the exit (${src}).`;
+    }
+  }
+
+  async function pickRule(rule) {
+    const tok = ++ruleToken;
+    stopPlay();
+    dzBtn.setAttribute("aria-pressed", rule === "dantzig" ? "true" : "false");
+    blBtn.setAttribute("aria-pressed", rule === "bland" ? "true" : "false");
+    if (engineOK) {
+      const sol = await ctx.solve(trace.problem, { pivot_rule: rule, max_iterations: 10000, record_trace: true });
+      if (tok !== ruleToken) return; // a newer click superseded this solve
+      if (sol && sol.trace && applyWalk(sol.trace.steps)) {
+        ctx.setEngine("live");
+        setProv(true);
+        ruleMsg(rule, steps.length, true);
+        return;
+      }
+    }
+    if (tok !== ruleToken) return;
+    // No engine, or the live solve failed: fall back to the recorded Dantzig walk.
+    applyWalk(committedSteps);
+    ctx.setEngine("trace");
+    setProv(false);
+    ruleMsg("dantzig", committedSteps.length, false);
+    dzBtn.setAttribute("aria-pressed", "true");
+    blBtn.setAttribute("aria-pressed", "false");
+  }
+  dzBtn.addEventListener("click", () => pickRule("dantzig"));
+  blBtn.addEventListener("click", () => pickRule("bland"));
+
   // ======================================================================
   // First paint, then swap the stills for the live views in one pass
   // ======================================================================
@@ -416,8 +498,24 @@ export default async function mount(box, ctx) {
     if (playBtn) kids.push(playBtn);
     kids.push(stepTag);
     cubeCtl.replaceChildren(...kids);
+    cubeCtl.parentNode.insertBefore(ruleWrap, cubeCtl); // selector sits above the scrubber
   }
   if (betOut) betOut.replaceChildren(betWrap);
 
-  ctx.setEngine("trace"); // every number here is replayed from kleeminty3.json
+  // Resting state: the recorded Dantzig walk (replaying trace). Warm the WASM
+  // engine; if it loads, enable Bland and re-solve Dantzig live so the badge and
+  // provenance flip to the honest live state (a live solve reproduced this walk).
+  ctx.setEngine("trace");
+  setProv(false);
+  ruleMsg("dantzig", committedSteps.length, false);
+  ctx.ensureEngine().then(
+    (ok) => {
+      engineOK = ok === true;
+      if (!engineOK) return;
+      blBtn.disabled = false;
+      blBtn.removeAttribute("title");
+      pickRule("dantzig");
+    },
+    () => { engineOK = false; }
+  );
 }

@@ -1,17 +1,11 @@
-// ==========================================================================
 // Feasible Region . sync.js . linked-brushing plumbing shared by every figure
 //
-// Milestone B shared plumbing. Dependency-free ES module: no DOM creation, no
-// d3. It gives every figure ONE way to say "these two things are the same
-// thing" across a figure's panels. An element carries data-key="<kind>:<id>";
-// hovering or keyboard-focusing any element with a key lights every element
-// under the same figure root that shares that exact key, by toggling .is-lit
-// (styled once in css /* fig:sync */). Hover and focus behave identically, so
-// the highlight is never colour-only and never mouse-only (A11y).
-//
-// A figure imports this directly, exactly as hero imports lp2d:
-//   import { linkFigure, conKey, conHue } from "../sync.js";
-// main.js and the figure ctx are untouched by sync.
+// Dependency-free ES module: no DOM creation, no d3. One way to say "these two
+// things are the same" across a figure's panels. An element carries
+// data-key="<kind>:<id>"; hovering or keyboard-focusing any keyed element lights
+// every element under the same figure root sharing that exact key, by toggling
+// .is-lit (styled once in css /* fig:sync */). Hover and focus behave identically
+// (A11y). A figure imports this directly, as hero imports lp2d.
 //
 // data-key grammar (contract section 3):
 //   con:<1..5>     one constraint everywhere it appears (slack column, shadow

@@ -1,31 +1,36 @@
-// ==========================================================================
 // Feasible Region . figures/dualview.js . S3 synchronized polytope + tableau
 //
-// The signature figure. One native <input type=range> scrubber (plus prev,
-// next, and play) drives TWO views in lockstep: an isometric projection of the
-// three variable cargo polytope on the left, and the live simplex tableau on
-// the right. Stepping the walk lights the entering column and the leaving row
-// in the tableau AND the matching vertex and traversed edge in the polytope at
-// once, tied by a shared data-key. The numbers are replayed
-// exactly from ./traces/topic21.json (engine badge: replaying trace), so with
-// scripts off the authored still already shows the finished walk and its
-// optimum, and with scripts on nothing about the arithmetic changes.
-//
-// No d3 here: the polytope is a handful of lines and dots built straight with
-// the DOM, so this figure carries no library weight of its own.
-// ==========================================================================
+// One native scrubber drives an isometric 3-variable polytope and the simplex
+// tableau in lockstep, lighting the entering column, leaving row, and matching
+// vertex/edge via a shared data-key. At rest every number replays
+// traces/topic21.json. A second range (the hull-frame stock limit) is a WHAT-IF:
+// off its recorded value the WASM core re-solves (ctx.solve) and poly3d
+// re-enumerates the exact n=3 hull, so "solving live" is literally true;
+// with no WebAssembly the slider is disabled with an honest note. The
+// projection is fit ONCE from committed geometry and reused, so it never rescales.
 
 import { fmt } from "../lp2d.js";
 import { linkFigure } from "../sync.js";
+import { enumerateVertices } from "../poly3d.js";
 
 const SVGNS = "http://www.w3.org/2000/svg";
 const COS30 = Math.cos(Math.PI / 6);
 
-// Fixed polytope panel viewBox and inner padding. The authored no-JS still uses
-// the same numbers, so the live projection lands exactly where the still drew.
+// Fixed polytope panel viewBox and inner padding. The no-JS still uses the same
+// numbers, so the live projection lands exactly where the still drew.
 const PANEL_W = 380;
 const PANEL_H = 320;
 const PAD = 30;
+
+// What-if slider perturbs binding constraint 2 (2 x1 + x2 <= 27). Home = its
+// recorded rhs; off home, live re-solve.
+const WHATIF_CON = 2;
+const WHATIF_HOME = 27;
+const WHATIF_MIN = 18;
+const WHATIF_MAX = 36;
+const SOLVE_DEBOUNCE_MS = 140;
+const DISABLED_TIP =
+  "Live re-solve needs the WebAssembly engine; showing the recorded walk";
 
 // Isometric projection of a 3D cargo vertex to 2D. Height (x3) lifts the point.
 function project(v) {
@@ -45,8 +50,8 @@ function htmlEl(name, attrs, text) {
   return e;
 }
 
-// Variable index -> label. 0..2 are the decision variables x1..x3; 3..7 are the
-// five slacks s1..s5, one per resource limit (color language).
+// Variable index -> label: 0..2 are decision variables x1..x3; 3..7 are slacks
+// s1..s5, one per resource limit (color language).
 function varLabel(i, names) {
   return i < 3 ? names[i] || `x${i + 1}` : `s${i - 2}`;
 }
@@ -62,19 +67,28 @@ const sameVertex = (a, b) =>
 export default async function mount(box, ctx) {
   const trace = await ctx.loadTrace(ctx.fixture || "topic21");
   const problem = trace.problem;
-  const steps = trace.steps;
+  const committedSteps = trace.steps;
+  const committedResult = trace.result || {};
   const geom = trace.geometry;
   const names = problem.var_names || ["x1", "x2", "x3"];
-  const nSteps = steps.length;
-  const nCols = steps[0].tableau[0].length; // decision + slacks + rhs
+  const nCols = committedSteps[0].tableau[0].length; // decision + slacks + rhs
   const nVars = nCols - 1;
+  const nRows = committedSteps[0].tableau.length; // constraint rows + objective
 
   const scope = box.closest("figure, section") || document;
   const tableauPanel = scope.querySelector('[data-role="dualview-tableau"]');
   const controls = scope.querySelector('[data-role="dualview-controls"]');
+  const whatifHost = scope.querySelector('[data-role="dualview-whatif"]');
   const readout = scope.querySelector('[data-role="dualview-readout"]');
+  const provenance = scope.querySelector('[data-role="dualview-provenance"]');
+  // The step-by-step figcaption narrates the RECORDED walk; hide it off-default so
+  // it never co-locates a stale present-tense claim next to a perturbed walk.
+  const walkCaption = scope.querySelector('[data-role="dualview-walkcaption"]');
+  // Authored fig-sub IS the trace-mode provenance; capture it so the trace
+  // variant round-trips exactly and only the live variant is new here.
+  const traceProvText = provenance ? provenance.textContent : "";
 
-  // ---- projection fit (identical math to the authored still) -----------
+  // ---- fixed isometric projection (once, from committed geometry) -------
   const proj = geom.vertices.map(project);
   const xs = proj.map((p) => p[0]);
   const ys = proj.map((p) => p[1]);
@@ -87,57 +101,31 @@ export default async function mount(box, ctx) {
   const scale = Math.min(contentW / (maxX - minX), contentH / (maxY - minY));
   const offX = PAD + (contentW - (maxX - minX) * scale) / 2;
   const offY = PAD + (contentH - (maxY - minY) * scale) / 2;
-  const screen = proj.map((p) => [
-    offX + (p[0] - minX) * scale,
-    offY + (maxY - p[1]) * scale, // flip: larger height sits higher on screen
-  ]);
+  // Project ANY cargo point (committed or perturbed) with the one fixed frame.
+  function screenOf(v) {
+    const p = project(v);
+    return [offX + (p[0] - minX) * scale, offY + (maxY - p[1]) * scale];
+  }
 
-  // Which geometry vertex does each walk step land on.
-  const walk = steps.map((s) => geom.vertices.findIndex((v) => sameVertex(v, s.vertex)));
-
-  // ---- build the live polytope SVG -------------------------------------
+  // ---- live polytope SVG shell (groups refilled per model) -------------
   const svg = svgEl("svg", {
     class: "fig-svg dv-polytope",
     viewBox: `0 0 ${PANEL_W} ${PANEL_H}`,
     preserveAspectRatio: "xMidYMid meet",
     role: "img",
-    "aria-label": "Isometric view of the cargo polytope with the corner walk drawn on it.",
+    "aria-label":
+      "Isometric view of the cargo polytope with the corner walk drawn on it.",
   });
-
-  geom.edges.forEach(([i, j]) => {
-    svg.appendChild(
-      svgEl("line", {
-        class: "dv-edge",
-        x1: screen[i][0], y1: screen[i][1], x2: screen[j][0], y2: screen[j][1],
-      })
-    );
-  });
-
-  // One trail segment per hop; shown up to the current step.
-  const trailEls = [];
-  for (let k = 0; k < walk.length - 1; k++) {
-    const a = screen[walk[k]];
-    const b = screen[walk[k + 1]];
-    const line = svgEl("line", { class: "dv-trail", x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
-    trailEls.push(line);
-    svg.appendChild(line);
-  }
-
-  const vertEls = geom.vertices.map((v, idx) => {
-    const c = svgEl("circle", { class: "dv-vertex", cx: screen[idx][0], cy: screen[idx][1], r: 3.5 });
-    c.setAttribute("data-vertex", String(idx));
-    svg.appendChild(c);
-    return c;
-  });
-
+  const gEdges = svgEl("g", { class: "dv-edges" });
+  const gTrails = svgEl("g", { class: "dv-trails" });
+  const gVerts = svgEl("g", { class: "dv-verts" });
+  svg.append(gEdges, gTrails, gVerts);
   const ring = svgEl("circle", { class: "dv-current-ring", r: 10 });
   const current = svgEl("circle", { class: "dv-current", r: 6 });
-  svg.appendChild(ring);
-  svg.appendChild(current);
   const currentLabel = svgEl("text", { class: "dv-current-label" });
-  svg.appendChild(currentLabel);
+  svg.append(ring, current, currentLabel);
 
-  // ---- build the live tableau table ------------------------------------
+  // ---- live tableau table (structure once, cells refilled per step) ----
   const table = htmlEl("table", { class: "tableau", role: "img" });
   const thead = htmlEl("thead");
   const headRow = htmlEl("tr");
@@ -156,7 +144,6 @@ export default async function mount(box, ctx) {
 
   const tbody = htmlEl("tbody");
   const bodyRows = [];
-  const nRows = steps[0].tableau.length;
   for (let r = 0; r < nRows; r++) {
     const tr = htmlEl("tr");
     const rowHead = htmlEl("th", { scope: "row", class: "dv-row-head" });
@@ -173,24 +160,94 @@ export default async function mount(box, ctx) {
   }
   table.appendChild(tbody);
 
-  // ---- controls: native range scrubber + prev / next / play ------------
+  // ---- controls: step scrubber + prev / next / play --------------------
   const prevBtn = htmlEl("button", { type: "button", class: "btn dv-step-btn" }, "Prev");
   const nextBtn = htmlEl("button", { type: "button", class: "btn dv-step-btn" }, "Next");
   // Autoplay is a motion affordance: under prefers-reduced-motion there is no
-  // play button at all (nothing pulses), only the scrubber and prev / next. Every
-  // reference below is guarded with `playBtn &&` so the null case is inert.
+  // play button at all, only the scrubber and prev / next.
   const playBtn = ctx.prefersReducedMotion
     ? null
     : htmlEl("button", { type: "button", class: "btn dv-play", "aria-pressed": "false" }, "Play");
   const range = htmlEl("input", {
-    type: "range", class: "scrubber", min: "0", max: String(nSteps - 1), step: "1",
+    type: "range", class: "scrubber", min: "0", max: "0", step: "1",
     "aria-label": "Simplex iteration",
   });
   const stepTag = htmlEl("span", { class: "dv-step-tag", "aria-hidden": "true" });
 
-  // ---- render one step into both views ---------------------------------
-  let cur = nSteps - 1; // authored default: the finished walk, optimum ringed
-  let timer = null;
+  // ---- what-if: second native range perturbs the binding constraint ----
+  // Starts disabled: enabled only once ctx.ensureEngine confirms WebAssembly.
+  const whatifCap = htmlEl("span", { class: "whatif-cap" }, "Hull-frame stock limit");
+  const whatif = htmlEl("input", {
+    type: "range", class: "scrubber whatif-range",
+    min: String(WHATIF_MIN), max: String(WHATIF_MAX), step: "1", value: String(WHATIF_HOME),
+    "aria-label": "Hull-frame stock limit, the right-hand side of binding constraint 2 x1 plus x2",
+    disabled: "", title: DISABLED_TIP,
+  });
+  const whatifTag = htmlEl("span", { class: "dv-step-tag whatif-tag", "aria-hidden": "true" });
+  const resetBtn = htmlEl("button", { type: "button", class: "btn dv-step-btn whatif-reset", disabled: "" }, "Reset");
+
+  // ---- mutable model state (reassigned by applyModel) ------------------
+  let mode = "committed";
+  let steps = committedSteps;
+  let nSteps = steps.length;
+  let cur = nSteps - 1;
+  let vertEls = [];
+  let trailEls = [];
+  let walkIdx = [];
+  let solveTimer = null;
+  let solveSeq = 0;
+
+  const clampInt = (raw) => {
+    let R = Math.round(Number(raw));
+    if (!isFinite(R)) R = WHATIF_HOME;
+    return Math.max(WHATIF_MIN, Math.min(WHATIF_MAX, R));
+  };
+
+  // Rebuild both panels from one model { steps, vertices, edges } via the one
+  // fixed projection. Committed and perturbed views share this path, so what is
+  // drawn is always exactly what was replayed or solved.
+  function applyModel(model) {
+    steps = model.steps;
+    nSteps = steps.length;
+    const verts = model.vertices;
+
+    gEdges.textContent = "";
+    model.edges.forEach(([i, j]) => {
+      const a = screenOf(verts[i]);
+      const b = screenOf(verts[j]);
+      gEdges.appendChild(
+        svgEl("line", { class: "dv-edge", x1: a[0], y1: a[1], x2: b[0], y2: b[1] })
+      );
+    });
+
+    gVerts.textContent = "";
+    vertEls = verts.map((v, idx) => {
+      const s = screenOf(v);
+      const c = svgEl("circle", { class: "dv-vertex", cx: s[0], cy: s[1], r: 3.5 });
+      c.setAttribute("data-vertex", String(idx));
+      gVerts.appendChild(c);
+      return c;
+    });
+
+    // One trail segment per hop, from the projected step vertices, so the trail
+    // is correct even if a walk vertex is off the enumerated hull.
+    gTrails.textContent = "";
+    trailEls = [];
+    for (let k = 0; k < nSteps - 1; k++) {
+      const a = screenOf(steps[k].vertex);
+      const b = screenOf(steps[k + 1].vertex);
+      const line = svgEl("line", { class: "dv-trail", x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
+      trailEls.push(line);
+      gTrails.appendChild(line);
+    }
+
+    // Which enumerated corner each step lands on, for is-visited lighting.
+    walkIdx = steps.map((s) => verts.findIndex((v) => sameVertex(v, s.vertex)));
+
+    cur = nSteps - 1; // land on the finished walk, optimum ringed
+    range.max = String(nSteps - 1);
+    render();
+  }
 
   function renderTableau(step) {
     for (let r = 0; r < nRows; r++) {
@@ -202,7 +259,6 @@ export default async function mount(box, ctx) {
       }
       bodyRows[r].tr.classList.toggle("dv-obj-row", isObjRow);
     }
-    // Clear then re-apply the pivot highlight.
     headCells.forEach((th) => th.classList.remove("is-entering"));
     bodyRows.forEach(({ tr, cells }) => {
       tr.classList.remove("is-leaving");
@@ -219,12 +275,11 @@ export default async function mount(box, ctx) {
 
   function render() {
     const step = steps[cur];
-    // polytope trail + current vertex
     trailEls.forEach((line, k) => line.classList.toggle("is-on", k < cur));
-    vertEls.forEach((c, idx) => {
-      c.classList.toggle("is-visited", walk.slice(0, cur + 1).includes(idx));
-    });
-    const p = screen[walk[cur]];
+    const visited = walkIdx.slice(0, cur + 1);
+    vertEls.forEach((c, idx) => c.classList.toggle("is-visited", visited.includes(idx)));
+
+    const p = screenOf(step.vertex);
     ring.setAttribute("cx", p[0]);
     ring.setAttribute("cy", p[1]);
     current.setAttribute("cx", p[0]);
@@ -238,16 +293,12 @@ export default async function mount(box, ctx) {
 
     renderTableau(step);
 
-    // Shared data-key ties one pivot step into a single group so hovering or
-    // focusing any member lights the rest across both panels (contract section 3):
-    // the current vertex, the trail edge that led into it, the entering column
-    // header, and the leaving row head. On the optimal step there is no entering
-    // column, so the vertex pairs with the z-row head instead. The key is cleared
-    // from every candidate first, so only this step's group is ever lit.
+    // Shared data-key ties one pivot step into a group so hovering or focusing
+    // any member lights the rest across both panels.
     const key = `pivot:${cur}`;
     current.setAttribute("data-key", key);
     trailEls.forEach((line) => line.removeAttribute("data-key"));
-    if (cur > 0) trailEls[cur - 1].setAttribute("data-key", key);
+    if (cur > 0 && trailEls[cur - 1]) trailEls[cur - 1].setAttribute("data-key", key);
     headCells.forEach((th) => th.removeAttribute("data-key"));
     bodyRows.forEach(({ rowHead }) => rowHead.removeAttribute("data-key"));
     const leaveRow = step.leaving == null ? -1 : step.basis.indexOf(step.leaving);
@@ -258,10 +309,7 @@ export default async function mount(box, ctx) {
       bodyRows[nRows - 1].rowHead.setAttribute("data-key", key); // z-row head
     }
 
-    // controls
     range.value = String(cur);
-    // Announce the step with its real vertex, not a bare number, and keep
-    // aria-valuenow matched to it (A3).
     range.setAttribute("aria-valuenow", String(cur));
     range.setAttribute(
       "aria-valuetext",
@@ -271,7 +319,6 @@ export default async function mount(box, ctx) {
     prevBtn.disabled = cur === 0;
     nextBtn.disabled = cur === nSteps - 1;
 
-    // aria-live summary of basis, vertex, objective (A3)
     if (readout) {
       const basisNames = step.basis.map((b) => varLabel(b, names)).join(", ");
       const move =
@@ -295,6 +342,100 @@ export default async function mount(box, ctx) {
     render();
   }
 
+  // ---- what-if provenance + aria + engine badge ------------------------
+  function traceProvenance() {
+    if (provenance) provenance.textContent = traceProvText;
+  }
+  function liveProvenance(R) {
+    if (!provenance) return;
+    provenance.textContent =
+      `You set the hull-frame stock limit to ${R}, so both panels have left the recorded ` +
+      `walk: the same simplex core, compiled to WebAssembly, just re-solved this changed ` +
+      `problem in your browser, and the polytope was re-enumerated corner by corner from ` +
+      `that solve. Reset to return to the recorded ${WHATIF_HOME} unit walk.`;
+  }
+  // aria-valuetext template (Decision 7): "limit = R, optimum (x, y, z), value V".
+  function setWhatif(R, x, val) {
+    whatif.value = String(R);
+    whatif.setAttribute("aria-valuenow", String(R));
+    whatifTag.textContent = "= " + R;
+    const opt =
+      x && x.length >= 3
+        ? `optimum (${fmt(x[0])}, ${fmt(x[1])}, ${fmt(x[2])}), value ${fmt(val)}`
+        : "recorded walk";
+    whatif.setAttribute("aria-valuetext", `limit = ${R}, ${opt}`);
+    resetBtn.disabled = R === WHATIF_HOME || whatif.disabled;
+  }
+
+  function goCommitted() {
+    mode = "committed";
+    applyModel({ steps: committedSteps, vertices: geom.vertices, edges: geom.edges });
+    setWhatif(
+      WHATIF_HOME,
+      committedResult.x || [9, 9, 4],
+      committedResult.objective_value != null ? committedResult.objective_value : 22
+    );
+    traceProvenance();
+    if (walkCaption) walkCaption.hidden = false;
+    ctx.setEngine("trace");
+  }
+
+  function perturbedLP(R) {
+    return {
+      direction: problem.direction,
+      objective: problem.objective.slice(),
+      constraints: problem.constraints.map((c, i) => ({
+        coeffs: c.coeffs.slice(),
+        op: c.op,
+        rhs: i === WHATIF_CON ? R : c.rhs,
+      })),
+      var_names: names.slice(),
+    };
+  }
+
+  function scheduleSolve() {
+    if (solveTimer) clearTimeout(solveTimer);
+    solveTimer = setTimeout(runSolve, SOLVE_DEBOUNCE_MS);
+  }
+
+  // Off-default: enumerate the perturbed hull (sync, exact) and re-solve the walk
+  // live (ctx.solve). Draw both from that one solve and flip the badge to live;
+  // any failure degrades honestly to the recorded walk.
+  async function runSolve() {
+    solveTimer = null;
+    const seq = ++solveSeq;
+    const R = clampInt(whatif.value);
+    if (R === WHATIF_HOME) {
+      goCommitted();
+      return;
+    }
+    const lp = perturbedLP(R);
+    const hull = enumerateVertices(lp.constraints);
+    const sol = await ctx.solve(lp, {
+      pivot_rule: "dantzig",
+      max_iterations: 10000,
+      record_trace: true,
+    });
+    if (seq !== solveSeq) return; // a newer drag superseded this solve
+    const solved = sol && sol.trace && sol.trace.steps;
+    if (!sol || sol.status !== "optimal" || !solved || !solved.length) {
+      if (typeof console !== "undefined" && console.debug) {
+        console.debug("[dualview] live re-solve unavailable; showing recorded walk");
+      }
+      whatif.value = String(WHATIF_HOME);
+      goCommitted();
+      return;
+    }
+    mode = "live";
+    applyModel({ steps: solved, vertices: hull.vertices, edges: hull.edges });
+    setWhatif(R, sol.x, sol.objective_value);
+    liveProvenance(R);
+    if (walkCaption) walkCaption.hidden = true;
+    ctx.setEngine("live");
+  }
+
+  // ---- controls behaviour ----------------------------------------------
+  let timer = null;
   function stopPlay() {
     if (timer) {
       clearInterval(timer);
@@ -306,8 +447,8 @@ export default async function mount(box, ctx) {
     }
   }
   function startPlay() {
-    if (!playBtn) return; // no autoplay under reduced motion
-    if (cur === nSteps - 1) setStep(0); // replay from the start
+    if (!playBtn) return;
+    if (cur === nSteps - 1) setStep(0);
     playBtn.setAttribute("aria-pressed", "true");
     playBtn.textContent = "Pause";
     timer = setInterval(() => {
@@ -327,15 +468,37 @@ export default async function mount(box, ctx) {
     stopPlay();
     setStep(cur + 1);
   });
-  playBtn &&
-    playBtn.addEventListener("click", () => (timer ? stopPlay() : startPlay()));
+  playBtn && playBtn.addEventListener("click", () => (timer ? stopPlay() : startPlay()));
   range.addEventListener("input", () => {
     stopPlay();
     setStep(parseInt(range.value, 10) || 0);
   });
 
-  // Hover on a tableau column emphasizes it, a light preview of the linked
-  // brushing without stepping the walk.
+  whatif.addEventListener("input", () => {
+    if (whatif.disabled) return; // no live re-solve without the engine
+    stopPlay();
+    const R = clampInt(whatif.value);
+    whatifTag.textContent = "= " + R;
+    whatif.setAttribute("aria-valuenow", String(R));
+    // valuetext overrides valuenow for SRs; refresh it now so a mid-drag readout
+    // reports the NEW limit as solving, never the previous optimum (setWhatif
+    // fills the full "optimum ..." template once the debounced solve lands).
+    whatif.setAttribute("aria-valuetext", "limit = " + R + ", solving");
+    resetBtn.disabled = R === WHATIF_HOME;
+    scheduleSolve();
+  });
+  resetBtn.addEventListener("click", () => {
+    if (whatif.disabled) return;
+    solveSeq++; // cancel any in-flight solve
+    if (solveTimer) {
+      clearTimeout(solveTimer);
+      solveTimer = null;
+    }
+    whatif.value = String(WHATIF_HOME);
+    goCommitted();
+  });
+
+  // Hover on a tableau column previews the linked brushing without stepping.
   headCells.forEach((th, c) => {
     th.addEventListener("mouseenter", () => {
       bodyRows.forEach(({ cells }) => cells[c].classList.add("is-hover"));
@@ -352,6 +515,10 @@ export default async function mount(box, ctx) {
     controls.textContent = "";
     controls.append(prevBtn, range, nextBtn, ...(playBtn ? [playBtn] : []), stepTag);
   }
+  if (whatifHost) {
+    whatifHost.textContent = "";
+    whatifHost.append(whatifCap, whatif, whatifTag, resetBtn);
+  }
   if (tableauPanel) {
     const wrap = htmlEl("div", { class: "tableau-scroll" });
     wrap.appendChild(table);
@@ -362,13 +529,33 @@ export default async function mount(box, ctx) {
   if (still) still.replaceWith(svg);
   else box.appendChild(svg);
 
-  render();
+  goCommitted(); // authored default: the finished recorded walk, optimum ringed
 
-  // Wire linked brushing across the whole figure: one delegated pointer + focus
-  // listener set so hovering or focusing any keyed element (a vertex, a trail
-  // edge, an entering column, a leaving row) lights every element sharing its
-  // pivot key across both panels. Idempotent, so a re-hydrate never double-wires.
+  // Wire linked brushing once; the delegated listeners cover the groups that
+  // applyModel refills, so a perturbation never needs to re-wire.
   linkFigure(box.closest("figure"));
 
-  ctx.setEngine("trace"); // every number here is replayed from topic21.json
+  // Enable the what-if slider only when the engine is usable; otherwise keep it
+  // disabled with the honest note, recorded replay untouched.
+  ctx.ensureEngine().then(
+    (ready) => {
+      if (ready) {
+        whatif.disabled = false;
+        whatif.removeAttribute("title");
+        resetBtn.disabled = clampInt(whatif.value) === WHATIF_HOME;
+        if (whatifHost) whatifHost.classList.remove("is-disabled");
+      } else {
+        whatif.disabled = true;
+        resetBtn.disabled = true;
+        whatif.title = DISABLED_TIP;
+        if (whatifHost) whatifHost.classList.add("is-disabled");
+      }
+    },
+    () => {
+      whatif.disabled = true;
+      resetBtn.disabled = true;
+      whatif.title = DISABLED_TIP;
+      if (whatifHost) whatifHost.classList.add("is-disabled");
+    }
+  );
 }

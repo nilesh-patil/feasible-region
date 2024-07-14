@@ -1,21 +1,12 @@
-// ==========================================================================
 // Feasible Region . figures/maxflow.js . S6 max flow as a linear program
 //
-// One picture, two readings of the same eight numbers. On the left a source to
-// sink network drawn from the maxflow trace: six nodes, eight directed arcs,
-// each labelled flow over capacity at the optimum. On the right the identical
-// arcs written as a linear program: a flow row, a cap row, and one balance row
-// per interior node. Hover or keyboard focus an arc and its matrix column lights
-// up, and the reverse, tied by a shared data-key through sync.js.
-//
-// Every number is replayed from ./traces/maxflow.json (engine badge: replaying
-// trace), so with scripts off the authored still already shows the finished flow
-// and its value, and with scripts on nothing about the arithmetic changes. The
-// arc directions come straight from the variable names (fsa means s to a), and
-// the minimum cut is read off the capacity duals, so the max flow min cut
-// equality is drawn, not asserted. No d3: the network is a handful of lines and
-// circles built straight with the DOM, so the figure carries no library weight.
-// ==========================================================================
+// One picture, two readings of the same eight numbers: a source-to-sink network
+// (six nodes, eight directed arcs labelled flow over capacity at the optimum)
+// beside the identical arcs written as a linear program. Hover or focus an arc
+// and its matrix column light together via a shared data-key (sync.js). Every
+// number replays ./traces/maxflow.json (badge: replaying trace), so scripts-off
+// the authored still shows the finished flow. The min cut is read off the
+// capacity duals, so max-flow-min-cut is drawn, not asserted. No d3.
 
 import { linkFigure, varKey } from "../sync.js";
 

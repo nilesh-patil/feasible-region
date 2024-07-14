@@ -614,6 +614,22 @@ input[type="range"].scrubber:focus-visible::-moz-range-thumb {
 .dv-step-btn { flex: none; }
 .dv-play { flex: none; min-width: 4.2em; }
 
+/* What-if row: a second native range perturbs the binding constraint's rhs and
+   the figure re-solves live. It reuses .scrubber, so only the caption, the value
+   tag, and the disabled cue are new. Colour only via tokens, so both themes hold.
+   The host is empty (collapsed) without JS and disabled without WebAssembly. */
+.whatif-row { margin-top: var(--sp-2); }
+.whatif-row:empty { display: none; }
+.whatif-cap {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.whatif-tag { color: var(--ink); }
+input[type="range"].whatif-range:disabled { cursor: not-allowed; opacity: 0.5; }
+.whatif-row.is-disabled .whatif-cap { color: var(--faint); }
+
 /* Polytope panel */
 .dv-edge { stroke: var(--hairline-strong); stroke-width: 1; fill: none; }
 .dv-trail {
@@ -1205,6 +1221,29 @@ a:focus-visible { outline-offset: 3px; }
   margin: 0;
 }
 
+/* Pivot-rule selector: Dantzig vs Bland, a live re-solve of the cube walk */
+.km-rules { margin-top: var(--sp-2); }
+.km-rule-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.km-rules-label {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+.km-rule-btn { flex: none; min-width: 4.4em; }
+.km-rule-msg {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--faint);
+  margin: var(--sp-2) 0 0;
+  min-height: 1.2em;
+}
+
 /* fig:maxflow  (S6, data-figure="maxflow")  ------------------------------- */
 /* Owner: S6 implementer. A source to sink network beside its linear program.
    Both panels share the data-key brush from fig:sync: HTML cells light with the
@@ -1346,3 +1385,213 @@ a:focus-visible { outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   .mf-line { transition: none; }
 }
+
+/* fig:shortestpath  (S6, data-figure="shortestpath")  --------------------- */
+/* Owner: S6 shortest-path implementer. A four node graph beside its node
+   potential bounds. con: ties each edge to its matrix row (they share the edge's
+   constraint hue via --hue), var: ties each node to its potential column, both
+   through the fig:sync brush. All colour comes from tokens, so both themes
+   recolour for free; a route edge carries a heavier stroke AND a "route" tag as
+   well as its hue, so the state is never colour only. Only stroke, fill, and
+   background change on brushing, so CLS stays ~ 0. */
+.sp-figure { margin: 0; }
+.sp-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-4);
+  align-items: start;
+}
+@media (min-width: 720px) {
+  .sp-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr); }
+}
+.sp-graph-box { min-height: 9rem; }
+
+/* graph panel */
+.sp-line {
+  fill: none;
+  stroke: var(--hairline-strong);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  transition: stroke 0.12s ease, stroke-width 0.12s ease;
+}
+.sp-wlabel {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  fill: var(--faint);
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+/* an edge on the shortest route: its own hue, heavier, plus the route tag */
+.sp-edge.is-route .sp-line { stroke: var(--hue); stroke-width: 3.4; }
+.sp-edge.is-route .sp-wlabel { fill: var(--hue); font-weight: 800; }
+/* the brush wins over both states so a lit edge always reads as lit */
+.sp-edge.is-lit .sp-line { stroke: var(--objective); stroke-width: 3.6; }
+.sp-edge.is-lit .sp-wlabel { fill: var(--objective); font-weight: 800; }
+.sp-edge { cursor: default; }
+.sp-edge:focus { outline: none; }
+.sp-edge:focus-visible .sp-line { stroke: var(--objective); stroke-width: 3.6; }
+.sp-edge:focus-visible .sp-wlabel { fill: var(--objective); font-weight: 800; }
+
+.sp-node circle { fill: var(--surface); stroke: var(--hairline-strong); stroke-width: 1.6; }
+.sp-node.is-terminal circle { fill: var(--surface-2); stroke: var(--accent); stroke-width: 2.4; }
+.sp-node-id { fill: var(--ink); font-size: 0.92rem; font-weight: 700; }
+.sp-pot { fill: var(--faint); font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; }
+.sp-node { cursor: default; }
+.sp-node:focus { outline: none; }
+.sp-node.is-lit circle,
+.sp-node:focus-visible circle { stroke: var(--objective); stroke-width: 2.8; }
+.sp-node.is-lit .sp-pot,
+.sp-node:focus-visible .sp-pot { fill: var(--objective); font-weight: 800; }
+
+/* matrix panel */
+.sp-matrix-panel { min-width: 0; }
+.sp-matrix-scroll { overflow-x: auto; }
+.sp-matrix {
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  width: 100%;
+}
+.sp-matrix-cap {
+  caption-side: top;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: var(--sp-1);
+  padding-bottom: 0.4em;
+}
+.sp-matrix th, .sp-matrix td {
+  padding: 0.3em 0.5em;
+  text-align: center;
+  border-bottom: 1px solid var(--hairline);
+  white-space: nowrap;
+}
+.sp-rowhead { text-align: left; color: var(--faint); font-weight: 700; }
+.sp-edge-head { border-left: 3px solid transparent; padding-left: 0.55em; }
+.sp-row.is-route .sp-edge-head { border-left-color: var(--hue); }
+.sp-edge-name { font-weight: 700; color: var(--ink); }
+.sp-route-tag {
+  margin-left: 0.4em;
+  font-family: var(--font-sans);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--hue);
+}
+.sp-col-head { color: var(--ink); font-weight: 700; cursor: default; }
+.sp-col-head:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.sp-bound-head { color: var(--faint); }
+.sp-matrix td.is-nz { color: var(--ink); font-weight: 650; }
+.sp-matrix td.sp-bound { color: var(--ink); font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sp-line { transition: none; }
+}
+
+/* fig:race  (S6, data-figure="race")  ------------------------------------- */
+/* Owner: S6 race implementer. Two racers on one iso polytope, both recorded.
+   Corner Case (the drone) replays the boundary walk: a solid trail in --trail and
+   a solid-filled glyph. Strictly Feasible (the vessel) replays the recorded
+   central path from the centralpath-topic21 sidecar: a muted --faint line and an
+   outline hull, distinct from the boundary racer by colour and glyph. All colour
+   comes from tokens; the glyphs ease along their paths and the global
+   reduced-motion rule freezes that easing. */
+.race-figure { margin: 0; }
+.race-box { min-height: 11rem; }
+
+/* polytope wireframe, shared by both racers */
+.race-edge { stroke: var(--hairline-strong); stroke-width: 1; fill: none; }
+
+/* boundary racer: recorded trail + corners */
+.race-trail {
+  stroke: var(--trail);
+  stroke-width: 3;
+  stroke-linecap: round;
+  fill: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.race-trail.is-on { opacity: 1; }
+.race-trail.is-lit { stroke: var(--objective); stroke-width: 5; opacity: 1; }
+.race-corner { fill: var(--fainter); transition: fill 0.15s ease; }
+.race-corner.is-visited { fill: var(--trail); }
+.race-corner.is-lit { fill: var(--objective); }
+.race-corner:focus { outline: none; }
+.race-corner:focus-visible { stroke: var(--objective); stroke-width: 2; }
+
+/* the drone glyph is solid because it is real data */
+.race-drone { transition: transform 0.28s ease; }
+.race-drone-body { fill: var(--accent); }
+.race-drone-rotor { fill: var(--accent); }
+.race-drone-arm { stroke: var(--accent); stroke-width: 1.4; }
+
+/* interior racer: the recorded central path, a solid muted line. The dashed
+   is-schematic style is kept as a defensive fallback if the sidecar is missing. */
+.race-interior { fill: none; }
+.race-interior.is-schematic {
+  stroke: var(--faint);
+  stroke-width: 1.8;
+  stroke-dasharray: 6 5;
+  opacity: 0.85;
+}
+.race-interior.is-real { stroke: var(--faint); stroke-width: 2.4; }
+
+/* the vessel glyph is an outline hull, distinct from the solid drone */
+.race-vessel { transition: transform 0.28s ease; }
+.race-vessel-hull { fill: none; stroke: var(--faint); stroke-width: 1.5; }
+.race-vessel-fin { stroke: var(--faint); stroke-width: 1.2; }
+.race-vessel-sail { fill: none; stroke: var(--faint); stroke-width: 1.2; stroke-linejoin: round; }
+
+/* markers: the recorded interior start, the shared arrival */
+.race-start { fill: none; stroke: var(--faint); stroke-width: 1.4; }
+.race-arrival { fill: var(--objective); stroke: var(--surface); stroke-width: 2; }
+.race-arrival-label {
+  fill: var(--objective);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.race-illus-label,
+.race-schematic-tag {
+  fill: var(--faint);
+  font-family: var(--font-sans);
+  font-size: 0.66rem;
+  font-style: italic;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.race-schematic-tag { font-style: normal; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* controls + surrounding copy */
+.race-controls { min-height: 2.6rem; }
+.race-step-btn { flex: none; }
+.race-play { flex: none; min-width: 4.2em; }
+.race-step-tag { font-family: var(--font-mono); font-size: 0.78rem; color: var(--faint); white-space: nowrap; }
+.race-legend { align-items: center; }
+.race-glyph { width: 2.2em; height: 1.4em; flex: none; vertical-align: middle; }
+.race-cue {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  background: var(--surface-2);
+  border-left: 3px solid var(--faint);
+  border-radius: var(--radius);
+  padding: 0.5em 0.75em;
+  margin-top: var(--sp-3);
+}
+.race-cue b { color: var(--ink); }

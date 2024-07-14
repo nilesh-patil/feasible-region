@@ -680,9 +680,14 @@
 
           <div class="scrubber-row dv-controls" data-role="dualview-controls"></div>
 
+          <!-- What-if host: filled by dualview.js with a second native range that
+               perturbs the binding constraint and re-solves live. Empty (and so
+               invisible) without JS; disabled with an honest note without WASM. -->
+          <div class="scrubber-row whatif-row" data-role="dualview-whatif"></div>
+
           <div class="badge-row">
             <span class="engine-badge" data-engine="trace" data-role="dualview-engine">replaying trace</span>
-            <span class="fig-sub">Every number in both panels replays the topic21 trace our
+            <span class="fig-sub" data-role="dualview-provenance">Every number in both panels replays the topic21 trace our
               reference solver wrote, step for step; scipy's HiGHS confirms the same optimum.
               The scrubber only chooses which recorded step to show.</span>
           </div>
@@ -693,9 +698,9 @@
           </p>
 
           <figcaption>
-            Corner Case walks the cargo polytope <b>(0,0,0)</b> to
+            <span data-role="dualview-walkcaption">Corner Case walks the cargo polytope <b>(0,0,0)</b> to
             <b>(8,0,0)</b> to <b>(12,3,0)</b> to <b>(12,3,4)</b> to <b>(9,9,4)</b> while the
-            tableau mirrors every hop, and the objective climbs <b>0, 8, 15, 19, 22</b>. Move
+            tableau mirrors every hop, and the objective climbs <b>0, 8, 15, 19, 22</b>. </span>Move
             the scrubber and the vertex lit on the left is the same entering column and leaving
             row lit on the right.
           </figcaption>
@@ -711,6 +716,12 @@
           sits at <b>(9, 9, 4)</b> with objective <b>22</b>. Every pivot on that walk is
           Gaussian elimination on the tableau: the entering column and the leaving row that
           light up together are one step of row reduction.</p>
+        <p>A second knob sits under the walk. Drag the binding hull-frame stock limit off its
+          recorded <b>27</b> and both panels leave the trace: the polytope re-enumerates and the
+          walk re-solves live in your browser, a fresh optimum each time. Reset to <b>27</b> and
+          every number returns to the recorded walk at <b>(9, 9, 4)</b>, objective <b>22</b>,
+          exactly as our reference solver wrote it; where the live engine cannot load, the knob
+          simply stays put.</p>
         <p>Trust the picture only this far. In two or three dimensions you can see the
           corners; past three there is nothing left to see, the number of corners can climb
           faster than any screen could hold, and several corners can pile onto a single point,
@@ -980,10 +991,9 @@
 
           <div class="badge-row">
             <span class="engine-badge" data-engine="trace" data-role="km-engine">replaying trace</span>
-            <span class="fig-sub">Both panels come from the kleeminty3 trace, corner for corner
-              as our reference solver logged it, and an independent solver reached the same optimum. The
-              slider only chooses which dimension to price, the scrubber only chooses which
-              recorded corner to show.</span>
+            <span class="fig-sub" data-role="km-provenance">Both panels replay the kleeminty3 trace,
+              corner for corner as our reference solver logged it; an independent solver reached the
+              same optimum.</span>
           </div>
 
           <p class="readout km-resting-line" data-role="km-resting">
@@ -1124,50 +1134,128 @@
             <b>s to b</b> and <b>a to c</b>. Saturated arcs: s to b, a to c, c to b, c to t.
           </p>
 
-          <div class="figure-box is-reserved" data-figure="shortestpath" data-fixture="shortestpath"
-               role="img" aria-label="Reserved space for the shortest path card: the same graph read as node potentials, best route dt = 4."
-               style="--fig-ar: 16 / 5;">
-            <div class="coming-soon">Shortest path as an LP<br>best dt = 4<br>milestone B</div>
+          <!-- Shortest path as an LP. The still below stands alone with no JS: the
+               finished route on the graph with node potentials, the same five edges
+               as node potential bounds, and the resting result, all replayed from the
+               shortestpath trace. On scroll, shortestpath.js swaps each still for a
+               live one and wires the shared brush so an edge and its matrix row light
+               together, and a node and its potential column, from pointer or keyboard. -->
+          <div class="sp-figure" data-figure="shortestpath" data-fixture="shortestpath">
+            <div class="sp-grid">
+              <div class="figure-box sp-graph-box" data-role="sp-graph" style="--fig-ar: 340 / 244;">
+                <svg class="fig-svg sp-graph" viewBox="0 0 340 244" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Four node network s, a, b, t. The shortest route s to a to b to t has length 4. Move through the edges to hear each length."><defs><marker id="sp-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L8,4 L0,8 Z" fill="context-stroke"></path></marker></defs><g class="sp-edge is-route" data-key="con:1" style="--hue: var(--constraint-1);" tabindex="0" role="img" aria-label="Edge s to a, length 1, on the shortest route"><line class="sp-line" x1="63.72" y1="110.73" x2="138.28" y2="63.27" marker-end="url(#sp-arrow)"></line><text class="sp-wlabel" x="107.98" y="101.97" text-anchor="middle">1</text></g><g class="sp-edge" data-key="con:2" style="--hue: var(--constraint-2);" tabindex="0" role="img" aria-label="Edge s to b, length 4"><line class="sp-line" x1="63.72" y1="133.27" x2="138.28" y2="180.73" marker-end="url(#sp-arrow)"></line><text class="sp-wlabel" x="94.02" y="171.97" text-anchor="middle">4</text></g><g class="sp-edge is-route" data-key="con:3" style="--hue: var(--constraint-3);" tabindex="0" role="img" aria-label="Edge a to b, length 2, on the shortest route"><line class="sp-line" x1="156.00" y1="73.00" x2="156.00" y2="171.00" marker-end="url(#sp-arrow)"></line><text class="sp-wlabel" x="143.00" y="126.00" text-anchor="middle">2</text></g><g class="sp-edge" data-key="con:4" style="--hue: var(--constraint-4);" tabindex="0" role="img" aria-label="Edge a to t, length 6"><line class="sp-line" x1="174.84" y1="61.29" x2="279.16" y2="112.71" marker-end="url(#sp-arrow)"></line><text class="sp-wlabel" x="221.25" y="102.66" text-anchor="middle">6</text></g><g class="sp-edge is-route" data-key="con:5" style="--hue: var(--constraint-5);" tabindex="0" role="img" aria-label="Edge b to t, length 1, on the shortest route"><line class="sp-line" x1="174.84" y1="182.71" x2="279.16" y2="131.29" marker-end="url(#sp-arrow)"></line><text class="sp-wlabel" x="232.75" y="172.66" text-anchor="middle">1</text></g><g class="sp-node is-terminal"><circle cx="46" cy="122" r="21"></circle><text class="sp-node-id" x="46" y="128" text-anchor="middle">s</text><text class="sp-pot" x="46" y="178" text-anchor="middle">ds=0</text></g><g class="sp-node" data-key="var:da" tabindex="0" role="img" aria-label="Node a, potential da equals 1"><circle cx="156" cy="52" r="21"></circle><text class="sp-node-id" x="156" y="58" text-anchor="middle">a</text><text class="sp-pot" x="156" y="24" text-anchor="middle">da=1</text></g><g class="sp-node" data-key="var:db" tabindex="0" role="img" aria-label="Node b, potential db equals 3"><circle cx="156" cy="192" r="21"></circle><text class="sp-node-id" x="156" y="198" text-anchor="middle">b</text><text class="sp-pot" x="156" y="228" text-anchor="middle">db=3</text></g><g class="sp-node is-terminal" data-key="var:dt" tabindex="0" role="img" aria-label="Node t, potential dt equals 4"><circle cx="298" cy="122" r="21"></circle><text class="sp-node-id" x="298" y="128" text-anchor="middle">t</text><text class="sp-pot" x="298" y="178" text-anchor="middle">dt=4</text></g></svg>
+              </div>
+              <div class="sp-matrix-panel" data-role="sp-matrix">
+                <div class="sp-matrix-scroll"><table class="sp-matrix"><caption class="sp-matrix-cap">The same five edges, as node potential bounds</caption><thead><tr><th scope="col" class="sp-rowhead">edge</th><th scope="col" class="sp-col-head" data-key="var:da" tabindex="0" role="img" aria-label="Potential column da, node a, value 1"><span class="sp-col-name">da</span></th><th scope="col" class="sp-col-head" data-key="var:db" tabindex="0" role="img" aria-label="Potential column db, node b, value 3"><span class="sp-col-name">db</span></th><th scope="col" class="sp-col-head" data-key="var:dt" tabindex="0" role="img" aria-label="Potential column dt, node t, value 4"><span class="sp-col-name">dt</span></th><th scope="col" class="sp-bound-head">≤</th></tr></thead><tbody><tr class="sp-row is-route"><th scope="row" class="sp-rowhead sp-edge-head" data-key="con:1" style="--hue: var(--constraint-1);" tabindex="0" role="img" aria-label="Edge s to a, bound 1, on the shortest route"><span class="sp-edge-name">s→a</span><span class="sp-route-tag">route</span></th><td data-key="con:1" class="is-nz">1</td><td data-key="con:1" class="">0</td><td data-key="con:1" class="">0</td><td data-key="con:1" class="sp-bound">1</td></tr><tr class="sp-row"><th scope="row" class="sp-rowhead sp-edge-head" data-key="con:2" style="--hue: var(--constraint-2);" tabindex="0" role="img" aria-label="Edge s to b, bound 4"><span class="sp-edge-name">s→b</span></th><td data-key="con:2" class="">0</td><td data-key="con:2" class="is-nz">1</td><td data-key="con:2" class="">0</td><td data-key="con:2" class="sp-bound">4</td></tr><tr class="sp-row is-route"><th scope="row" class="sp-rowhead sp-edge-head" data-key="con:3" style="--hue: var(--constraint-3);" tabindex="0" role="img" aria-label="Edge a to b, bound 2, on the shortest route"><span class="sp-edge-name">a→b</span><span class="sp-route-tag">route</span></th><td data-key="con:3" class="is-nz">-1</td><td data-key="con:3" class="is-nz">1</td><td data-key="con:3" class="">0</td><td data-key="con:3" class="sp-bound">2</td></tr><tr class="sp-row"><th scope="row" class="sp-rowhead sp-edge-head" data-key="con:4" style="--hue: var(--constraint-4);" tabindex="0" role="img" aria-label="Edge a to t, bound 6"><span class="sp-edge-name">a→t</span></th><td data-key="con:4" class="is-nz">-1</td><td data-key="con:4" class="">0</td><td data-key="con:4" class="is-nz">1</td><td data-key="con:4" class="sp-bound">6</td></tr><tr class="sp-row is-route"><th scope="row" class="sp-rowhead sp-edge-head" data-key="con:5" style="--hue: var(--constraint-5);" tabindex="0" role="img" aria-label="Edge b to t, bound 1, on the shortest route"><span class="sp-edge-name">b→t</span><span class="sp-route-tag">route</span></th><td data-key="con:5" class="">0</td><td data-key="con:5" class="is-nz">-1</td><td data-key="con:5" class="is-nz">1</td><td data-key="con:5" class="sp-bound">1</td></tr></tbody></table></div>
+              </div>
+            </div>
+            <div class="badge-row">
+              <span class="engine-badge" data-engine="trace" data-role="sp-engine">replaying trace</span>
+              <span class="fig-sub" data-role="sp-provenance">The shortestpath trace the reference
+                solver recorded fixes every length and potential here. An edge binds exactly when
+                its dual is positive, and the binding edges spell out the route.</span>
+            </div>
+            <p class="readout" aria-live="polite" data-role="sp-readout">
+              Shortest route <b>s to a to b to t</b> has length <b>dt = 4</b>. Node potentials ds
+              <b>0</b>, da <b>1</b>, db <b>3</b>, dt <b>4</b>. Binding edges: s to a, a to b, b to t.
+            </p>
           </div>
 
           <figcaption>
             A source to sink network at its maximum flow of <b>8</b>. Each arrow reads flow over
             capacity, four arcs run full, and the minimum cut, <b>s to b</b> and <b>a to c</b>,
             sums to <b>8</b> as well. The matrix beside it is the very same eight numbers written
-            as a linear program. Shortest path over the same graph, read as node potentials with
-            best <b>dt = 4</b>, lands in a later pass.
+            as a linear program. The card above reads a second network as node potentials: pin the
+            source at <b>0</b>, and the farthest the sink can be pushed is <b>dt = 4</b>, the length
+            of the shortest route. Those potentials are the shortest-path echo of the shadow prices
+            from Section 04, a price read straight off the optimum, distance from the source standing
+            in for what one more unit is worth.
           </figcaption>
         </figure>
 
         <figure>
-          <p class="notice">The climax, still to come: the boundary walk of Corner Case set
-            against the interior path of Strictly Feasible, on one shared polytope.</p>
-          <div class="figure-box is-reserved" data-figure="race" data-fixture="centralpath-topic21"
-               role="img" aria-label="Reserved space for the race: the simplex boundary walk replayed against the interior point central path on one shared polytope."
-               style="--fig-ar: 21 / 9;">
-            <div class="coming-soon">
-              The race<br>simplex boundary walk against the interior point central path<br>
-              arrives in milestone B
+          <p class="notice">One polytope, two racers; scrub the slider to send Corner Case corner
+            to corner along the boundary while Strictly Feasible threads the interior.</p>
+          <!-- The race. The still below stands alone with no JS: the recorded boundary walk of
+               Corner Case (from the topic21 trace) and the recorded interior central path of
+               Strictly Feasible (from the centralpath-topic21 sidecar) on the same iso polytope,
+               both arriving at (9, 9, 4). On scroll, race.js swaps the still for the live replay
+               and wires one scrubber to drive both racers. Both racers are trace replays; there
+               is no live interior solver, so the badge stays "replaying trace". -->
+          <div class="race-figure" data-figure="race" data-fixture="topic21">
+            <div class="figure-box race-box" data-role="race-stage" style="--fig-ar: 8 / 5;">
+              <svg class="fig-svg race-stage-svg" viewBox="0 0 480 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Race corner 2 of 4. Corner Case on the boundary at 12, 3, 0; Strictly Feasible on the recorded interior path, mu 0.098, heading to 9, 9, 4."><line class="race-edge" x1="137.40929832092033" y1="133.0769230769231" x2="137.40929832092033" y2="65.38461538461539"></line><line class="race-edge" x1="137.40929832092033" y1="133.0769230769231" x2="137.40929832092033" y2="217.6923076923077"></line><line class="race-edge" x1="137.40929832092033" y1="133.0769230769231" x2="210.68837094883438" y2="107.6923076923077"></line><line class="race-edge" x1="137.40929832092033" y1="65.38461538461539" x2="137.40929832092033" y2="150"></line><line class="race-edge" x1="137.40929832092033" y1="65.38461538461539" x2="210.68837094883438" y2="40"></line><line class="race-edge" x1="137.40929832092033" y1="217.6923076923077" x2="137.40929832092033" y2="150"></line><line class="race-edge" x1="137.40929832092033" y1="217.6923076923077" x2="210.68837094883438" y2="260"></line><line class="race-edge" x1="137.40929832092033" y1="150" x2="210.68837094883438" y2="192.30769230769232"></line><line class="race-edge" x1="210.68837094883438" y1="107.6923076923077" x2="210.68837094883438" y2="40"></line><line class="race-edge" x1="210.68837094883438" y1="107.6923076923077" x2="342.59070167907964" y2="133.0769230769231"></line><line class="race-edge" x1="210.68837094883438" y1="40" x2="342.59070167907964" y2="65.38461538461539"></line><line class="race-edge" x1="342.59070167907964" y1="133.0769230769231" x2="342.59070167907964" y2="65.38461538461539"></line><line class="race-edge" x1="342.59070167907964" y1="133.0769230769231" x2="327.93488715349685" y2="192.30769230769232"></line><line class="race-edge" x1="342.59070167907964" y1="65.38461538461539" x2="327.93488715349685" y2="124.61538461538461"></line><line class="race-edge" x1="327.93488715349685" y1="192.30769230769232" x2="327.93488715349685" y2="124.61538461538461"></line><line class="race-edge" x1="327.93488715349685" y1="192.30769230769232" x2="210.68837094883438" y2="260"></line><line class="race-edge" x1="327.93488715349685" y1="124.61538461538461" x2="210.68837094883438" y2="192.30769230769232"></line><line class="race-edge" x1="210.68837094883438" y1="260" x2="210.68837094883438" y2="192.30769230769232"></line><path class="race-interior is-real" d="M 232.5,142.0 L 233.1,140.0 L 234.1,136.9 L 235.5,132.3 L 237.2,126.1 L 238.3,119.3 L 237.4,113.9 L 233.2,110.7 L 226.8,109.0 L 220.9,108.3 L 216.7,107.9 L 214.2,107.8 L 212.7,107.7 L 211.9,107.7 L 211.4,107.7 L 211.1,107.7 L 210.9,107.7 L 210.8,107.7 L 210.8,107.7 L 210.7,107.7 L 210.7,107.7 L 210.7,107.7 L 210.7,107.7 L 210.7,107.7"></path><line class="race-trail is-on" x1="210.68837094883438" y1="192.30769230769232" x2="327.93488715349685" y2="124.61538461538461" data-key="pivot:1"></line><line class="race-trail is-on" x1="327.93488715349685" y1="124.61538461538461" x2="342.59070167907964" y2="65.38461538461539" data-key="pivot:2"></line><line class="race-trail" x1="342.59070167907964" y1="65.38461538461539" x2="342.59070167907964" y2="133.0769230769231" data-key="pivot:3"></line><line class="race-trail" x1="342.59070167907964" y1="133.0769230769231" x2="210.68837094883438" y2="107.6923076923077" data-key="pivot:4"></line><circle class="race-corner is-visited" cx="210.68837094883438" cy="192.30769230769232" r="4" data-key="pivot:0" tabindex="0" role="img" aria-label="Corner 0 of 4, at 0, 0, 0"></circle><circle class="race-corner is-visited" cx="327.93488715349685" cy="124.61538461538461" r="4" data-key="pivot:1" tabindex="0" role="img" aria-label="Corner 1 of 4, at 8, 0, 0"></circle><circle class="race-corner is-visited" cx="342.59070167907964" cy="65.38461538461539" r="4" data-key="pivot:2" tabindex="0" role="img" aria-label="Corner 2 of 4, at 12, 3, 0"></circle><circle class="race-corner" cx="342.59070167907964" cy="133.0769230769231" r="4" data-key="pivot:3" tabindex="0" role="img" aria-label="Corner 3 of 4, at 12, 3, 4"></circle><circle class="race-corner" cx="210.68837094883438" cy="107.6923076923077" r="4" data-key="pivot:4" tabindex="0" role="img" aria-label="Corner 4 of 4, at 9, 9, 4"></circle><circle class="race-start" cx="232.5" cy="142.0" r="3.4"></circle><circle class="race-arrival" cx="210.68837094883438" cy="107.6923076923077" r="5"></circle><text class="race-arrival-label" x="210.7" y="87.7" text-anchor="middle">arrival (9, 9, 4)</text><g class="race-drone" transform="translate(342.6, 65.4)" data-key="pivot:2"><line class="race-drone-arm" x1="-7" y1="-5" x2="7" y2="5"></line><line class="race-drone-arm" x1="-7" y1="5" x2="7" y2="-5"></line><circle class="race-drone-rotor" cx="-7" cy="-5" r="2.6"></circle><circle class="race-drone-rotor" cx="7" cy="-5" r="2.6"></circle><circle class="race-drone-rotor" cx="-7" cy="5" r="2.6"></circle><circle class="race-drone-rotor" cx="7" cy="5" r="2.6"></circle><rect class="race-drone-body" x="-4.5" y="-3" width="9" height="6" rx="1.6"></rect></g><g class="race-vessel" transform="translate(213.4, 107.7)"><path class="race-vessel-hull" d="M-10,0 Q-2,5.5 9,2.6 Q11.5,0 9,-2.6 Q-2,-5.5 -10,0 Z"></path><line class="race-vessel-fin" x1="-1" y1="-1" x2="-1" y2="-8"></line><path class="race-vessel-sail" d="M-1,-8 L5,-3 L-1,-2 Z"></path></g></svg>
             </div>
+            <div class="scrubber-row race-controls" data-role="race-controls"></div>
+            <ul class="legend race-legend">
+              <li>
+                <svg class="race-glyph" viewBox="0 0 46 16" aria-hidden="true">
+                  <line class="race-trail is-on" x1="2" y1="8" x2="26" y2="8"></line>
+                  <g class="race-drone" transform="translate(35, 8)">
+                    <line class="race-drone-arm" x1="-7" y1="-5" x2="7" y2="5"></line>
+                    <line class="race-drone-arm" x1="-7" y1="5" x2="7" y2="-5"></line>
+                    <circle class="race-drone-rotor" cx="-7" cy="-5" r="2.6"></circle>
+                    <circle class="race-drone-rotor" cx="7" cy="-5" r="2.6"></circle>
+                    <circle class="race-drone-rotor" cx="-7" cy="5" r="2.6"></circle>
+                    <circle class="race-drone-rotor" cx="7" cy="5" r="2.6"></circle>
+                    <rect class="race-drone-body" x="-4.5" y="-3" width="9" height="6" rx="1.6"></rect>
+                  </g>
+                </svg>
+                Corner Case, the boundary walk (recorded)
+              </li>
+              <li>
+                <svg class="race-glyph" viewBox="0 0 46 16" aria-hidden="true">
+                  <line class="race-interior is-real" x1="2" y1="8" x2="26" y2="8"></line>
+                  <g class="race-vessel" transform="translate(35, 8)">
+                    <path class="race-vessel-hull" d="M-10,0 Q-2,5.5 9,2.6 Q11.5,0 9,-2.6 Q-2,-5.5 -10,0 Z"></path>
+                    <line class="race-vessel-fin" x1="-1" y1="-1" x2="-1" y2="-8"></line>
+                    <path class="race-vessel-sail" d="M-1,-8 L5,-3 L-1,-2 Z"></path>
+                  </g>
+                </svg>
+                Strictly Feasible, the interior central path (recorded)
+              </li>
+            </ul>
+            <p class="race-cue" data-role="race-cue">Recorded on both sides: Corner Case replays the
+              boundary walk, Strictly Feasible replays the interior <b>central path</b> (all 24 logged
+              points, <b>mu</b> from 45 toward zero) to the shared arrival <b>(9, 9, 4)</b>. Neither
+              is a live solve.</p>
+            <div class="badge-row">
+              <span class="engine-badge" data-engine="trace" data-role="race-engine">replaying trace</span>
+              <span class="fig-sub" data-role="race-provenance">The corner walk is replayed vertex by
+                vertex from the topic21 trace; the interior racer replays the recorded central path
+                from the centralpath-topic21 sidecar, point by point as mu falls. Both are trace
+                replays, never a live solve.</span>
+            </div>
+            <p class="readout" aria-live="polite" data-role="race-readout">
+              <b>Corner Case</b> at corner <b>2</b> of 4 (12, 3, 0); <b>Strictly Feasible</b> in the
+              interior, mu = <b>0.098</b>, heading to (9, 9, 4).
+            </p>
           </div>
           <figcaption>
-            This panel is reserved for the race: simplex along the boundary against the
-            interior-point central path on one shared polytope, arriving in a later pass.
-            Interior points are strictly feasible points, which is how the rival earns its name.
+            The race on one cargo polytope: Corner Case hops the boundary corner to corner, five
+            recorded vertices from the topic21 trace, while Strictly Feasible threads the interior
+            along the recorded central path, 24 logged points converging on the shared arrival
+            <b>(9, 9, 4)</b> as mu falls. Interior points are strictly feasible points, which is how
+            the rival earns its name.
           </figcaption>
         </figure>
       </div>
 
       <div class="l-body">
         <p class="vignette">The same drone that walked the cargo hold is loaned to the fleet,
-          first to plot shuttle courses, then to balance relay traffic across a dozen ships. A
-          sleeker vessel watches it work. Strictly Feasible has never once touched a wall, and
-          it means to prove the long way round the boundary was never necessary.</p>
-        <p>Both jobs are linear programs wearing network clothes: read as node potentials the
-          graph returns a shortest route of <b>dt = 4</b>, and read as arc capacities the same
-          shape pushes a maximum flow of <b>8</b>. The race then replays simplex along the
-          boundary against the interior-point central path across one shared polytope, and
-          interior points are strictly feasible points, which is how the rival earns its name.</p>
+          plotting shuttle courses one shift and balancing relay traffic the next. A sleeker
+          vessel has watched the whole tour without once touching a wall. Strictly Feasible
+          means to prove that the long way round the boundary, corner after corner, was never
+          the only way home.</p>
+        <p>An interior-point method never works the boundary. Instead of stepping corner to
+          corner the way Corner Case does, it follows a path that threads the interior and bends
+          toward the optimum, and every point it passes lies strictly inside every limit, which
+          is exactly what its pilot is named for. Simplex takes the corners and the interior
+          method takes the middle; the interior track above is the recorded central path, replayed
+          point by point as the barrier parameter mu falls toward zero rather than solved live in
+          your browser. The two network figures make the same point in different clothes: read as
+          node potentials a graph gives a shortest route of <b>dt = 4</b>, and read as arc
+          capacities a network pushes a maximum flow of <b>8</b>.</p>
       </div>
     </section>
 
@@ -1186,6 +1274,14 @@
           which minimizes, so we negate the objective to maximize). The oracle badge links to
           exactly how that check runs, so no number here asks to be taken on faith.</p>
 
+        <p>Two solvers stand behind these figures. The reference solver wrote every committed
+          trace on this page, corner for corner, and scipy's HiGHS independently confirms each
+          optimum. The live figures add one more voice: the same simplex core, written in Rust
+          and compiled to WebAssembly, re-solves in your browser when you drag the hero's limits
+          or push the what-if in Section 03, and it lands on the very corners the traces already
+          recorded. The traces stay the reference solver's; the browser only checks the work
+          again, in real time.</p>
+
         <h3>Sources</h3>
         <ul class="source-list">
           <li>
@@ -1198,7 +1294,7 @@
             <span class="src-tag">CLRS.</span> Cormen, Leiserson, Rivest, and Stein,
             <em>Introduction to Algorithms</em>, chapter 29 (linear programming) and
             section 28.1 (solving systems of linear equations by Gaussian
-            elimination, cited again inside the open the hood pivot zoom).
+            elimination, the row reduction each simplex pivot performs).
             <a href="https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/">MIT Press</a>.
           </li>
           <li>

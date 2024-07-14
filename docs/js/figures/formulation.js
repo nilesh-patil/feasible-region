@@ -1,24 +1,13 @@
-// ==========================================================================
 // Feasible Region . figures/formulation.js . S2 the formulation pipeline
 //
-// Mounted by main.js on the #s2 figure box (data-figure="formulation",
-// data-fixture="statquest"). This is the "words to a tableau" widget. Each
-// plain-English limit on the fab-bay mix is a clickable story-line card; check
-// one and it carves the feasible region on the left AND grows the standard-form
-// block on the right, adding one equation and a named slack (the spare capacity
-// that turns a <= into an exact =). Start over clears back to the whole quadrant
-// so the reader can build the formulation one limit at a time.
-//
-// The region and its best corner are recomputed here by half-plane clipping and
-// exact vertex enumeration from ../lp2d.js (in two variables the optimum always
-// sits at a corner, so no solver and no trace replay are needed): the badge goes
-// to "drawn from geometry" once live. The statquest problem block seeds the
-// numbers; the authored no-JS still already states the resting result, so with
-// scripts off the box is never blank.
-//
-// No d3 here: the plot is a handful of lines and dots built straight with the
-// DOM, so this figure carries no library weight of its own.
-// ==========================================================================
+// Mounts on #s2 (data-fixture="statquest"), the "words to a tableau" widget.
+// Each plain-English limit on the fab-bay mix is a clickable card; check one and
+// it carves the feasible region on the left AND grows the standard-form block on
+// the right, adding one equation and a named slack. The region and its best
+// corner are recomputed by half-plane clipping and exact vertex enumeration from
+// ../lp2d.js (2 variables, so the optimum sits at a corner: no solver, no trace
+// replay), and the badge reads "drawn from geometry". The authored no-JS still
+// states the resting result, so scripts-off the box is never blank. No d3 here.
 
 import { feasibleRegion, objectiveArgmax, lineThroughBox, fmt } from "../lp2d.js";
 import { linkFigure, conHue, conKey } from "../sync.js";
@@ -450,6 +439,6 @@ export default async function mount(box, ctx) {
     provenance.textContent =
       "Live, the region and its best corner are recomputed here by testing the " +
       "objective at every corner, exact in two dimensions; at rest they match " +
-      "the trace the core recorded for this mix.";
+      "the trace the reference solver recorded for this mix.";
   }
 }
