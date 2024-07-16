@@ -12,6 +12,7 @@
 import { fmt } from "../lp2d.js";
 import { linkFigure } from "../sync.js";
 import { enumerateVertices } from "../poly3d.js";
+import mountHood from "./hood.js";
 
 const SVGNS = "http://www.w3.org/2000/svg";
 const COS30 = Math.cos(Math.PI / 6);
@@ -292,6 +293,7 @@ export default async function mount(box, ctx) {
     currentLabel.textContent = `(${fmt(v[0])}, ${fmt(v[1])}, ${fmt(v[2])})`;
 
     renderTableau(step);
+    hood.sync(step, cur, nSteps, mode);
 
     // Shared data-key ties one pivot step into a group so hovering or focusing
     // any member lights the rest across both panels.
@@ -528,6 +530,8 @@ export default async function mount(box, ctx) {
   const still = box.querySelector("svg");
   if (still) still.replaceWith(svg);
   else box.appendChild(svg);
+
+  const hood = mountHood(scope, ctx, { names, nRows, nCols, label: (i) => varLabel(i, names) });
 
   goCommitted(); // authored default: the finished recorded walk, optimum ringed
 
