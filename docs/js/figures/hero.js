@@ -89,6 +89,14 @@ function dirWord(theta) {
   return words[Math.round(deg / 45) % 8];
 }
 
+// Screen-reader wording for the isoprofit slider: the objective value the level
+// line currently marks, plus where that value sits relative to the best corner.
+function isoValueText(v, atMax) {
+  return atMax
+    ? `objective level ${fmt(v)}, the highest the region allows, resting on the best corner`
+    : `objective level ${fmt(v)}, sweep up toward the best corner`;
+}
+
 // Normalise the trace's problem into a<=form half-planes. A ">=" row is negated.
 function readConstraints(problem) {
   return problem.constraints.map((row, i) => {
@@ -128,6 +136,10 @@ export default async function mount(el, ctx) {
     theta: Math.atan2(problem.objective[1], problem.objective[0]),
     theta0: Math.atan2(problem.objective[1], problem.objective[0]),
     objMag,
+    // Upgrade B: where the isoprofit level line sits, as a fraction from the
+    // region's lowest objective value (0) to the optimum's value (1). At rest it
+    // rides mid region so the reader can sweep it up and feel it stop at a corner.
+    isoF: 0.5,
   };
 
   // ---- scales ----------------------------------------------------------
@@ -262,6 +274,37 @@ export default async function mount(el, ctx) {
   gLabels.append("text").attr("x", VW - M.right).attr("y", y0px + 20).attr("text-anchor", "end").text(problem.var_names?.[0] || "x1");
   gLabels.append("text").attr("x", x0px - 16).attr("y", M.top + 6).text(problem.var_names?.[1] || "x2");
 
+  // ---- isoprofit sweep (Upgrade B): a draggable equal-value line -------
+  // The dashed line is a level set of the objective: every point on it scores
+  // the same value. Sweeping it in the gradient direction raises that value, and
+  // the highest value the region still touches is reached at a single corner,
+  // which is exactly the optimum. That makes the article's thesis causal: push
+  // the line as high as it goes and it comes to rest on the ringed corner. It is
+  // held distinct from the solid objective arrow (dashed stroke, its own hollow
+  // knob) and its short hit segment sits at the far end of the line, clear of the
+  // objective's own hit line so the two drags never fight.
+  const gIso = svg.append("g");
+  const isoHalo = gIso
+    .append("line")
+    .attr("style", "stroke: var(--objective); stroke-width: 13; stroke-linecap: round; opacity: 0;");
+  const isoLine = gIso
+    .append("line")
+    .attr("style", "stroke: var(--objective); stroke-width: 1.6; stroke-dasharray: 6 5; opacity: 0.85; pointer-events: none;");
+  const isoHit = gIso
+    .append("line")
+    .attr("style", "stroke: transparent; stroke-width: 20; cursor: grab; touch-action: none;")
+    .attr("tabindex", 0)
+    .attr("role", "slider")
+    .attr("aria-label", "Objective level line")
+    .attr("aria-orientation", "vertical");
+  const isoKnob = gIso
+    .append("circle")
+    .attr("r", 4.5)
+    .attr("style", "fill: var(--surface); stroke: var(--objective); stroke-width: 2; stroke-dasharray: 3 2.4; pointer-events: none;");
+  const isoLabel = gIso
+    .append("text")
+    .attr("style", "font-family: var(--font-sans); font-size: 12px; font-weight: 650; fill: var(--objective); pointer-events: none;");
+
   // optimum: pulse ring behind, solid dot on top
   const gOpt = svg.append("g");
   const ring = gOpt
@@ -359,6 +402,9 @@ export default async function mount(el, ctx) {
     const cy = state.objMag * Math.sin(state.theta);
     const poly = feasibleRegion(constraints, X_MAX, Y_MAX);
     const opt = objectiveArgmax(poly, cx, cy);
+    // Upgrade B: the level line is at its highest feasible value (resting on the
+    // optimum). Used to light the binding constraints below.
+    const atMax = state.isoF >= 0.99;
 
     regionPath.attr("points", poly.map((p) => `${X(p[0])},${Y(p[1])}`).join(" "));
 
@@ -373,6 +419,12 @@ export default async function mount(el, ctx) {
       // rare frame where the drawn line has left the box: a focused handle that
       // reports a stale number is worse than one with no visible line.
       k.hitLine.attr("aria-valuenow", fmt(k.c));
+      // Upgrade B: once the level line is pushed to its highest value, the
+      // constraints that pass through the optimum are the binding ones; give them
+      // a colored glow so the reader sees which limits form that corner.
+      const bindErr = opt ? Math.abs(k.a * opt.point[0] + k.b * opt.point[1] - k.c) : Infinity;
+      k._bindLit = atMax && bindErr < 1e-6;
+      refreshHalo(k);
       if (!seg) {
         // Line off-canvas (fully relaxed). Hide the drawn line, halo, grips, and
         // label, but KEEP the hit line displayed so keyboard focus is never lost
@@ -423,6 +475,68 @@ export default async function mount(el, ctx) {
       optDot.attr("display", "none");
       ring.attr("display", "none");
     }
+
+    // ---- isoprofit level line (Upgrade B) --------------------------------
+    // The value the line marks ranges from the region's lowest objective value to
+    // the optimum's; the handle fraction picks where it sits between them.
+    let vMin = 0;
+    let vMax = 0;
+    if (poly.length) {
+      vMin = Infinity;
+      vMax = -Infinity;
+      poly.forEach((p) => {
+        const val = cx * p[0] + cy * p[1];
+        if (val < vMin) vMin = val;
+        if (val > vMax) vMax = val;
+      });
+    }
+    const isoSpan = vMax - vMin;
+    const isoV = vMin + state.isoF * isoSpan;
+    // Stashed so the drag handler can map a pointer projection back to a fraction
+    // without recomputing the region.
+    state.isoVMin = vMin;
+    state.isoSpan = isoSpan;
+    const isoSeg = isoSpan > 1e-9 ? lineThroughBox(cx, cy, isoV, X_MAX, Y_MAX) : null;
+    const showIso = (e, on) => e.attr("display", on ? null : "none");
+    if (!isoSeg) {
+      // Keep isoHit displayed (never hidden) so keyboard focus is never stranded.
+      [isoLine, isoHalo, isoKnob, isoLabel].forEach((e) => showIso(e, false));
+    } else {
+      const [q0, q1] = isoSeg;
+      const iax = X(q0[0]),
+        iay = Y(q0[1]),
+        ibx = X(q1[0]),
+        iby = Y(q1[1]);
+      [isoLine, isoHalo].forEach((e) =>
+        showIso(e, true).attr("x1", iax).attr("y1", iay).attr("x2", ibx).attr("y2", iby)
+      );
+      // Anchor the knob (and its short hit segment) at the endpoint farther from
+      // the objective's pivot, keeping the level-line handle clear of the arrow.
+      const obx = X(OBJ_BASE.x),
+        oby = Y(OBJ_BASE.y);
+      const dA = Math.hypot(iax - obx, iay - oby);
+      const dB = Math.hypot(ibx - obx, iby - oby);
+      const kx = dA >= dB ? iax : ibx;
+      const ky = dA >= dB ? iay : iby;
+      const ox2 = dA >= dB ? ibx : iax;
+      const oy2 = dA >= dB ? iby : iay;
+      const segLen = Math.hypot(ox2 - kx, oy2 - ky) || 1;
+      const hx = (ox2 - kx) / segLen;
+      const hy = (oy2 - ky) / segLen;
+      const HIT = 42; // short: the hit segment never runs alongside the objective's
+      showIso(isoKnob, true).attr("cx", kx).attr("cy", ky);
+      isoHit.attr("x1", kx).attr("y1", ky).attr("x2", kx + hx * HIT).attr("y2", ky + hy * HIT);
+      showIso(isoLabel, true)
+        .attr("x", kx + (hx >= 0 ? 8 : -8))
+        .attr("y", ky - 8)
+        .attr("text-anchor", hx >= 0 ? "start" : "end")
+        .text(fmt(isoV));
+    }
+    isoHit
+      .attr("aria-valuemin", fmt(vMin))
+      .attr("aria-valuemax", fmt(vMax))
+      .attr("aria-valuenow", fmt(isoV))
+      .attr("aria-valuetext", isoValueText(isoV, atMax));
 
     updateReadout(poly, opt);
   }
@@ -573,15 +687,52 @@ export default async function mount(el, ctx) {
       this.style.cursor = "grab";
     });
 
+  // Upgrade B: dragging the level line translates it in the gradient direction.
+  // The pointer projection onto the objective is turned into a fraction using the
+  // value span stashed by the last draw. It only schedules a redraw, never a
+  // solve, so it cannot perturb the live-solve token or the badge.
+  const dragIso = d3
+    .drag()
+    .container(svgNode)
+    .on("start", function () {
+      this.style.cursor = "grabbing";
+    })
+    .on("drag", function (event) {
+      const p = dataAt(event);
+      const span = state.isoSpan || 0;
+      if (span <= 1e-9) return;
+      const cx = state.objMag * Math.cos(state.theta);
+      const cy = state.objMag * Math.sin(state.theta);
+      const v = cx * p.x + cy * p.y;
+      state.isoF = clamp((v - state.isoVMin) / span, 0, 1);
+      scheduleDraw();
+    })
+    .on("end", function () {
+      this.style.cursor = "grab";
+    });
+
   constraints.forEach((k) => d3.select(k.hitLine.node()).call(dragConstraint));
   d3.select(objHit.node()).call(dragObjective);
+  d3.select(isoHit.node()).call(dragIso);
 
   // ---- keyboard --------------------------------------------------------
   const focusHalo = (line, on) => line.attr("opacity", on ? 0.28 : 0);
+  // A constraint's halo is lit when it is focused OR (Upgrade B) when it is a
+  // binding limit at the resting-on-optimum level line; take the stronger of the
+  // two so neither state clobbers the other.
+  function refreshHalo(k) {
+    k.haloLine.attr("opacity", Math.max(k._focused ? 0.28 : 0, k._bindLit ? 0.32 : 0));
+  }
   constraints.forEach((k) => {
     const node = k.hitLine.node();
-    node.addEventListener("focus", () => focusHalo(k.haloLine, true));
-    node.addEventListener("blur", () => focusHalo(k.haloLine, false));
+    node.addEventListener("focus", () => {
+      k._focused = true;
+      refreshHalo(k);
+    });
+    node.addEventListener("blur", () => {
+      k._focused = false;
+      refreshHalo(k);
+    });
     node.addEventListener("keydown", (event) => {
       const step = event.shiftKey ? 1 : 0.25;
       let handled = true;
@@ -634,6 +785,39 @@ export default async function mount(el, ctx) {
     if (handled) {
       event.preventDefault();
       bump();
+    }
+  });
+
+  // Upgrade B: keyboard for the level line. Up/Right raise the objective value,
+  // Down/Left lower it, Home drops to the region's floor, End jumps to the best
+  // corner, Shift takes coarse steps. Redraw only, never a solve.
+  const isoNode = isoHit.node();
+  isoNode.addEventListener("focus", () => isoHalo.attr("opacity", 0.22));
+  isoNode.addEventListener("blur", () => isoHalo.attr("opacity", 0));
+  isoNode.addEventListener("keydown", (event) => {
+    const step = event.shiftKey ? 0.2 : 0.05;
+    let handled = true;
+    switch (event.key) {
+      case "ArrowUp":
+      case "ArrowRight":
+        state.isoF = clamp(state.isoF + step, 0, 1);
+        break;
+      case "ArrowDown":
+      case "ArrowLeft":
+        state.isoF = clamp(state.isoF - step, 0, 1);
+        break;
+      case "Home":
+        state.isoF = 0;
+        break;
+      case "End":
+        state.isoF = 1;
+        break;
+      default:
+        handled = false;
+    }
+    if (handled) {
+      event.preventDefault();
+      scheduleDraw();
     }
   });
 
