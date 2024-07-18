@@ -234,10 +234,18 @@
       <div class="l-body">
         <h2 id="cold-open-h" class="eyebrow" style="font-size:0.72rem;">Cold open</h2>
         <p>In 1939, George Stigler set out to find the cheapest diet that could
-          keep a person alive and well: seventy-seven foods, no computer. His team
-          ground through the arithmetic by hand, roughly 120 person-days of it, and
-          landed on $39.93 a year. It was very nearly right. The method that could
-          prove it would not arrive for another decade.</p>
+          keep a person alive and well: seventy-seven foods, no computer. By hand
+          and by judgment alone he arrived at $39.93 a year, and freely admitted he
+          could not prove it the true minimum. The method that could prove it would
+          not arrive for another decade. When it did, in 1947, nine clerks at the
+          National Bureau of Standards ran it for some 120 person-days and settled
+          the question at $39.69, twenty-four cents under his guess.</p>
+        <aside class="frame-note">The ship and drones narrating these sections take their
+          names and manners from the Culture novels of Iain M. Banks (1987 to 2012), where
+          world-sized starships called General Systems Vehicles are run by witty, benevolent
+          AI 'Minds' and crewed by sentient drones that are full citizens. It is stage
+          dressing, not load-bearing: skip every mention of the ship and the linear
+          programming underneath stands exactly as it is.</aside>
         <p>Ten thousand years later, that same mathematics has become plumbing. The
           General Systems Vehicle Marginal Utility provisions itself every few
           milliseconds: what to fabricate, what to spend, what to keep in reserve,
@@ -353,7 +361,9 @@
             or turn the objective, and the shaded region and its best corner re-solve
             on every move. The resting answer is the corner at <b>(4, 0)</b>, where
             the objective reaches <b>12</b>, hard against both budgets rather than
-            tucked inside them.
+            tucked inside them. Raise the dashed level line as high as it will go
+            and it settles on that same corner, the objective at its highest
+            feasible value.
             <ul class="legend" aria-hidden="true">
               <li><span class="swatch" data-c="1"></span> x1 + x2 limit</li>
               <li><span class="swatch" data-c="2"></span> x1 + 3 x2 limit</li>
@@ -546,7 +556,9 @@
         <p>The fab-bay mix stays maximize <b>3 x1 + 2 x2</b>, but each at-most limit becomes
           an exact equation once a slack is added: <b>x1 + x2 + s1 = 4</b> and
           <b>x1 + 3 x2 + s2 = 6</b>, where s1 and s2 hold the feedstock and press time still
-          to spare. Those equalities are the first rows of the tableau.</p>
+          to spare. Those equalities are the first rows of the tableau. Two products against
+          two limits is all a plane can draw; the bay's real orders run longer, and the next
+          section scales the same program up until the picture gives out.</p>
       </div>
     </section>
 
@@ -680,6 +692,11 @@
 
           <div class="scrubber-row dv-controls" data-role="dualview-controls"></div>
 
+          <!-- Open-the-hood host: filled by dualview.js (via hood.js) with a
+               collapsible panel that works one pivot's row operations by hand.
+               Empty (and so invisible, save the reserved band) without JS. -->
+          <div class="hood-host" data-role="dualview-hood"></div>
+
           <!-- What-if host: filled by dualview.js with a second native range that
                perturbs the binding constraint and re-solves live. Empty (and so
                invisible) without JS; disabled with an honest note without WASM. -->
@@ -708,12 +725,14 @@
       </div>
 
       <div class="l-body">
-        <p class="vignette">Corner Case, the survey drone, will not cut across the cargo
-          hold. It hops corner to corner along the hull, and at each landing the tableau
-          on the wall redraws itself to match the pose the drone just struck.</p>
-        <p>A third product, phase-crystal, enters as <b>x3</b>, so the program grows to
-          maximize <b>x1 + x2 + x3</b> under five resource limits, and its best corner
-          sits at <b>(9, 9, 4)</b> with objective <b>22</b>. Every pivot on that walk is
+        <p class="vignette">Back in the same bay, Corner Case, the survey drone, will not cut
+          across the cargo hold. It hops corner to corner along the hull, and at each landing
+          the tableau on the wall redraws itself to match the pose the drone just struck.</p>
+        <p>Scaled up for a full cargo run, the fab-bay problem outgrows the plane that
+          held it: a third product, phase-crystal, comes online as <b>x3</b>, and the ship
+          restates the job for the bigger bay, maximize <b>x1 + x2 + x3</b> with each product
+          counted evenly, under five limits of its own. Its best corner sits at <b>(9, 9, 4)</b>
+          with objective <b>22</b>. Every pivot on that walk is
           Gaussian elimination on the tableau: the entering column and the leaving row that
           light up together are one step of row reduction.</p>
         <p>A second knob sits under the walk. Drag the binding hull-frame stock limit off its
@@ -817,6 +836,63 @@
                 <text x="8" y="240" style="font-size: 11px; fill: var(--ink);">priced out, the resources are worth 22, the primal optimum</text>
               </svg>
               </div>
+            </div>
+          </div>
+
+          <!-- S4 value function (upgrade C). A third view of the SAME shadow
+               price: the hull-frame stock price (3/7) is the slope of the best
+               profit curve as its limit moves. With no JS the authored still
+               states the resting slope at b = 27; on scroll duality.js swaps in
+               a draggable limit and a moving point whose local slope is the
+               shadow price, kinking where the price steps to a new value. Every
+               breakpoint is oracle-computed (scipy HiGHS); nothing is solved
+               live here. --h holds con:3's hue so the marks tie to hull-frame. -->
+          <div class="s4-vf" data-role="valuefn" style="--h: var(--constraint-3);">
+            <p class="s4-head">The price is a slope</p>
+            <div class="figure-box vf-box" style="--fig-ar: 360 / 220;">
+              <svg class="fig-svg vf-still" viewBox="0 0 360 220" preserveAspectRatio="xMidYMid meet"
+                   role="img" style="font-family: var(--font-sans);"
+                   aria-label="Best profit against the hull-frame stock limit. The curve climbs and flattens; at the committed limit 27 its slope is three sevenths, the shadow price. Past about 41.4 the slope is zero, so more stock is worth nothing.">
+                <!-- axes -->
+                <line x1="44" y1="188" x2="346" y2="188" style="stroke: var(--hairline-strong); stroke-width: 1;"></line>
+                <line x1="44" y1="20" x2="44" y2="188" style="stroke: var(--hairline-strong); stroke-width: 1;"></line>
+                <!-- z gridlines + ticks -->
+                <line x1="44" y1="167" x2="346" y2="167" style="stroke: var(--hairline); stroke-width: 1; stroke-dasharray: 3 3;"></line>
+                <line x1="44" y1="114.5" x2="346" y2="114.5" style="stroke: var(--hairline); stroke-width: 1; stroke-dasharray: 3 3;"></line>
+                <line x1="44" y1="62" x2="346" y2="62" style="stroke: var(--hairline); stroke-width: 1; stroke-dasharray: 3 3;"></line>
+                <text x="38" y="170" text-anchor="end" style="font-size: 9px; fill: var(--faint);">15</text>
+                <text x="38" y="117.5" text-anchor="end" style="font-size: 9px; fill: var(--faint);">20</text>
+                <text x="38" y="65" text-anchor="end" style="font-size: 9px; fill: var(--faint);">25</text>
+                <!-- b ticks -->
+                <text x="44" y="201" text-anchor="middle" style="font-size: 9px; fill: var(--faint);">12</text>
+                <text x="117.2" y="201" text-anchor="middle" style="font-size: 9px; fill: var(--faint);">20</text>
+                <text x="181.3" y="201" text-anchor="middle" style="font-size: 9px; font-weight: 700; fill: var(--accent);">27</text>
+                <text x="313.4" y="201" text-anchor="middle" style="font-size: 9px; fill: var(--faint);">41.4</text>
+                <text x="346" y="201" text-anchor="middle" style="font-size: 9px; fill: var(--faint);">45</text>
+                <!-- axis titles -->
+                <text x="195" y="214" text-anchor="middle" style="font-size: 10px; font-weight: 600; fill: var(--faint);">hull-frame stock limit</text>
+                <text x="13" y="104" text-anchor="middle" transform="rotate(-90 13 104)" style="font-size: 10px; font-weight: 600; fill: var(--faint);">best profit</text>
+                <!-- allowable-range boundaries (the resting price 3/7 holds between them) -->
+                <line x1="117.2" y1="188" x2="117.2" y2="125" style="stroke: var(--constraint-3); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.5;"></line>
+                <line x1="313.4" y1="188" x2="313.4" y2="28.5" style="stroke: var(--constraint-3); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.5;"></line>
+                <!-- the value curve, faint -->
+                <polyline points="44,181 117.2,125 313.4,28.5 346,28.5" style="fill: none; stroke: var(--faint); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round;"></polyline>
+                <circle cx="117.2" cy="125" r="2.6" style="fill: var(--faint);"></circle>
+                <circle cx="313.4" cy="28.5" r="2.6" style="fill: var(--faint);"></circle>
+                <!-- extrapolated tangent at b = 27 (slope 3/7), clipped to the plot -->
+                <line x1="44" y1="161" x2="330.8" y2="20" style="stroke: var(--constraint-3); stroke-width: 1.5; stroke-dasharray: 4 3; opacity: 0.75;"></line>
+                <!-- the active 3/7 segment (con:3), the resting guide + point -->
+                <line x1="117.2" y1="125" x2="313.4" y2="28.5" style="fill: none; stroke: var(--constraint-3); stroke-width: 3.25; stroke-linecap: round;"></line>
+                <line x1="181.3" y1="93.5" x2="181.3" y2="188" style="stroke: var(--constraint-3); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.5;"></line>
+                <circle cx="181.3" cy="93.5" r="5" style="fill: var(--constraint-3); stroke: var(--surface); stroke-width: 2;"></circle>
+                <text x="192" y="84" style="font-size: 11px; font-weight: 700; fill: var(--constraint-3);">3/7</text>
+              </svg>
+            </div>
+            <div class="vf-controls" data-role="vf-controls">
+              <p class="vf-readout">At <b>b = 27</b> the best profit is <b>22</b>. One more unit of
+                hull-frame stock is worth <b>3/7</b> here, the slope of the curve, and holds while
+                the limit stays between 20 and 41.4. With scripts on, drag the limit to watch the
+                slope, and the price, change.</p>
             </div>
           </div>
 
@@ -1016,7 +1092,8 @@
           now built the corners for it: this cargo manifold is skewed just enough that the
           drone's own greedy instinct drags it across every last vertex before the exit shows
           itself.</p>
-        <p>The manifold is maximize <b>100 x1 + 10 x2 + x3</b> under three tilted limits,
+        <p>The manifold is the same cargo bay, its limits skewed on purpose: maximize
+          <b>100 x1 + 10 x2 + x3</b> under three tilted limits,
           and Dantzig's rule marches through all <b>2&#179; = 8</b> corners before it
           lands at <b>(0, 0, 10000)</b>. Stretch the same construction to <b>n = 200</b>
           and the tour runs to about <b>2 to the 200</b> pivots. The worst case is not
@@ -1247,15 +1324,15 @@
           vessel has watched the whole tour without once touching a wall. Strictly Feasible
           means to prove that the long way round the boundary, corner after corner, was never
           the only way home.</p>
-        <p>An interior-point method never works the boundary. Instead of stepping corner to
-          corner the way Corner Case does, it follows a path that threads the interior and bends
-          toward the optimum, and every point it passes lies strictly inside every limit, which
-          is exactly what its pilot is named for. Simplex takes the corners and the interior
-          method takes the middle; the interior track above is the recorded central path, replayed
-          point by point as the barrier parameter mu falls toward zero rather than solved live in
-          your browser. The two network figures make the same point in different clothes: read as
-          node potentials a graph gives a shortest route of <b>dt = 4</b>, and read as arc
-          capacities a network pushes a maximum flow of <b>8</b>.</p>
+        <p>On the very cargo polytope from Section 03, an interior-point method never works the
+          boundary. Instead of stepping corner to corner the way Corner Case does, it follows a
+          path that threads the interior and bends toward the optimum, and every point it passes
+          lies strictly inside every limit, which is exactly what its pilot is named for. Simplex
+          takes the corners and the interior method takes the middle; the interior track above is
+          the recorded central path, replayed as the barrier parameter mu falls toward zero rather
+          than solved live in your browser. Both network figures are linear programs in different
+          clothes: read as node potentials a graph gives a shortest route of <b>dt = 4</b>, and
+          read as arc capacities a network pushes a maximum flow of <b>8</b>.</p>
       </div>
     </section>
 
@@ -1303,10 +1380,10 @@
             <a href="https://www.youtube.com/@statquest">StatQuest on YouTube</a>.
           </li>
           <li>
-            <span class="src-tag">Prior art: microlp.</span> The pure-Rust LP solver
-            microlp (a maintained descendant of minilp) is prior art for a small,
-            embeddable simplex, and a useful cross-reference for this core.
-            <a href="https://crates.io/crates/microlp">microlp on crates.io</a>.
+            <span class="src-tag">Prior art: minilp.</span> The pure-Rust LP solver
+            minilp is prior art for a small, embeddable simplex, and a useful
+            cross-reference for this core.
+            <a href="https://crates.io/crates/minilp">minilp on crates.io</a>.
           </li>
           <li>
             <span class="src-tag">Vendored libraries.</span> Figures draw with d3
