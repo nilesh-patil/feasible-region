@@ -163,7 +163,7 @@ export default async function mount(box, ctx) {
   // shaded feasible region (updated)
   const regionPath = svgEl("polygon", {
     style:
-      "fill: var(--wash); stroke: var(--trail); stroke-width: 1.5; stroke-linejoin: round;",
+      "fill: var(--region-fill); stroke: var(--trail); stroke-width: 1.5; stroke-linejoin: round;",
   });
   svg.appendChild(regionPath);
 

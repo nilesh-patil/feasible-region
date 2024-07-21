@@ -93,6 +93,10 @@
   --constraint-5-fill: rgba(157, 100, 0, 0.16);
   --objective-fill: rgba(122, 47, 178, 0.14);
   --wash: rgba(181, 116, 0, 0.16);   /* neutral cross-highlight wash */
+  /* The shaded feasible region in the hero and formulation figures. One token,
+     four render paths (two JS figures, two no-JS stills), so hydrated and
+     fallback paint stay in lockstep. Matches the light wash exactly. */
+  --region-fill: rgba(181, 116, 0, 0.16);
 }
 
 /* 2. DARK THEME (explicit opt-in only; the canonical distill look is light) == */
@@ -131,6 +135,10 @@ html[data-theme="dark"] {
     --constraint-5-fill: rgba(240, 189, 62, 0.2);
     --objective-fill: rgba(192, 140, 245, 0.2);
     --wash: rgba(240, 189, 62, 0.18);
+    /* Region fill runs darker than the wash here: a page-sized field at the
+       full wash strength glows too loud on deep charcoal. Same gold, lower
+       alpha, so the hue identity holds and the region recedes to a tint. */
+    --region-fill: rgba(240, 189, 62, 0.12);
 }
 
 /* 3. RESET AND BASE  ====================================================== */
@@ -185,7 +193,9 @@ h1, h2, h3, h4 {
 }
 h1 { font-size: var(--fs-h1); letter-spacing: -0.022em; }
 h2 { font-size: var(--fs-h2); margin-top: var(--sp-2); }
-h3 { font-size: var(--fs-h3); }
+/* An h3 binds to the text it introduces: more air above than below. The
+   universal reset zeroes heading margins, so the rhythm is restored here. */
+h3 { font-size: var(--fs-h3); margin-top: var(--sp-5); margin-bottom: var(--sp-2); }
 
 p, ul, ol, blockquote { font-size: 1em; }
 p + p { margin-top: var(--sp-4); }
@@ -223,7 +233,9 @@ section > h2 { margin-bottom: var(--sp-4); }
 
 /* Cold open: a non-fiction hook, set apart with a drop cap */
 .cold-open { margin-top: var(--sp-6); }
-.cold-open > p:first-of-type::first-letter {
+/* The paragraphs sit inside the .l-body wrapper, so the child combinator must
+   step through it or the drop cap never renders. */
+.cold-open .l-body > p:first-of-type::first-letter {
   float: left;
   font-family: var(--font-serif);
   font-weight: 600;
@@ -411,6 +423,10 @@ figcaption {
   line-height: 1.55;
   color: var(--faint);
   margin-top: var(--sp-3);
+  /* Measure cap: figures ride the wide 62rem column, but a caption line at
+     that width runs past 150 characters. At this font size, 34rem holds a
+     line near 88 characters, inside the roughly-90 reading bound. */
+  max-width: 34rem;
 }
 figcaption strong, figcaption b { color: var(--ink-soft); font-weight: 650; }
 
@@ -476,6 +492,7 @@ figcaption strong, figcaption b { color: var(--ink-soft); font-weight: 650; }
   font-family: var(--font-sans);
   font-size: 0.8rem;
   color: var(--ink-soft);
+  max-width: var(--measure); /* legends hold the body measure, not the figure column */
 }
 .legend li { margin: 0; display: inline-flex; align-items: center; gap: 0.45em; }
 .swatch {
@@ -957,12 +974,35 @@ a:focus-visible { outline-offset: 3px; }
 }
 
 @media print {
-  :root {
+  /* The dark selector must ride along here: it outranks the plain root reset,
+     so without it a reader who prints from dark mode gets pale screen ink on
+     white paper. With it, print output is the same whichever theme is set. */
+  :root,
+  html[data-theme="dark"] {
+    color-scheme: light;
     --bg: #ffffff; --bg-glow: none;
     --surface: #ffffff; --surface-2: #f4f2ec;
     --ink: #000000; --ink-soft: #1a1a1a;
-    --faint: #444444; --hairline: #bbbbbb; --hairline-strong: #888888;
+    --faint: #444444; --fainter: #767676;
+    --hairline: #bbbbbb; --hairline-strong: #888888;
     --accent: #14314f; --shadow: none;
+    /* Data hues pinned to the light set: the lifted dark palette is tuned for
+       charcoal and prints pale, so paper always gets the paper-tuned inks. */
+    --constraint-1: #c34818;
+    --constraint-2: #0a6fb0;
+    --constraint-3: #0a7f65;
+    --constraint-4: #a83f80;
+    --constraint-5: #9d6400;
+    --objective: #7a2fb2;
+    --trail: #6f6660;
+    --constraint-1-fill: rgba(195, 72, 24, 0.16);
+    --constraint-2-fill: rgba(10, 111, 176, 0.15);
+    --constraint-3-fill: rgba(10, 127, 101, 0.15);
+    --constraint-4-fill: rgba(168, 63, 128, 0.15);
+    --constraint-5-fill: rgba(157, 100, 0, 0.16);
+    --objective-fill: rgba(122, 47, 178, 0.14);
+    --wash: rgba(181, 116, 0, 0.16);
+    --region-fill: rgba(181, 116, 0, 0.16);
   }
   body { background: #fff; font-size: 11pt; }
   .toc, .scrubber-row, .btn, input[type="range"].scrubber { display: none !important; }
