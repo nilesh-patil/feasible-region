@@ -40,12 +40,12 @@ committed `Cargo.lock` holds the proc-macro tree at versions that build on it.
 
 ## Sources
 
-- **ICS311 Topic 21** (University of Hawaii): the worked cargo problem and the
-  network formulations.
-  https://www2.hawaii.edu/~nodari/teaching/f19/Notes/Topic-21.html
+- **ICS311 Topic 21** (Dan Suthers, University of Hawaii, fall 2020 offering):
+  the worked cargo problem and the network formulations.
+  https://www2.hawaii.edu/~suthers/courses/ics311f20/Notes/Topic-21.html
 - **CLRS**, *Introduction to Algorithms*: chapter 29 (linear programming) and
-  section 28.1 (the Gaussian elimination each pivot performs).
-- **StatQuest** (Josh Starmer): the resource-allocation story problem.
-  https://www.youtube.com/@statquest
+  section 28.1 (the Gaussian elimination each pivot performs). The fab-bay
+  problem is an instance of the classic two-variable product-mix exercise
+  found in any linear programming text.
 
 Released under the MIT License.
