@@ -7,6 +7,15 @@
 // "geometric". A live WASM solve runs alongside and flips the badge to "solving
 // live" only when it reproduces the shown corner. d3 (v7) is a UMD window
 // global; if it or the trace fails to load we throw and main.js keeps the still.
+//
+// The frame is a viewport, not a constraint. The optimum and the readout
+// come from the TRUE half planes (no viewport box), so relaxing a limit can
+// never mint frame artifacts as corners. Region edges created only by the
+// frame draw dashed; an optimum past the frame becomes an edge marker with
+// wording that says the region continues beyond the chart; a reset control
+// restores the fixture; every hit line runs full chord at 28px with a non
+// scaling stroke, with the level-line hit painted below the constraint and
+// objective hits so overlapping grabs resolve to them.
 
 import {
   feasibleRegion,
@@ -125,6 +134,54 @@ function readConstraints(problem) {
   });
 }
 
+// Corners of the TRUE feasible set: the live half planes plus nonnegativity
+// and nothing else. The viewport box never enters, so a relaxed limit cannot
+// report frame clip artifacts as vertices; this is what the readout shows and
+// what the scipy oracle checks (accept a). Pairwise line crossings kept
+// only when they satisfy every half plane; exact in two variables.
+function trueVertices(cons) {
+  const half = cons.map((k) => [k.a, k.b, k.c]).concat([
+    [-1, 0, 0],
+    [0, -1, 0],
+  ]);
+  const pts = [];
+  for (let i = 0; i < half.length; i++) {
+    for (let j = i + 1; j < half.length; j++) {
+      const [a1, b1, c1] = half[i];
+      const [a2, b2, c2] = half[j];
+      const det = a1 * b2 - a2 * b1;
+      if (Math.abs(det) < 1e-12) continue;
+      const x = (c1 * b2 - c2 * b1) / det;
+      const y = (a1 * c2 - a2 * c1) / det;
+      if (!half.every(([a, b, c]) => a * x + b * y <= c + 1e-7)) continue;
+      if (!pts.some((p) => Math.hypot(p[0] - x, p[1] - y) < 1e-6)) pts.push([x, y]);
+    }
+  }
+  return pts;
+}
+
+// The statquest rows keep both coefficients positive, so the true region here
+// is always bounded; this guard keeps the readout honest anyway if a fixture
+// ever relaxes that. A maximum is unbounded exactly when some recession ray of
+// the feasible cone improves the objective, and in 2D every extreme ray lies
+// along the boundary of one of the half planes.
+function unboundedRay(cons, cx, cy) {
+  const half = cons.map((k) => [k.a, k.b]).concat([
+    [-1, 0],
+    [0, -1],
+  ]);
+  for (const [a, b] of half) {
+    for (const r of [
+      [b, -a],
+      [-b, a],
+    ]) {
+      const inCone = half.every(([p, q]) => p * r[0] + q * r[1] <= 1e-9);
+      if (inCone && cx * r[0] + cy * r[1] > 1e-9) return true;
+    }
+  }
+  return false;
+}
+
 export default async function mount(el, ctx) {
   const d3 = await ensureD3();
   const trace = await ctx.loadTrace(ctx.fixture || "statquest");
@@ -186,13 +243,37 @@ export default async function mount(el, ctx) {
     gGrid.append("line").attr("x1", x0px).attr("y1", Y(t)).attr("x2", VW - M.right).attr("y2", Y(t))
   );
 
-  // shaded feasible region (updated)
-  const regionPath = svg
-    .append("polygon")
-    .attr("style", "fill: var(--wash); stroke: var(--trail); stroke-width: 1.5; stroke-linejoin: round;");
+  // shaded feasible region (updated). The fill is the polygon clipped to the
+  // frame; its outline is drawn separately so edges that exist only because
+  // the frame cut the region off can render dashed: a dashed edge says
+  // the region continues past the chart, a solid edge is a real boundary.
+  const regionPath = svg.append("polygon").attr("style", "fill: var(--region-fill);");
+  const edgeSolid = svg
+    .append("path")
+    .attr("style", "fill: none; stroke: var(--trail); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round;");
+  const edgeDashed = svg
+    .append("path")
+    .attr("display", "none")
+    .attr("style", "fill: none; stroke: var(--trail); stroke-width: 1.5; stroke-dasharray: 5 5; stroke-linecap: round;");
 
   // corner dots (updated)
   const gVertices = svg.append("g").attr("style", "fill: var(--trail);");
+
+  // One shared style for every drag hit line: full 28px touch width that
+  // holds at any viewport because the stroke never scales with the svg.
+  const HIT_STYLE =
+    "stroke: transparent; stroke-width: 28; vector-effect: non-scaling-stroke; cursor: grab; touch-action: none;";
+
+  // The level-line hit runs the FULL chord of the frame, so it is created
+  // first: painted below the constraint and objective hits, an overlapping
+  // grab resolves to those instead (z order). Its visuals stay on top.
+  const isoHit = svg
+    .append("line")
+    .attr("style", HIT_STYLE)
+    .attr("tabindex", 0)
+    .attr("role", "slider")
+    .attr("aria-label", "Objective level line")
+    .attr("aria-orientation", "vertical");
 
   // constraint visible + halo + hit lines, plus labels
   const gConstraints = svg.append("g");
@@ -208,7 +289,7 @@ export default async function mount(el, ctx) {
       .attr("style", `font-family: var(--font-sans); font-size: 12px; fill: ${k.colorVar};`);
     k.hitLine = gConstraints
       .append("line")
-      .attr("style", "stroke: transparent; stroke-width: 20; cursor: grab; touch-action: none;")
+      .attr("style", HIT_STYLE)
       .attr("tabindex", 0)
       .attr("role", "slider")
       .attr("aria-label", `Constraint ${k.termStr} at most, right hand side`)
@@ -233,7 +314,7 @@ export default async function mount(el, ctx) {
     .text("objective");
   const objHit = svg
     .append("line")
-    .attr("style", "stroke: transparent; stroke-width: 20; cursor: grab; touch-action: none;")
+    .attr("style", HIT_STYLE)
     .attr("tabindex", 0)
     .attr("role", "slider")
     .attr("aria-label", "Objective direction")
@@ -281,8 +362,8 @@ export default async function mount(el, ctx) {
   // which is exactly the optimum. That makes the article's thesis causal: push
   // the line as high as it goes and it comes to rest on the ringed corner. It is
   // held distinct from the solid objective arrow (dashed stroke, its own hollow
-  // knob) and its short hit segment sits at the far end of the line, clear of the
-  // objective's own hit line so the two drags never fight.
+  // knob). Its full-chord hit line is created up top, below the constraint and
+  // objective hits, so the drags never fight (z order).
   const gIso = svg.append("g");
   const isoHalo = gIso
     .append("line")
@@ -290,13 +371,6 @@ export default async function mount(el, ctx) {
   const isoLine = gIso
     .append("line")
     .attr("style", "stroke: var(--objective); stroke-width: 1.6; stroke-dasharray: 6 5; opacity: 0.85; pointer-events: none;");
-  const isoHit = gIso
-    .append("line")
-    .attr("style", "stroke: transparent; stroke-width: 20; cursor: grab; touch-action: none;")
-    .attr("tabindex", 0)
-    .attr("role", "slider")
-    .attr("aria-label", "Objective level line")
-    .attr("aria-orientation", "vertical");
   const isoKnob = gIso
     .append("circle")
     .attr("r", 4.5)
@@ -321,6 +395,17 @@ export default async function mount(el, ctx) {
     .append("circle")
     .attr("r", 7)
     .attr("style", "fill: var(--objective); stroke: var(--surface); stroke-width: 2;");
+  // Off frame optimum: the ringed dot gives way to outward chevrons
+  // pinned to the frame edge and aimed at the true corner, so a corner past
+  // the chart is never drawn as a fake corner parked on the border.
+  const edgeMarker = gOpt
+    .append("path")
+    .attr("d", "M-10,-7 L0,0 L-10,7 M-18,-7 L-8,0 L-18,7")
+    .attr("display", "none")
+    .attr(
+      "style",
+      "fill: none; stroke: var(--objective); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; pointer-events: none;"
+    );
 
   // Persistent drag affordance: end-dots plus a hollow center knob on each
   // constraint line, and a knob at the objective tip. These are always visible,
@@ -369,46 +454,132 @@ export default async function mount(el, ctx) {
     if (provenance) provenance.textContent = isLive ? PROV_LIVE : PROV_GEOM;
   }
 
+  // The prose names the two limits; keep the same names here so the caption,
+  // the still, and the live readout tell one story. Fall back to the drawn
+  // inequality if the fixture ever grows a row the story has no name for.
+  const LIMIT_NAMES = ["the feedstock limit", "the press-time limit"];
+
+  // Which limits pass through this corner, floors included, plus the slack
+  // left in whichever limits do not. The static readout teaches the binding
+  // pair at rest; the live one keeps teaching it at whatever corner the
+  // current drag has made best.
+  function formedBy(point) {
+    const nameOf = (k, i) => LIMIT_NAMES[i] || `the limit ${k.termStr}`;
+    const pins = [];
+    const slack = [];
+    constraints.forEach((k, i) => {
+      const s = k.c - (k.a * point[0] + k.b * point[1]);
+      if (Math.abs(s) < 1e-6) pins.push(nameOf(k, i));
+      else if (s > 0) slack.push(`${nameOf(k, i)} has slack ${fmt(s)}`);
+    });
+    if (Math.abs(point[0]) < 1e-9) pins.push(`the floor ${xname} = 0`);
+    if (Math.abs(point[1]) < 1e-9) pins.push(`the floor ${yname} = 0`);
+    if (!pins.length) return "";
+    const head = pins[0].charAt(0).toUpperCase() + pins[0].slice(1);
+    let out =
+      pins.length === 1
+        ? ` ${head} alone pins this corner`
+        : ` ${head} and ${pins.slice(1).join(" and ")} form this corner`;
+    out += slack.length ? `; ${slack.join("; ")}.` : ".";
+    return out;
+  }
+
   // Write the readout + aria-label from a point/value pair, whatever its source
   // (the geometric argmax, or a live solve when the badge is live). The corner
-  // count is a geometric property, so it always comes from the polygon.
+  // count is a geometric property of the TRUE region, never the frame clip.
+  // When the corner sits past the frame the wording says so honestly.
   function writeReadout(point, value, n) {
     const px = fmt(point[0]);
     const py = fmt(point[1]);
     const val = fmt(value);
+    const over = [];
+    if (point[0] > X_MAX + 1e-9) over.push("right");
+    if (point[1] > Y_MAX + 1e-9) over.push("top");
+    const cont = over.length
+      ? ` That corner sits past the ${over.join(" and ")} edge of the chart; the region continues beyond the drawn frame.`
+      : "";
+    const formed = formedBy(point);
     svg.attr(
       "aria-label",
-      `Feasible region with ${n} corners. The objective points ${dirWord(state.theta)}. Its best corner is ${xname} = ${px}, ${yname} = ${py}, where the objective value is ${val}.`
+      `Feasible region with ${n} corners. The objective points ${dirWord(state.theta)}. Its best corner is ${xname} = ${px}, ${yname} = ${py}, where the objective value is ${val}.${formed}${cont}`
     );
     if (readout) {
       readout.innerHTML =
-        `x* = <b>(${px}, ${py})</b>. Objective value <b>${val}</b>. Feasible region has <b>${n}</b> corners.`;
+        `Best corner <b>(${px}, ${py})</b>, objective <b>${val}</b>. Feasible region has <b>${n}</b> corners.${formed}${cont}`;
     }
   }
 
-  function updateReadout(poly, opt) {
+  function updateReadout(nCorners, opt, unbounded) {
+    if (unbounded) {
+      const msg =
+        "These limits leave the region open in the objective direction, so the value can grow without end and no corner is best.";
+      svg.attr("aria-label", msg);
+      if (readout) readout.textContent = msg;
+      return;
+    }
     if (!opt) {
       const msg = "The limits leave no points in common, so there is no feasible region.";
       svg.attr("aria-label", msg);
       if (readout) readout.textContent = msg;
       return;
     }
-    writeReadout(opt.point, opt.value, poly.length);
+    writeReadout(opt.point, opt.value, nCorners);
   }
 
   // ---- draw (recompute polygon + optimum, reposition everything) -------
   function draw() {
     const cx = state.objMag * Math.cos(state.theta);
     const cy = state.objMag * Math.sin(state.theta);
+    // The drawn fill is clipped to the frame; the corners, the optimum, and the
+    // readout come from the TRUE half planes, box-free. The two agree
+    // whenever the region fits the frame, and only the words and the dashes
+    // change when it does not.
     const poly = feasibleRegion(constraints, X_MAX, Y_MAX);
-    const opt = objectiveArgmax(poly, cx, cy);
+    const verts = trueVertices(constraints);
+    const unbounded = verts.length > 0 && unboundedRay(constraints, cx, cy);
+    const opt = unbounded ? null : objectiveArgmax(verts, cx, cy);
     // Upgrade B: the level line is at its highest feasible value (resting on the
     // optimum). Used to light the binding constraints below.
     const atMax = state.isoF >= 0.99;
 
     regionPath.attr("points", poly.map((p) => `${X(p[0])},${Y(p[1])}`).join(" "));
 
-    const dots = gVertices.selectAll("circle").data(poly);
+    // Region outline in two passes: edges the frame minted (both endpoints on
+    // the frame's far sides) draw dashed, real boundary edges draw solid. The
+    // fixture rows are never axis parallel, so a frame-side edge can only be a
+    // clip artifact. With nothing clipped the loop closes into one solid path,
+    // identical to the polygon outline the authored still paints.
+    let solidD = "";
+    let dashedD = "";
+    if (poly.length >= 2) {
+      const CLIP = 1e-7;
+      const onClip = (p, q) =>
+        (p[0] > X_MAX - CLIP && q[0] > X_MAX - CLIP) ||
+        (p[1] > Y_MAX - CLIP && q[1] > Y_MAX - CLIP);
+      let prev = null;
+      let clipped = false;
+      for (let i = 0; i < poly.length; i++) {
+        const p = poly[i];
+        const q = poly[(i + 1) % poly.length];
+        const dash = onClip(p, q);
+        if (dash) clipped = true;
+        const seg =
+          prev === dash
+            ? ` L${X(q[0])} ${Y(q[1])}`
+            : `M${X(p[0])} ${Y(p[1])} L${X(q[0])} ${Y(q[1])}`;
+        if (dash) dashedD += seg;
+        else solidD += seg;
+        prev = dash;
+      }
+      if (!clipped) solidD = "M" + poly.map((p) => `${X(p[0])} ${Y(p[1])}`).join(" L") + " Z";
+    }
+    edgeSolid.attr("display", solidD ? null : "none").attr("d", solidD || null);
+    edgeDashed.attr("display", dashedD ? null : "none").attr("d", dashedD || null);
+
+    // Corner dots mark TRUE vertices only, and only where they can be drawn;
+    // an off frame corner is the edge marker's job, not a dot's.
+    const inFrame = verts.filter((p) => p[0] <= X_MAX + 1e-9 && p[1] <= Y_MAX + 1e-9);
+    const dots = gVertices.selectAll("circle").data(inFrame);
     dots.enter().append("circle").attr("r", 3.5).merge(dots).attr("cx", (p) => X(p[0])).attr("cy", (p) => Y(p[1]));
     dots.exit().remove();
 
@@ -466,25 +637,43 @@ export default async function mount(el, ctx) {
       .attr("aria-valuenow", objDegrees())
       .attr("aria-valuetext", `pointing ${dirWord(state.theta)}, ${objDegrees()} degrees`);
 
-    if (opt) {
+    const optInFrame =
+      opt && opt.point[0] <= X_MAX + 1e-9 && opt.point[1] <= Y_MAX + 1e-9;
+    if (optInFrame) {
       const ox = X(opt.point[0]),
         oy = Y(opt.point[1]);
       optDot.attr("display", null).attr("cx", ox).attr("cy", oy);
       ring.attr("display", null).attr("cx", ox).attr("cy", oy);
+      edgeMarker.attr("display", "none");
+    } else if (opt) {
+      // The true best corner sits past the frame: park the chevrons where the
+      // region's boundary leaves the chart, aimed at the off frame corner.
+      const mx = Math.min(opt.point[0], X_MAX);
+      const my = Math.min(opt.point[1], Y_MAX);
+      const angle =
+        (Math.atan2(Y(opt.point[1]) - Y(my), X(opt.point[0]) - X(mx)) * 180) / Math.PI;
+      edgeMarker
+        .attr("display", null)
+        .attr("transform", `translate(${X(mx)} ${Y(my)}) rotate(${fmt(angle)})`);
+      optDot.attr("display", "none");
+      ring.attr("display", "none");
     } else {
       optDot.attr("display", "none");
       ring.attr("display", "none");
+      edgeMarker.attr("display", "none");
     }
 
     // ---- isoprofit level line (Upgrade B) --------------------------------
-    // The value the line marks ranges from the region's lowest objective value to
-    // the optimum's; the handle fraction picks where it sits between them.
+    // The value the line marks ranges from the region's lowest objective value
+    // to the TRUE optimum's, so End rests it on the honest best corner even
+    // when that corner sits past the frame; the drawn portion is the chord the
+    // frame can show. Hidden if the objective is unbounded (no top to rest on).
     let vMin = 0;
     let vMax = 0;
-    if (poly.length) {
+    if (verts.length) {
       vMin = Infinity;
       vMax = -Infinity;
-      poly.forEach((p) => {
+      verts.forEach((p) => {
         const val = cx * p[0] + cy * p[1];
         if (val < vMin) vMin = val;
         if (val > vMax) vMax = val;
@@ -496,7 +685,8 @@ export default async function mount(el, ctx) {
     // without recomputing the region.
     state.isoVMin = vMin;
     state.isoSpan = isoSpan;
-    const isoSeg = isoSpan > 1e-9 ? lineThroughBox(cx, cy, isoV, X_MAX, Y_MAX) : null;
+    const isoSeg =
+      !unbounded && isoSpan > 1e-9 ? lineThroughBox(cx, cy, isoV, X_MAX, Y_MAX) : null;
     const showIso = (e, on) => e.attr("display", on ? null : "none");
     if (!isoSeg) {
       // Keep isoHit displayed (never hidden) so keyboard focus is never stranded.
@@ -507,11 +697,13 @@ export default async function mount(el, ctx) {
         iay = Y(q0[1]),
         ibx = X(q1[0]),
         iby = Y(q1[1]);
-      [isoLine, isoHalo].forEach((e) =>
+      // The hit line rides the full chord: grabbable anywhere along the
+      // level line, and painted below the other hits so they win any overlap.
+      [isoLine, isoHalo, isoHit].forEach((e) =>
         showIso(e, true).attr("x1", iax).attr("y1", iay).attr("x2", ibx).attr("y2", iby)
       );
-      // Anchor the knob (and its short hit segment) at the endpoint farther from
-      // the objective's pivot, keeping the level-line handle clear of the arrow.
+      // Anchor the knob and its label at the endpoint farther from the
+      // objective's pivot, keeping the visual handle clear of the arrow.
       const obx = X(OBJ_BASE.x),
         oby = Y(OBJ_BASE.y);
       const dA = Math.hypot(iax - obx, iay - oby);
@@ -519,18 +711,14 @@ export default async function mount(el, ctx) {
       const kx = dA >= dB ? iax : ibx;
       const ky = dA >= dB ? iay : iby;
       const ox2 = dA >= dB ? ibx : iax;
-      const oy2 = dA >= dB ? iby : iay;
-      const segLen = Math.hypot(ox2 - kx, oy2 - ky) || 1;
-      const hx = (ox2 - kx) / segLen;
-      const hy = (oy2 - ky) / segLen;
-      const HIT = 42; // short: the hit segment never runs alongside the objective's
+      const hx = ox2 >= kx ? 1 : -1;
       showIso(isoKnob, true).attr("cx", kx).attr("cy", ky);
-      isoHit.attr("x1", kx).attr("y1", ky).attr("x2", kx + hx * HIT).attr("y2", ky + hy * HIT);
+      // The label spells the word: z is not defined yet in S1.
       showIso(isoLabel, true)
         .attr("x", kx + (hx >= 0 ? 8 : -8))
         .attr("y", ky - 8)
         .attr("text-anchor", hx >= 0 ? "start" : "end")
-        .text(fmt(isoV));
+        .text(`objective = ${fmt(isoV)}`);
     }
     isoHit
       .attr("aria-valuemin", fmt(vMin))
@@ -538,7 +726,7 @@ export default async function mount(el, ctx) {
       .attr("aria-valuenow", fmt(isoV))
       .attr("aria-valuetext", isoValueText(isoV, atMax));
 
-    updateReadout(poly, opt);
+    updateReadout(verts.length, opt, unbounded);
   }
 
   // Coalesce drag/keyboard updates to one redraw per animation frame.
@@ -597,15 +785,16 @@ export default async function mount(el, ctx) {
       ctx.setEngine("geometric");
       setProvenance(false);
     }
-    // Warn once, only when the engine RAN and truly disagreed (the box-artifact
-    // case). A null solve with no engine is the honest WASM-blocked fallback, so
-    // it stays silent (zero console errors).
+    // Warn once, only when the engine RAN and truly disagreed. Both sides now
+    // solve the same box-free program, so a disagreement is a genuine
+    // defect, not a frame artifact. A null solve with no engine is the honest
+    // WASM-blocked fallback, so it stays silent (zero console errors).
     const enginePresent = sol != null || engineUp;
     if (enginePresent && g && !liveWarned) {
       liveWarned = true;
       if (window.console && console.warn) {
         console.warn(
-          "hero: the live solve and the box-clipped geometry disagree here; showing the geometric corner."
+          "hero: the live solve and the exact geometry disagree here; showing the geometric corner."
         );
       }
     }
@@ -618,8 +807,10 @@ export default async function mount(el, ctx) {
     // any solve a newer interaction has superseded.
     const cx = state.objMag * Math.cos(state.theta);
     const cy = state.objMag * Math.sin(state.theta);
-    const poly = feasibleRegion(constraints, X_MAX, Y_MAX);
-    const g = objectiveArgmax(poly, cx, cy);
+    // The solver and the geometry get the SAME box-free program, so the
+    // badge can flip live even when the best corner sits past the frame.
+    const verts = trueVertices(constraints);
+    const g = unboundedRay(constraints, cx, cy) ? null : objectiveArgmax(verts, cx, cy);
     const lp = {
       direction: "maximize",
       objective: [cx, cy],
@@ -628,7 +819,7 @@ export default async function mount(el, ctx) {
     };
     ctx.solve(lp, SOLVE_OPTS).then((sol) => {
       if (token !== solveToken) return;
-      applyLive(sol, { g, n: poly.length });
+      applyLive(sol, { g, n: verts.length });
     });
   }
 
@@ -829,6 +1020,34 @@ export default async function mount(el, ctx) {
   const still = el.querySelector("svg");
   if (still) still.replaceWith(svgNode);
   else el.appendChild(svgNode);
+
+  // Drag invitation and reset control exist only once the figure is live
+  // With scripts off there is no drag to advertise and nothing to
+  // reset, so the static page never shows either.
+  const notice = scope.querySelector("p.notice");
+  if (notice) {
+    notice.append(
+      " The figure is live: drag either limit line, turn the objective arrow, or sweep the dashed level line."
+    );
+  }
+  const resetBtn = document.createElement("button");
+  resetBtn.type = "button";
+  resetBtn.className = "btn";
+  resetBtn.textContent = "Reset";
+  resetBtn.setAttribute(
+    "aria-label",
+    "Reset the limits, the objective, and the level line to their resting state"
+  );
+  resetBtn.addEventListener("click", () => {
+    constraints.forEach((k) => {
+      k.c = k.c0;
+    });
+    state.theta = state.theta0;
+    state.isoF = 0.5;
+    bump();
+  });
+  const badgeRow = scope.querySelector(".badge-row");
+  (badgeRow || el.parentElement || el).appendChild(resetBtn);
 
   // At rest, before any live solve reports in, the honest state is the exact
   // geometric read: vertex enumeration, not a solver or a trace replay.
