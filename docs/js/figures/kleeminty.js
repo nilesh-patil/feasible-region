@@ -9,7 +9,7 @@
 // polytope; with WASM blocked the cube replays the recorded Dantzig walk. The
 // big-n chart is exact arithmetic and never drives the engine badge.
 
-import { makeProjector, walkIndices } from "../iso3d.js";
+import { classifyEdges, makeProjector, triadArms, walkIndices } from "../iso3d.js";
 
 const SVGNS = "http://www.w3.org/2000/svg";
 
@@ -231,12 +231,48 @@ export default async function mount(box, ctx) {
     role: "img",
   });
 
-  // wireframe edges (no faces, matches the S3 look)
-  geom.edges.forEach(([i, j]) => {
-    cube.appendChild(
-      svgEl("line", { class: "km-edge", x1: screen[i][0], y1: screen[i][1], x2: screen[j][0], y2: screen[j][1] })
-    );
+  // wireframe edges (no stored faces, matches the S3 look)
+  const edgeEls = geom.edges.map(([i, j]) => {
+    const e = svgEl("line", { class: "km-edge", x1: screen[i][0], y1: screen[i][1], x2: screen[j][0], y2: screen[j][1] });
+    cube.appendChild(e);
+    return e;
   });
+
+  // Depth cues, recomputed from the problem constraints and the live
+  // projection: at mount and again after every pivot-rule re-solve. The hull
+  // never changes here, but the classes are recomputed, never cached.
+  function classifyWire() {
+    const depth = classifyEdges(trace.problem.constraints, geom.vertices, geom.edges, {
+      project: proj.project,
+      spans: proj.spans,
+    });
+    edgeEls.forEach((el, k) => el.classList.toggle("is-back", depth[k] === "back"));
+  }
+  classifyWire();
+
+  // Axis triad in the free lower-left corner plus the labeled origin. The
+  // hidden corner projects about 22 viewBox units up and right of the origin,
+  // so the label hangs low and right, clear of that corner's back edges.
+  const gTriad = svgEl("g", { class: "iso-triad", "aria-hidden": "true" });
+  for (const arm of triadArms(40, 240, 15)) {
+    gTriad.appendChild(
+      svgEl("line", { class: "iso-triad-arm", x1: arm.x1, y1: arm.y1, x2: arm.x2, y2: arm.y2 })
+    );
+    const t = svgEl("text", { class: "iso-triad-label", x: arm.lx, y: arm.ly, "text-anchor": arm.anchor });
+    t.textContent = arm.label;
+    gTriad.appendChild(t);
+  }
+  cube.appendChild(gTriad);
+  const kmOrigin = proj.project([0, 0, 0]);
+  const originLabel = svgEl("text", {
+    class: "iso-origin",
+    x: kmOrigin[0] + 8,
+    y: kmOrigin[1] + 12,
+    "text-anchor": "start",
+    "aria-hidden": "true",
+  });
+  originLabel.textContent = "0";
+  cube.appendChild(originLabel);
 
   // vertices (created before the trail so trail segments insert just beneath them)
   const vertEls = geom.vertices.map((v, idx) => {
@@ -431,6 +467,7 @@ export default async function mount(box, ctx) {
     walk = w;
     lastStep = steps.length - 1;
     buildTrail(walk);
+    classifyWire(); // rule re-solve: depth cues recomputed with the walk
     scrub.max = String(lastStep);
     cur = lastStep;
     renderCube();

@@ -57,6 +57,12 @@
   --hairline: #e8e8e8;
   --hairline-strong: #d4d4d4;
 
+  /* Wireframe depth pair for the three 3D stages (S3, S5, S6): front edges
+     lift to at least 3:1 on the figure surface, back edges recede lighter and
+     dashed. Both stay subordinate to the heavier, darker walk trail. */
+  --edge-front: #7d7d7d;
+  --edge-back: #bdbdbd;
+
   /* Chrome accent: restrained distill link blue. Not a data hue. */
   --accent: #2660a4;
   --accent-soft: #4a7fc0;
@@ -112,6 +118,8 @@ html[data-theme="dark"] {
     --fainter: #6f727c;
     --hairline: #2a2f3a;
     --hairline-strong: #3b4250;
+    --edge-front: #7d8492;
+    --edge-back: #434a58;
 
     --accent: #9fbaf0;
     --accent-soft: #c4d5f5;
@@ -684,8 +692,9 @@ input[type="range"].scrubber:focus-visible::-moz-range-thumb {
 input[type="range"].whatif-range:disabled { cursor: not-allowed; opacity: 0.5; }
 .whatif-row.is-disabled .whatif-cap { color: var(--faint); }
 
-/* Polytope panel */
-.dv-edge { stroke: var(--hairline-strong); stroke-width: 1; fill: none; }
+/* Polytope panel. Front edges take the lifted depth token; back edges recede
+   via the shared fig:iso3d vocabulary declared once near fig:sync. */
+.dv-edge { stroke: var(--edge-front); stroke-width: 1.4; fill: none; }
 .dv-trail {
   stroke: var(--trail);
   stroke-width: 3;
@@ -985,6 +994,7 @@ a:focus-visible { outline-offset: 3px; }
     --ink: #000000; --ink-soft: #1a1a1a;
     --faint: #444444; --fainter: #767676;
     --hairline: #bbbbbb; --hairline-strong: #888888;
+    --edge-front: #7d7d7d; --edge-back: #bdbdbd;
     --accent: #14314f; --shadow: none;
     /* Data hues pinned to the light set: the lifted dark palette is tuned for
        charcoal and prints pale, so paper always gets the paper-tuned inks. */
@@ -1032,6 +1042,32 @@ a:focus-visible { outline-offset: 3px; }
    No animation lives here, so there is nothing for reduced motion to disable. */
 .is-lit { background: var(--wash); }
 :where(svg) .is-lit { stroke: var(--objective); stroke-width: 2.5; }
+
+/* fig:iso3d  (shared 3D wireframe depth cues: S3, S5, S6)  ==== fig:iso3d = */
+/* One vocabulary for the three isometric wireframes. The figure JS classifies
+   every edge front or back against the fixed view direction (iso3d.js
+   classifyEdges, recomputed on every what-if perturbation and pivot-rule
+   re-solve). Back edges recede: lighter ink and the ONE shared dash pattern,
+   2 4, declared only here. It is deliberately distinct from the race
+   schematic dash (6 5) and from the 3 3 gridline and guide hairlines, so a
+   receding edge never reads as a gridline or a schematic path. Front edges
+   keep the solid lifted stroke declared in each figure's own block, still
+   subordinate to the 3px walk trail. The axis triad and origin label share
+   one look across all three stages. */
+.dv-edge.is-back,
+.km-edge.is-back,
+.race-edge.is-back {
+  stroke: var(--edge-back);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+.iso-triad-arm { stroke: var(--faint); stroke-width: 1.2; }
+.iso-triad-label,
+.iso-origin {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  fill: var(--faint);
+}
 
 /* fig:formulation  (S2, data-figure="formulation")  ----------------------- */
 /* Owner: S2 implementer. .fm-storyline cards + checkbox, .fm-stdform rows
@@ -1427,7 +1463,7 @@ a:focus-visible { outline-offset: 3px; }
 }
 
 /* Cube: wireframe edges, the trail, the visited corners, the current corner */
-.km-edge { stroke: var(--hairline-strong); stroke-width: 1; fill: none; }
+.km-edge { stroke: var(--edge-front); stroke-width: 1.4; fill: none; }
 .km-trail {
   stroke: var(--trail);
   stroke-width: 3;
@@ -1758,8 +1794,8 @@ a:focus-visible { outline-offset: 3px; }
 .race-figure { margin: 0; }
 .race-box { min-height: 11rem; }
 
-/* polytope wireframe, shared by both racers */
-.race-edge { stroke: var(--hairline-strong); stroke-width: 1; fill: none; }
+/* polytope wireframe, shared by both racers; depth cues via fig:iso3d */
+.race-edge { stroke: var(--edge-front); stroke-width: 1.4; fill: none; }
 
 /* boundary racer: recorded trail + corners */
 .race-trail {

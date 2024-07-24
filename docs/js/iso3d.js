@@ -1,10 +1,17 @@
 // Feasible Region . iso3d.js . pure isometric projection helpers
 //
 // Dependency-free ES module of PURE functions: no DOM, no d3, no rotation, no
-// hull faces. Any 3D figure (S5's Klee-Minty cube, the race) projects through
-// here so it lands with byte-identical math to the S3 tableau walk, keeping the
-// site's isometric look consistent. The projection is a fixed isometric plane
-// (no turntable). Every export is console unit-checkable.
+// stored hull faces. Any 3D figure (S5's Klee-Minty cube, the race) projects
+// through here so it lands with byte-identical math to the S3 tableau walk,
+// keeping the site's isometric look consistent. The projection is a fixed
+// isometric plane (no turntable). Every export is console unit-checkable.
+//
+// Depth cues: classifyEdges labels each wireframe edge front or back against
+// the fixed view direction. No face data exists anywhere, so face adjacency is
+// derived per call from problem.constraints alone: an edge is BACK exactly
+// when the ray from its midpoint toward the camera passes through the strict
+// interior of the polytope. Consumers rerun it on every what-if perturbation
+// and pivot-rule re-solve; nothing is cached, nothing is guessed.
 
 // cos(30 degrees). The x and y axes fan out at +/- 30 degrees from horizontal,
 // so a unit step in x1 or x2 moves this far sideways. Frozen to the same value
@@ -84,7 +91,135 @@ export function makeProjector(opts) {
 
   return {
     project: (v) => fit.map(projectIso(norm(v))),
+    // World-space axis spans when normalize is on, else null. classifyEdges
+    // needs them: normalization warps the camera direction back to world space.
+    spans: normalize ? spans.slice() : null,
   };
+}
+
+// ===========================================================================
+// Edge visibility. The projection kernel is the (1, 1, 1) direction in the
+// (possibly normalized) projection space, and every figure draws +x3 downward
+// on screen, so the viewer sits on the MINUS (1, 1, 1) side. In world space
+// that camera direction is minus the per-axis spans (all ones without
+// normalization). An edge midpoint whose ray toward the camera crosses the
+// strict interior of { x >= 0 : A x <= b } is occluded by the body, so the
+// edge is BACK; a grazing ray (edge on a facet the view direction rides along)
+// never enters the strict interior, so silhouette edges classify FRONT.
+// ===========================================================================
+
+// Bounding half-spaces a . x <= b: the constraints plus x1, x2, x3 >= 0.
+function halfspacesOf(constraints) {
+  const hs = constraints.map((c) => ({
+    a: [c.coeffs[0], c.coeffs[1], c.coeffs[2]],
+    b: c.rhs,
+  }));
+  for (let d = 0; d < 3; d++) {
+    const a = [0, 0, 0];
+    a[d] = -1;
+    hs.push({ a, b: 0 });
+  }
+  return hs;
+}
+
+// True exactly when the ray point + t * dcam (t > 0) meets the STRICT
+// interior. Convexity makes the inside t-set an interval, so intersect the
+// per-constraint strict intervals directly. A ray that rides a bounding plane
+// never goes strictly inside it, which is the silhouette-front rule.
+function rayHitsInterior(point, dcam, halfspaces) {
+  let lo = 1e-9;
+  let hi = Infinity;
+  const dmax = Math.max(Math.abs(dcam[0]), Math.abs(dcam[1]), Math.abs(dcam[2]));
+  for (const { a, b } of halfspaces) {
+    const av = a[0] * point[0] + a[1] * point[1] + a[2] * point[2];
+    const ad = a[0] * dcam[0] + a[1] * dcam[1] + a[2] * dcam[2];
+    const asum = Math.abs(a[0]) + Math.abs(a[1]) + Math.abs(a[2]);
+    const margin = 1e-9 * (Math.max(1, Math.abs(b)) + asum);
+    if (Math.abs(ad) <= 1e-12 * Math.max(1, asum * dmax)) {
+      if (!(av < b - margin)) return false; // rides this plane, never inside
+      continue;
+    }
+    const tStar = (b - margin - av) / ad;
+    if (ad > 0) hi = Math.min(hi, tStar);
+    else lo = Math.max(lo, tStar);
+    if (lo >= hi) return false;
+  }
+  return lo < hi;
+}
+
+// Parameter of point p along the projected segment e (0 at e.a, 1 at e.b).
+function segParam(e, p) {
+  const dx = e.b[0] - e.a[0];
+  const dy = e.b[1] - e.a[1];
+  const L2 = dx * dx + dy * dy;
+  if (L2 === 0) return 0;
+  return ((p[0] - e.a[0]) * dx + (p[1] - e.a[1]) * dy) / L2;
+}
+
+// Do two projected segments overlap along one screen line? Used to promote a
+// back edge that would z-fight a collinear front edge (a dashed stroke drawn
+// under a solid one shimmers), so the pair reads as one solid silhouette.
+function collinearOverlap(e, f) {
+  const tol = 0.05;
+  const len = Math.hypot(e.b[0] - e.a[0], e.b[1] - e.a[1]);
+  for (const p of [f.a, f.b]) {
+    const cross =
+      (e.b[0] - e.a[0]) * (p[1] - e.a[1]) - (e.b[1] - e.a[1]) * (p[0] - e.a[0]);
+    if (Math.abs(cross) > tol * len) return false;
+  }
+  const t1 = segParam(e, f.a);
+  const t2 = segParam(e, f.b);
+  const lo = Math.min(t1, t2);
+  const hi = Math.max(t1, t2);
+  return hi > 0.02 && lo < 0.98 && !(hi < 0.02 || lo > 0.98);
+}
+
+// Classify every geometry edge front or back for the fixed isometric view.
+// `constraints` are the LIVE problem constraints (committed or perturbed),
+// `vertices` and `edges` the matching hull, and opts carries:
+//   project  the figure's own vertex-to-screen map (the actual projection)
+//   spans    per-axis world spans when the projector normalizes, else omit
+// Returns an array aligned with `edges` of "front" | "back" strings.
+export function classifyEdges(constraints, vertices, edges, opts) {
+  const project = opts.project;
+  const s = (opts && opts.spans) || [1, 1, 1];
+  const dcam = [-s[0], -s[1], -s[2]];
+  const hs = halfspacesOf(constraints);
+  const out = edges.map(([i, j]) => {
+    const vi = vertices[i];
+    const vj = vertices[j];
+    const mid = [(vi[0] + vj[0]) / 2, (vi[1] + vj[1]) / 2, (vi[2] + vj[2]) / 2];
+    return {
+      cls: rayHitsInterior(mid, dcam, hs) ? "back" : "front",
+      a: project(vi),
+      b: project(vj),
+    };
+  });
+  for (const e of out) {
+    if (e.cls !== "back") continue;
+    for (const f of out) {
+      if (f.cls === "front" && collinearOverlap(e, f)) {
+        e.cls = "front";
+        break;
+      }
+    }
+  }
+  return out.map((e) => e.cls);
+}
+
+// The small x1 / x2 / x3 axis triad every 3D stage carries. The fixed
+// isometric plane makes the screen directions constants: +x1 runs right and
+// up, +x2 left and up, +x3 straight down (the fit flips Y). Returns, per axis,
+// the arm segment from the anchor plus a label position and text anchor; the
+// caller draws them, so this stays DOM-free.
+export function triadArms(ax, ay, len) {
+  const dx = COS30 * len;
+  const dy = 0.5 * len;
+  return [
+    { label: "x1", x1: ax, y1: ay, x2: ax + dx, y2: ay - dy, lx: ax + dx + 4, ly: ay - dy + 3.5, anchor: "start" },
+    { label: "x2", x1: ax, y1: ay, x2: ax - dx, y2: ay - dy, lx: ax - dx - 4, ly: ay - dy + 3.5, anchor: "end" },
+    { label: "x3", x1: ax, y1: ay, x2: ax, y2: ay + len, lx: ax, ly: ay + len + 11, anchor: "middle" },
+  ];
 }
 
 // Index of the vertex that matches target within eps on every coordinate, else

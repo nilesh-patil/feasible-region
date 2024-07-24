@@ -12,6 +12,9 @@
 import { fmt } from "../lp2d.js";
 import { linkFigure } from "../sync.js";
 import { enumerateVertices } from "../poly3d.js";
+// Pure classifier import only (plus the triad constant helper): the fixed-fit
+// projection stays local to this file, never pulled from iso3d.
+import { classifyEdges, triadArms } from "../iso3d.js";
 import mountHood from "./hood.js";
 
 const SVGNS = "http://www.w3.org/2000/svg";
@@ -120,7 +123,27 @@ export default async function mount(box, ctx) {
   const gEdges = svgEl("g", { class: "dv-edges" });
   const gTrails = svgEl("g", { class: "dv-trails" });
   const gVerts = svgEl("g", { class: "dv-verts" });
-  svg.append(gEdges, gTrails, gVerts);
+  // Axis triad in the free lower-left corner plus a labeled origin, both from
+  // the same fixed projection the polytope uses, so they never drift from it.
+  const gTriad = svgEl("g", { class: "iso-triad", "aria-hidden": "true" });
+  for (const arm of triadArms(40, 278, 15)) {
+    gTriad.appendChild(
+      svgEl("line", { class: "iso-triad-arm", x1: arm.x1, y1: arm.y1, x2: arm.x2, y2: arm.y2 })
+    );
+    const t = svgEl("text", { class: "iso-triad-label", x: arm.lx, y: arm.ly, "text-anchor": arm.anchor });
+    t.textContent = arm.label;
+    gTriad.appendChild(t);
+  }
+  const originScreen = screenOf([0, 0, 0]);
+  const originLabel = svgEl("text", {
+    class: "iso-origin",
+    x: originScreen[0] - 8,
+    y: originScreen[1] + 12,
+    "text-anchor": "end",
+    "aria-hidden": "true",
+  });
+  originLabel.textContent = "0";
+  svg.append(gEdges, gTriad, originLabel, gTrails, gVerts);
   const ring = svgEl("circle", { class: "dv-current-ring", r: 10 });
   const current = svgEl("circle", { class: "dv-current", r: 6 });
   const currentLabel = svgEl("text", { class: "dv-current-label" });
@@ -204,20 +227,25 @@ export default async function mount(box, ctx) {
     return Math.max(WHATIF_MIN, Math.min(WHATIF_MAX, R));
   };
 
-  // Rebuild both panels from one model { steps, vertices, edges } via the one
-  // fixed projection. Committed and perturbed views share this path, so what is
-  // drawn is always exactly what was replayed or solved.
+  // Rebuild both panels from one model { steps, vertices, edges, constraints }
+  // via the one fixed projection. Committed and perturbed views share this
+  // path, so what is drawn is always exactly what was replayed or solved, and
+  // edge depth is re-classified from the model's own constraints every time.
   function applyModel(model) {
     steps = model.steps;
     nSteps = steps.length;
     const verts = model.vertices;
 
     gEdges.textContent = "";
-    model.edges.forEach(([i, j]) => {
+    const depth = classifyEdges(model.constraints, verts, model.edges, { project: screenOf });
+    model.edges.forEach(([i, j], k) => {
       const a = screenOf(verts[i]);
       const b = screenOf(verts[j]);
       gEdges.appendChild(
-        svgEl("line", { class: "dv-edge", x1: a[0], y1: a[1], x2: b[0], y2: b[1] })
+        svgEl("line", {
+          class: depth[k] === "back" ? "dv-edge is-back" : "dv-edge",
+          x1: a[0], y1: a[1], x2: b[0], y2: b[1],
+        })
       );
     });
 
@@ -371,7 +399,12 @@ export default async function mount(box, ctx) {
 
   function goCommitted() {
     mode = "committed";
-    applyModel({ steps: committedSteps, vertices: geom.vertices, edges: geom.edges });
+    applyModel({
+      steps: committedSteps,
+      vertices: geom.vertices,
+      edges: geom.edges,
+      constraints: problem.constraints,
+    });
     setWhatif(
       WHATIF_HOME,
       committedResult.x || [9, 9, 4],
@@ -429,7 +462,12 @@ export default async function mount(box, ctx) {
       return;
     }
     mode = "live";
-    applyModel({ steps: solved, vertices: hull.vertices, edges: hull.edges });
+    applyModel({
+      steps: solved,
+      vertices: hull.vertices,
+      edges: hull.edges,
+      constraints: lp.constraints,
+    });
     setWhatif(R, sol.x, sol.objective_value);
     liveProvenance(R);
     if (walkCaption) walkCaption.hidden = true;

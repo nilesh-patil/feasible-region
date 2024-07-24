@@ -10,7 +10,7 @@
 // scrubber drives both. If the sidecar is ever missing, mount throws and main.js
 // keeps the authored still.
 
-import { makeProjector, findVertexIndex } from "../iso3d.js";
+import { classifyEdges, findVertexIndex, makeProjector, triadArms } from "../iso3d.js";
 import { linkFigure } from "../sync.js";
 
 const SVGNS = "http://www.w3.org/2000/svg";
@@ -96,9 +96,35 @@ export default async function mount(box, ctx) {
     role: "img",
     "aria-label": "Two racers on one cargo polytope: a recorded boundary walk and the recorded interior central path.",
   });
-  // polytope wireframe, shared by both racers
-  geom.edges.forEach(([i, j]) =>
-    svg.appendChild(svgEl("line", { class: "race-edge", x1: screen[i][0], y1: screen[i][1], x2: screen[j][0], y2: screen[j][1] }))
+  // polytope wireframe, shared by both racers; every edge is classified front
+  // or back from the problem constraints and this stage's own projection
+  const depth = classifyEdges(topic.problem.constraints, geom.vertices, geom.edges, { project });
+  geom.edges.forEach(([i, j], k) =>
+    svg.appendChild(
+      svgEl("line", {
+        class: depth[k] === "back" ? "race-edge is-back" : "race-edge",
+        x1: screen[i][0], y1: screen[i][1], x2: screen[j][0], y2: screen[j][1],
+      })
+    )
+  );
+  // axis triad in the free lower-left corner plus the labeled origin
+  const gTriad = svgEl("g", { class: "iso-triad", "aria-hidden": "true" });
+  for (const arm of triadArms(44, 240, 15)) {
+    gTriad.appendChild(svgEl("line", { class: "iso-triad-arm", x1: arm.x1, y1: arm.y1, x2: arm.x2, y2: arm.y2 }));
+    gTriad.appendChild(
+      svgEl("text", { class: "iso-triad-label", x: arm.lx, y: arm.ly, "text-anchor": arm.anchor }, arm.label)
+    );
+  }
+  svg.appendChild(gTriad);
+  const raceOrigin = project([0, 0, 0]);
+  svg.appendChild(
+    svgEl("text", {
+      class: "iso-origin",
+      x: raceOrigin[0] - 8,
+      y: raceOrigin[1] + 12,
+      "text-anchor": "end",
+      "aria-hidden": "true",
+    }, "0")
   );
   // interior racer: the recorded central path as a literal polyline
   svg.appendChild(

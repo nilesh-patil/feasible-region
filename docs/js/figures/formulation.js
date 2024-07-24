@@ -257,7 +257,7 @@ export default async function mount(box, ctx) {
   svg.appendChild(optDot);
   svg.appendChild(optLabel);
 
-  // ---- storyline cards (the interactive replacement for the still briefs) --
+  // ---- storyline cards (the interactive replacement for the still briefs) ----
   const cards = cons.map((k, i) => {
     const label = htmlEl("label", { class: "fm-card" });
     label.setAttribute("data-key", k.key);
@@ -279,7 +279,7 @@ export default async function mount(box, ctx) {
     return label;
   });
 
-  // ---- standard-form block (objective, one row per active limit, nonneg) --
+  // ---- standard-form block (objective, one row per active limit, nonneg) ----
   const stdform = htmlEl("div", { class: "fm-stdform" });
   stdform.setAttribute("data-role", "fm-stdform");
   stdform.appendChild(htmlEl("div", { class: "fm-row fm-obj" }, `maximize z = ${objTerm}`));
@@ -307,7 +307,7 @@ export default async function mount(box, ctx) {
     render();
   });
 
-  // ---- render: recompute the region, redraw everything, retell the state --
+  // ---- render: recompute the region, redraw everything, retell the state ----
   function render() {
     const n = active.filter(Boolean).length;
     const clip = cons.filter((_, i) => active[i]).map((k) => ({ a: k.a, b: k.b, c: k.c }));
