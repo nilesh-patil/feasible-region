@@ -199,6 +199,107 @@ function observeFigures() {
   mounts.forEach((el) => io.observe(el));
 }
 
+// ---- lazy KaTeX typesetting -----------------
+// TeX sources live in data-tex attributes; the authored ASCII stays in the
+// HTML, so readers without scripts keep today's plain blocks. The vendored
+// KaTeX stylesheet and script load only when a math-bearing section
+// approaches the viewport, and every render waits for BOTH files, the race
+// guard: raw TeX is never inserted as text, and .katex markup never exists
+// in the document before its stylesheet has applied.
+
+let katexReady = null; // memoized Promise<katex global>, one load ever
+
+function loadKatexOnce() {
+  if (katexReady) return katexReady;
+  katexReady = new Promise((resolve, reject) => {
+    let cssDone = false;
+    let jsDone = false;
+    const settle = () => {
+      if (cssDone && jsDone) resolve(window.katex);
+    };
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "./vendor/katex.min.css";
+    link.addEventListener("load", () => { cssDone = true; settle(); }, { once: true });
+    link.addEventListener("error", () => reject(new Error("katex css failed")), { once: true });
+    const script = document.createElement("script");
+    script.src = "./vendor/katex.min.js";
+    script.addEventListener("load", () => { jsDone = true; settle(); }, { once: true });
+    script.addEventListener("error", () => reject(new Error("katex js failed")), { once: true });
+    document.head.append(link, script);
+  });
+  return katexReady;
+}
+
+function typesetBlock(el) {
+  loadKatexOnce()
+    .then((katex) => {
+      if (!katex || el.dataset.texDone) return;
+      try {
+        katex.render(el.dataset.tex, el, { displayMode: true });
+        el.dataset.texDone = "true";
+        const kd = el.querySelector(".katex-display");
+        if (kd) {
+          // KaTeX display lines never wrap; on narrow viewports a long one
+          // scrolls inside its own block instead of widening the page.
+          kd.style.overflowX = "auto";
+          kd.style.overflowY = "hidden";
+          kd.style.padding = "2px 0";
+        }
+        // Blocks inside compact layouts (the S4 limit rows) opt out of the
+        // display margins and centering so the row grid keeps its shape.
+        if (kd && el.hasAttribute("data-tex-tight")) {
+          kd.style.margin = "0";
+          kd.style.textAlign = "left";
+          const inner = kd.querySelector(".katex");
+          if (inner) inner.style.textAlign = "left";
+        }
+      } catch (err) {
+        // Bad TeX never replaces the authored ASCII; the plain block stands.
+        if (window.console && console.debug) {
+          console.debug("katex render skipped:", err && err.message);
+        }
+      }
+    })
+    .catch(() => {
+      // Loading failed (offline, blocked): every block keeps its authored
+      // ASCII, which is the honest untypeset state. Nothing retries, nothing
+      // throws, no half-typeset math can appear.
+    });
+}
+
+function observeMath() {
+  const targets = Array.from(document.querySelectorAll("[data-tex]"));
+  // Without IntersectionObserver there is no "approaches the viewport"
+  // signal, and loading KaTeX eagerly would break the MUST, so the
+  // authored ASCII stands (the same honest state as scripts off).
+  if (targets.length === 0 || !("IntersectionObserver" in window)) return;
+
+  // Observe the sections that hold math (they always have a real box; an
+  // empty data-tex placeholder has zero height and could be skipped by the
+  // observer), typeset every block a section carries when it fires.
+  const sections = new Map(); // section element -> its data-tex blocks
+  targets.forEach((el) => {
+    const host = el.closest("section") || el;
+    if (!sections.has(host)) sections.set(host, []);
+    sections.get(host).push(el);
+  });
+
+  const io = new IntersectionObserver(
+    (entries, obs) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        obs.unobserve(entry.target);
+        (sections.get(entry.target) || []).forEach(typesetBlock);
+      }
+    },
+    // Fire a little ahead of arrival so the swap happens off screen, but
+    // never at boot: KaTeX loads only once real math is this close.
+    { rootMargin: "600px 0px" }
+  );
+  sections.forEach((_, host) => io.observe(host));
+}
+
 // ---- table-of-contents scroll-spy ---------------------------------------
 function tocScrollSpy() {
   const links = new Map();
@@ -272,6 +373,7 @@ function themeToggle() {
 function boot() {
   themeToggle();
   observeFigures();
+  observeMath();
   tocScrollSpy();
 }
 
