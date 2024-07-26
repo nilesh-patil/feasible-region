@@ -7,7 +7,7 @@
 // the step's own tableau, rows [pivot, one eliminated, z] and columns [pivot,
 // one other, rhs], recomputed live from that tableau so it works identically on
 // the recorded walk and on any live what if pivot. Every number goes through
-// fmt() and every label through the caller's varLabel, so the excerpt reads the
+// fmtR() and every label through the caller's varLabel, so the excerpt reads the
 // same as the main tableau (s4, s3, z and x1, x2, rhs line up exactly).
 //
 // dualview.js drives it through a tiny direct call contract: mountHood(scope,
@@ -17,7 +17,7 @@
 // on the optimal step at hydration, so nothing opens on load and layout never
 // shifts. If the host div is absent the mount returns a no op stub.
 
-import { fmt } from "../lp2d.js";
+import { fmtR } from "../fmt-rational.js";
 
 const TOL = 1e-6;
 let uid = 0;
@@ -216,10 +216,10 @@ export default function mountHood(scope, ctx, meta) {
   // ---- per frame text ---------------------------------------------------
   function opText(ri) {
     const m = model;
-    if (frame === 1 && ri === 0) return "divide by " + fmt(m.piv);
+    if (frame === 1 && ri === 0) return "divide by " + fmtR(m.piv);
     if (frame === 2 && ri !== 0) {
       const f = m.opFactor[ri];
-      return (f >= 0 ? "minus " : "plus ") + fmt(Math.abs(f)) + " x pivot";
+      return (f >= 0 ? "minus " : "plus ") + fmtR(Math.abs(f)) + " × pivot row";
     }
     return "";
   }
@@ -229,14 +229,14 @@ export default function mountHood(scope, ctx, meta) {
     if (frame === 0) {
       return (
         m.eLabel + " enters and " + m.lLabel + " leaves. The ratio test picks " +
-        "this row: " + fmt(m.rhsPiv) + " divided by " + fmt(m.piv) + " is " +
-        fmt(m.ratio) + ", the smallest ratio, so " + m.eLabel + " rises to " +
-        fmt(m.ratio) + "."
+        "this row: " + fmtR(m.rhsPiv) + " divided by " + fmtR(m.piv) + " is " +
+        fmtR(m.ratio) + ", the smallest ratio, so " + m.eLabel + " rises to " +
+        fmtR(m.ratio) + "."
       );
     }
     if (frame === 1) {
       return (
-        "Divide the leaving row by the pivot " + fmt(m.piv) + ", so the pivot " +
+        "Divide the leaving row by the pivot " + fmtR(m.piv) + ", so the pivot " +
         "cell becomes 1. The other rows have not moved yet."
       );
     }
@@ -245,12 +245,12 @@ export default function mountHood(scope, ctx, meta) {
       " column is a clean unit column. ";
     const bridge = m.hasNext
       ? "In the z row, " + m.oLabel + " now shows a reduced cost of +" +
-        fmt(m.nextRC) + ", so " + m.oLabel + " enters next. "
+        fmtR(m.nextRC) + ", so " + m.oLabel + " enters next. "
       : "Every reduced cost in the z row is now zero or negative, so this " +
         "reaches the optimal corner. ";
     return (
-      head + bridge + "The objective climbs from " + fmt(m.beforeObj) +
-      " to " + fmt(m.afterObj) + "."
+      head + bridge + "The objective climbs from " + fmtR(m.beforeObj) +
+      " to " + fmtR(m.afterObj) + "."
     );
   }
 
@@ -294,12 +294,12 @@ export default function mountHood(scope, ctx, meta) {
         const td = el("td", "hood-cell");
         if (ci === 0) td.classList.add("hood-col-piv");
         if (ri === 0 && ci === 0) td.classList.add("hood-pivot");
-        const now = fmt(cur[ri][ci]);
-        if (prev && fmt(prev[ri][ci]) !== now) {
+        const now = fmtR(cur[ri][ci]);
+        if (prev && fmtR(prev[ri][ci]) !== now) {
           const ghost = el("span", "hood-ghost");
           ghost.appendChild(el("span", "hood-was", "was"));
           ghost.appendChild(document.createTextNode(" "));
-          ghost.appendChild(el("s", null, fmt(prev[ri][ci])));
+          ghost.appendChild(el("s", null, fmtR(prev[ri][ci])));
           td.appendChild(ghost);
         }
         td.appendChild(el("span", "hood-now", now));
@@ -309,7 +309,7 @@ export default function mountHood(scope, ctx, meta) {
       tbody.appendChild(tr);
     }
 
-    const alt = m.colLabels.map((c, i) => c + " " + fmt(cur[0][i])).join(", ");
+    const alt = m.colLabels.map((c, i) => c + " " + fmtR(cur[0][i])).join(", ");
     table.setAttribute(
       "aria-label",
       "Pivot excerpt, frame " + (frame + 1) + " of 3. Pivot row " +
@@ -319,8 +319,8 @@ export default function mountHood(scope, ctx, meta) {
     note.textContent = noteFor();
     signNote.textContent =
       frame === 2
-        ? "The z row stores the objective negated, so the " + fmt(m.afterZRhs) +
-          " in its rhs corner means the objective is " + fmt(m.afterObj) + "."
+        ? "The z row stores the objective negated, so the " + fmtR(m.afterZRhs) +
+          " in its rhs corner means the objective is " + fmtR(m.afterObj) + "."
         : "";
   }
 

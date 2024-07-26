@@ -9,12 +9,15 @@
 // with no WebAssembly the slider is disabled with an honest note. The
 // projection is fit ONCE from committed geometry and reused, so it never rescales.
 
-import { fmt } from "../lp2d.js";
 import { linkFigure } from "../sync.js";
 import { enumerateVertices } from "../poly3d.js";
 // Pure classifier import only (plus the triad constant helper): the fixed-fit
 // projection stays local to this file, never pulled from iso3d.
 import { classifyEdges, triadArms } from "../iso3d.js";
+// Scoped rational formatter (NEW): the S3 tableau, manifest, and staircase read
+// exact fractions (-1/7, not -0.14) via fmtR, so the z row visibly becomes S4's
+// prices. fmtR() stays untouched in lp2d.js so S2's live-rebuilt block is unmoved.
+import { fmtR } from "../fmt-rational.js";
 import mountHood from "./hood.js";
 
 const SVGNS = "http://www.w3.org/2000/svg";
@@ -63,10 +66,79 @@ function varColorVar(i) {
   return i < 3 ? "var(--ink)" : `var(--constraint-${i - 2})`;
 }
 
-const sameVertex = (a, b) =>
-  Math.abs(a[0] - b[0]) < 1e-6 &&
-  Math.abs(a[1] - b[1]) < 1e-6 &&
-  Math.abs(a[2] - b[2]) < 1e-6;
+// One inequality line for the manifest card, built from a constraint so it live
+// updates under the what-if slider and never asserts a stale "<= 27". Reads back
+// exactly as the S4 limit list does, e.g. "2 x1 + x2 <= 27".
+function ineqText(coeffs, rhs, names) {
+  let lhs = "";
+  coeffs.forEach((c, i) => {
+    if (Math.abs(c) < 1e-9) return;
+    const mag = Math.abs(c);
+    const term =
+      (Math.abs(mag - 1) < 1e-9 ? "" : fmtR(mag) + " ") + varLabel(i, names);
+    if (lhs === "") lhs = (c < 0 ? "-" : "") + term;
+    else lhs += (c < 0 ? " - " : " + ") + term;
+  });
+  return lhs + " ≤ " + fmtR(rhs);
+}
+
+// Objective staircase: a step function of objective value per pivot
+// for the dead space under the tableau. One keyed mark per step carries its own
+// value in data-value, so the strip is a checkable supplementary read of numbers
+// already in the readout. The committed-walk output is authored verbatim into
+// index.html as the no-JS state; JS rebuilds it so a live re-solve shows its own
+// climb. Geometry is a plain string builder, so authored and hydrated match.
+const STAIR = { W: 252, H: 112, L: 16, R: 16, T: 22, B: 24 };
+const stairNum = (x) => String(Math.round(x * 100) / 100);
+function stairSVG(objectives, curIdx) {
+  const n = objectives.length;
+  const plotL = STAIR.L;
+  const plotR = STAIR.W - STAIR.R;
+  const plotT = STAIR.T;
+  const plotB = STAIR.H - STAIR.B;
+  const vmax = Math.max(...objectives, 1);
+  const colW = (plotR - plotL) / n;
+  const yOf = (v) => plotB - (v / vmax) * (plotB - plotT);
+  let out =
+    `<svg class="dv-stair-svg" viewBox="0 0 ${STAIR.W} ${STAIR.H}" ` +
+    `preserveAspectRatio="xMidYMid meet" role="img" ` +
+    `aria-label="Objective value after each pivot: ${objectives
+      .map(fmtR)
+      .join(", ")}. A step climb to the best corner.">`;
+  out +=
+    `<line class="dv-stair-axis" x1="${stairNum(plotL)}" y1="${stairNum(plotB)}" ` +
+    `x2="${stairNum(plotR)}" y2="${stairNum(plotB)}"></line>`;
+  for (let k = 0; k < n; k++) {
+    const x0 = plotL + k * colW;
+    const x1 = plotL + (k + 1) * colW;
+    const xc = plotL + (k + 0.5) * colW;
+    const y = yOf(objectives[k]);
+    const yprev = k === 0 ? plotB : yOf(objectives[k - 1]);
+    const cls = "dv-stair-step" + (k === curIdx ? " is-current" : "");
+    // A whitespace text node between marks keeps textContent's numbers separated
+    // ("0 8 15 ...") for a no-JS text read; it is non-rendering inside the SVG.
+    out += (k > 0 ? " " : "") + `<g class="${cls}" data-key="pivot:${k}" data-value="${fmtR(
+      objectives[k]
+    )}">`;
+    if (k > 0)
+      out +=
+        `<line class="dv-stair-riser" x1="${stairNum(x0)}" y1="${stairNum(
+          yprev
+        )}" x2="${stairNum(x0)}" y2="${stairNum(y)}"></line>`;
+    out +=
+      `<line class="dv-stair-tread" x1="${stairNum(x0)}" y1="${stairNum(y)}" ` +
+      `x2="${stairNum(x1)}" y2="${stairNum(y)}"></line>`;
+    out += `<circle class="dv-stair-dot" cx="${stairNum(xc)}" cy="${stairNum(
+      y
+    )}" r="3"></circle>`;
+    out +=
+      `<text class="dv-stair-val" x="${stairNum(xc)}" y="${stairNum(y - 7)}" ` +
+      `text-anchor="middle">${fmtR(objectives[k])}</text>`;
+    out += `</g>`;
+  }
+  out += `</svg>`;
+  return out;
+}
 
 export default async function mount(box, ctx) {
   const trace = await ctx.loadTrace(ctx.fixture || "topic21");
@@ -91,6 +163,24 @@ export default async function mount(box, ctx) {
   // Authored fig-sub IS the trace-mode provenance; capture it so the trace
   // variant round-trips exactly and only the live variant is new here.
   const traceProvText = provenance ? provenance.textContent : "";
+
+  // Manifest card: five named limits with live inequalities. The
+  // ineq spans are rewritten from the model's own constraints every apply, so
+  // the card can never assert rhs 27 while the panels solve a perturbed 30.
+  const manifestIneqEls = Array.from(
+    scope.querySelectorAll('[data-role="dualview-manifest"] .dv-manifest-ineq')
+  );
+  function updateManifest(constraints) {
+    manifestIneqEls.forEach((el, i) => {
+      const c = constraints[i];
+      if (c) el.textContent = ineqText(c.coeffs, c.rhs, names);
+    });
+  }
+
+  // Objective staircase host: rebuilt per model so it always reads
+  // the current walk's climb; stairSteps holds the per-step marks for emphasis.
+  const stairHost = scope.querySelector('[data-role="dualview-staircase"]');
+  let stairSteps = [];
 
   // ---- fixed isometric projection (once, from committed geometry) -------
   const proj = geom.vertices.map(project);
@@ -271,9 +361,39 @@ export default async function mount(box, ctx) {
     }
 
     // Which enumerated corner each step lands on, for is-visited lighting.
-    walkIdx = steps.map((s) => verts.findIndex((v) => sameVertex(v, s.vertex)));
+    // Cosmetic robustness: match each step vertex to its NEAREST
+    // hull corner rather than an exact 1e-6 findIndex, so float noise on a live
+    // solve can never silently leave a real corner unlit. The walk is never
+    // rejected (trails draw from step vertices directly); an unmatched vertex
+    // (> ~0.03 away, which does not occur on a valid solve) simply lights nothing.
+    walkIdx = steps.map((s) => {
+      let best = -1;
+      let bestD = Infinity;
+      verts.forEach((v, i) => {
+        const d =
+          (v[0] - s.vertex[0]) ** 2 +
+          (v[1] - s.vertex[1]) ** 2 +
+          (v[2] - s.vertex[2]) ** 2;
+        if (d < bestD) {
+          bestD = d;
+          best = i;
+        }
+      });
+      return bestD <= 1e-3 ? best : -1;
+    });
+
+    // Manifest inequalities and the objective staircase both follow the model,
+    // so neither ever shows a number the panels have left behind.
+    updateManifest(model.constraints);
 
     cur = nSteps - 1; // land on the finished walk, optimum ringed
+    if (stairHost) {
+      stairHost.innerHTML = stairSVG(
+        steps.map((s) => s.objective_value),
+        cur
+      );
+      stairSteps = Array.from(stairHost.querySelectorAll(".dv-stair-step"));
+    }
     range.max = String(nSteps - 1);
     render();
   }
@@ -284,7 +404,7 @@ export default async function mount(box, ctx) {
       bodyRows[r].rowHead.textContent = isObjRow ? "z" : varLabel(step.basis[r], names);
       bodyRows[r].rowHead.style.color = isObjRow ? "var(--faint)" : varColorVar(step.basis[r]);
       for (let c = 0; c < nCols; c++) {
-        bodyRows[r].cells[c].textContent = fmt(step.tableau[r][c]);
+        bodyRows[r].cells[c].textContent = fmtR(step.tableau[r][c]);
       }
       bodyRows[r].tr.classList.toggle("dv-obj-row", isObjRow);
     }
@@ -307,6 +427,9 @@ export default async function mount(box, ctx) {
     trailEls.forEach((line, k) => line.classList.toggle("is-on", k < cur));
     const visited = walkIdx.slice(0, cur + 1);
     vertEls.forEach((c, idx) => c.classList.toggle("is-visited", visited.includes(idx)));
+    // Staircase current-step emphasis follows the scrubber (never disagrees with
+    // the readout, which names the same objective for this step).
+    stairSteps.forEach((g, k) => g.classList.toggle("is-current", k === cur));
 
     const p = screenOf(step.vertex);
     ring.setAttribute("cx", p[0]);
@@ -318,7 +441,7 @@ export default async function mount(box, ctx) {
     currentLabel.setAttribute("y", Math.max(p[1] - 10, 14));
     currentLabel.setAttribute("text-anchor", p[0] > PANEL_W - 70 ? "end" : "start");
     if (p[0] > PANEL_W - 70) currentLabel.setAttribute("x", p[0] - 10);
-    currentLabel.textContent = `(${fmt(v[0])}, ${fmt(v[1])}, ${fmt(v[2])})`;
+    currentLabel.textContent = `(${fmtR(v[0])}, ${fmtR(v[1])}, ${fmtR(v[2])})`;
 
     renderTableau(step);
     hood.sync(step, cur, nSteps, mode);
@@ -343,7 +466,7 @@ export default async function mount(box, ctx) {
     range.setAttribute("aria-valuenow", String(cur));
     range.setAttribute(
       "aria-valuetext",
-      `Step ${cur} of ${nSteps - 1}, vertex (${fmt(v[0])}, ${fmt(v[1])}, ${fmt(v[2])})`
+      `Step ${cur} of ${nSteps - 1}, vertex (${fmtR(v[0])}, ${fmtR(v[1])}, ${fmtR(v[2])})`
     );
     stepTag.textContent = `step ${cur} of ${nSteps - 1}`;
     prevBtn.disabled = cur === 0;
@@ -357,13 +480,13 @@ export default async function mount(box, ctx) {
           : `Pivot: ${varLabel(step.entering, names)} enters, ${varLabel(step.leaving, names)} leaves.`;
       readout.innerHTML =
         `Step <b>${cur}</b> of ${nSteps - 1}. Basis holds <b>${basisNames}</b>. ` +
-        `Vertex <b>(${fmt(v[0])}, ${fmt(v[1])}, ${fmt(v[2])})</b>. ` +
-        `Objective <b>${fmt(step.objective_value)}</b>. ${move}`;
+        `Vertex <b>(${fmtR(v[0])}, ${fmtR(v[1])}, ${fmtR(v[2])})</b>. ` +
+        `Objective <b>${fmtR(step.objective_value)}</b>. ${move}`;
     }
     svg.setAttribute(
       "aria-label",
-      `Corner walk step ${cur} of ${nSteps - 1}. The lit vertex is at x1 ${fmt(v[0])}, ` +
-        `x2 ${fmt(v[1])}, x3 ${fmt(v[2])}, where the objective is ${fmt(step.objective_value)}.`
+      `Corner walk step ${cur} of ${nSteps - 1}. The lit vertex is at x1 ${fmtR(v[0])}, ` +
+        `x2 ${fmtR(v[1])}, x3 ${fmtR(v[2])}, where the objective is ${fmtR(step.objective_value)}.`
     );
   }
 
@@ -391,7 +514,7 @@ export default async function mount(box, ctx) {
     whatifTag.textContent = "= " + R;
     const opt =
       x && x.length >= 3
-        ? `optimum (${fmt(x[0])}, ${fmt(x[1])}, ${fmt(x[2])}), value ${fmt(val)}`
+        ? `optimum (${fmtR(x[0])}, ${fmtR(x[1])}, ${fmtR(x[2])}), value ${fmtR(val)}`
         : "recorded walk";
     whatif.setAttribute("aria-valuetext", `limit = ${R}, ${opt}`);
     resetBtn.disabled = R === WHATIF_HOME || whatif.disabled;
