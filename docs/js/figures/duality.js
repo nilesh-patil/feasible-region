@@ -258,6 +258,32 @@ function mountValueFunction(figureRoot) {
   controls.append(row, readout);
 }
 
+// The stacked contribution bar (strong-duality certificate, drawn). Each binding
+// limit contributes dual_i * rhs_i to the objective; the three products stack to
+// the twin best-profit bar and sum to 22. The authored still in index.html holds
+// the resting widths; on hydration this recomputes each segment width straight
+// from the trace duals and the constraint rhs, so the number is derived, never
+// hardcoded. Slack limits contribute 0 and keep their keyed zero clause so
+// the shared brush still lights them. --w carries the width on a fixed scale
+// (px per unit of profit); the CSS turns it into a flex-grow proportion.
+const STACK_SCALE = 14; // 22 profit units -> a 308 wide twin bar
+function mountStack(figureRoot, trace) {
+  const host = figureRoot.querySelector('[data-role="duality-stack"]');
+  if (!host) return;
+  const duals = trace.result.duals;
+  const rhs = trace.problem.constraints.map((c) => c.rhs);
+  const products = duals.map((d, i) => d * rhs[i]); // 0, 45/7, 81/7, 0, 4
+  products.forEach((p, i) => {
+    const w = String(Math.round(p * STACK_SCALE));
+    host
+      .querySelectorAll(`[data-key="${conKey(i)}"]`)
+      .forEach((seg) => seg.style.setProperty("--w", w));
+  });
+  const total = products.reduce((a, b) => a + b, 0); // 22
+  const totalEl = host.querySelector('[data-role="duality-stack-total"]');
+  if (totalEl) totalEl.style.setProperty("--w", String(Math.round(total * STACK_SCALE)));
+}
+
 export default async function mount(box, ctx) {
   const trace = await ctx.loadTrace(ctx.fixture || "topic21");
   const duals = trace.result.duals;
@@ -311,6 +337,11 @@ export default async function mount(box, ctx) {
   // in its own authored host inside this figure, so linkFigure below covers its
   // dot and slider (both keyed con:3) with the same brush as the bars.
   mountValueFunction(figureRoot);
+
+  // Strong-duality certificate: recompute the stacked contribution bar widths
+  // from the trace duals times the constraint rhs (never hardcoded), then let
+  // the shared brush below light each segment with its paired limit.
+  mountStack(figureRoot, trace);
 
   linkFigure(figureRoot);
 
