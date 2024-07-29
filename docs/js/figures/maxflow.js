@@ -113,6 +113,7 @@ function deriveModel(trace) {
     balance,
     interior,
     objVars,
+    objective: p.objective,
     cutArcs,
     maxFlow: trace.result.objective_value,
     satArcs: arcs.filter((a) => a.saturated),
@@ -261,6 +262,13 @@ function buildNet(model) {
 }
 
 // ---- the matrix panel ----------------------------------------------------
+// The matrix reconstructs the whole LP, so a reader can rebuild it cell for cell:
+// an objective row to maximize, the capacities as column-wise upper bounds, and
+// one net row per interior node. Those net rows are balance equalities, so they
+// gain a row-wise right-hand side cell in a new "=" column reading 0 (the other
+// rows leave that column blank). Structural zeros in the coefficient rows fade
+// against the nonzeros the same way the sibling shortest-path matrix marks its
+// own with is-nz, so the sparsity pattern reads at a glance.
 function buildMatrix(model) {
   const table = htmlEl("table", { class: "mf-matrix" });
   const caption = htmlEl("caption", { class: "mf-matrix-cap" });
@@ -286,39 +294,64 @@ function buildMatrix(model) {
     if (a.cut) th.appendChild(htmlEl("span", { class: "mf-cut-tag" }, "cut"));
     hrow.appendChild(th);
   });
+  // the row-wise right-hand side column; the net rows are equalities set to 0.
+  hrow.appendChild(htmlEl("th", { scope: "col", class: "mf-bound-head" }, "="));
   thead.appendChild(hrow);
   table.appendChild(thead);
 
   const tbody = htmlEl("tbody");
 
-  const addRow = (label, cells, cls) => {
+  // a blank cell in the bound column, for the rows that are not equalities.
+  const blankBound = () => htmlEl("td", { class: "mf-bound" });
+  // a coefficient cell that fades structural zeros against the nonzeros.
+  const coeffCell = (name, v) =>
+    htmlEl("td", { "data-key": varKey(name), class: Math.abs(v) > EPS ? "is-nz" : "" }, num(v));
+
+  const addRow = (label, cells, cls, headAttrs) => {
     const tr = htmlEl("tr", cls ? { class: cls } : null);
-    tr.appendChild(htmlEl("th", { scope: "row", class: "mf-rowhead" }, label));
+    tr.appendChild(
+      htmlEl("th", { scope: "row", class: "mf-rowhead", ...(headAttrs || {}) }, label)
+    );
     cells.forEach((c) => tr.appendChild(c));
     tbody.appendChild(tr);
   };
 
+  // objective row: maximize fsa + fsb, read straight off the objective vector.
+  // objVars names the maximized arcs for the spoken row label.
+  addRow(
+    "max",
+    model.objective
+      .map((v, i) => coeffCell(model.names[i], v))
+      .concat(blankBound()),
+    "mf-obj-row",
+    { "aria-label": `Objective, maximize ${model.objVars.join(" plus ")}` }
+  );
+
   // flow and cap rows carry the shared data-key so the column lights end to end.
   addRow(
     "flow",
-    model.arcs.map((a) =>
-      htmlEl(
-        "td",
-        { "data-key": varKey(a.name), class: a.saturated ? "is-saturated" : "" },
-        num(a.flow)
+    model.arcs
+      .map((a) =>
+        htmlEl(
+          "td",
+          { "data-key": varKey(a.name), class: a.saturated ? "is-saturated" : "" },
+          num(a.flow)
+        )
       )
-    ),
+      .concat(blankBound()),
     "mf-flow-row"
   );
   addRow(
     "cap",
-    model.arcs.map((a) =>
-      htmlEl(
-        "td",
-        { "data-key": varKey(a.name), class: a.saturated ? "is-saturated" : "" },
-        num(a.cap)
+    model.arcs
+      .map((a) =>
+        htmlEl(
+          "td",
+          { "data-key": varKey(a.name), class: a.saturated ? "is-saturated" : "" },
+          num(a.cap)
+        )
       )
-    ),
+      .concat(blankBound()),
     "mf-cap-row"
   );
 
@@ -326,9 +359,9 @@ function buildMatrix(model) {
   model.balance.forEach((row) => {
     addRow(
       `net ${row.node}`,
-      row.coeffs.map((coeff, i) =>
-        htmlEl("td", { "data-key": varKey(model.names[i]) }, num(coeff))
-      )
+      row.coeffs
+        .map((coeff, i) => coeffCell(model.names[i], coeff))
+        .concat(htmlEl("td", { class: "mf-bound" }, "0"))
     );
   });
 
