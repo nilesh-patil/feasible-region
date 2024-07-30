@@ -769,6 +769,86 @@ table.tableau tr.is-leaving > td.is-entering {
   box-shadow: inset 0 0 0 2px var(--objective);
 }
 
+/* Manifest card: the five limits named, so s1..s5 are not anonymous
+   a section before S4 names them. A compact wrapping list; each row shows the
+   slack chip in its own hue (--h, set per row), the name, and the live
+   inequality dualview.js rewrites from the model. Colour only via tokens. */
+.dv-manifest {
+  list-style: none;
+  margin: 0 0 var(--sp-4);
+  padding: var(--sp-2) var(--sp-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+}
+.dv-manifest-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45em;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.dv-manifest-slot {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--h);
+}
+.dv-manifest-name { font-family: var(--font-sans); color: var(--ink); }
+.dv-manifest-ineq { font-family: var(--font-mono); color: var(--ink-soft); }
+
+/* Right column of the dual view: tableau on top, objective staircase beneath it
+   in the two-column dead space. */
+.dualview-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+/* Objective staircase: a supplementary step read of the climb. It
+   exists only where the two-column dead space does, so it is hidden below 820px,
+   exactly the width where .dualview-grid drops to one column. The authored SVG is
+   the no-JS state; dualview.js rebuilds it for live re-solves. */
+.dv-staircase { display: none; }
+@media (min-width: 820px) {
+  .dv-staircase { display: block; }
+}
+.dv-stair-cap {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  color: var(--faint);
+  margin: 0 0 var(--sp-1);
+}
+.dv-stair-svg { width: 100%; height: auto; display: block; overflow: visible; }
+.dv-stair-axis { stroke: var(--hairline); stroke-width: 1; }
+.dv-stair-tread { stroke: var(--trail); stroke-width: 2; stroke-linecap: round; fill: none; }
+.dv-stair-riser {
+  stroke: var(--trail);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 2;
+  opacity: 0.7;
+  fill: none;
+}
+.dv-stair-dot { fill: var(--trail); }
+.dv-stair-val {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--ink-soft);
+}
+.dv-stair-step.is-current .dv-stair-tread { stroke: var(--objective); stroke-width: 3; }
+.dv-stair-step.is-current .dv-stair-dot {
+  fill: var(--objective);
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+.dv-stair-step.is-current .dv-stair-val { fill: var(--objective); font-weight: 700; }
+
+/* Identity line: the z row read in exact fractions is S4's price list. */
+.dv-identity { margin-top: var(--sp-3); }
+
 /* fig:hood  (S3 open-the-hood pivot zoom, data-role="dualview-hood")  ------ */
 /* Owner: hood agent. A collapsible worked-pivot panel under the dual view.
    Colour comes only from tokens, so both themes recolour for free. The panel bg
@@ -1337,6 +1417,95 @@ a:focus-visible { outline-offset: 3px; }
   box-shadow: inset 0 0 0 2px var(--h);
 }
 
+/* The strong-duality certificate, drawn. A compact aside above the
+   readout: weak-duality note, then each binding limit priced by its shadow
+   price times its rhs, the three products stacked left to right against a twin
+   best-profit bar in objective violet. --w carries each contribution on a fixed
+   scale; flex-grow turns it into a proportional width, so the stack and the twin
+   bar read as one length and the segments sum to the profit. duality.js resets
+   --w from the trace on hydration. Colour only from tokens. */
+.s4-weak {
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: var(--sp-4) 0 var(--sp-3);
+}
+.s4-stack {
+  margin: 0 0 var(--sp-4);
+  display: grid;
+  gap: 0.3rem;
+}
+.s4-stack-head {
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--faint);
+  margin: 0 0 0.15rem;
+}
+.s4-stack-bar {
+  display: flex;
+  height: 1.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+.s4-stack-seg {
+  flex: var(--w, 0) 0 0;
+  min-width: 0;
+  background: var(--h);
+}
+.s4-stack-seg + .s4-stack-seg { box-shadow: inset 1px 0 0 var(--surface); }
+.s4-stack-legend {
+  display: flex;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.s4-stack-lab {
+  flex: var(--w, 0) 0 0;
+  min-width: 0;
+  text-align: center;
+  color: var(--h);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  padding: 0 0.1rem;
+}
+.s4-stack-total { display: block; margin-top: 0.1rem; }
+.s4-stack-total-lab {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--objective);
+  margin-bottom: 0.15rem;
+}
+.s4-stack-total-bar {
+  display: block;
+  height: 1.5rem;
+  border-radius: 999px;
+  /* fill set inline to var(--objective) so still and hydrated paint agree */
+}
+.s4-stack-slacks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.9rem;
+  margin: 0.15rem 0 0;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  color: var(--faint);
+}
+.s4-stack-slack { border-radius: 999px; padding: 0.05rem 0.25rem; }
+/* Lit refinements: the shared fig:sync .is-lit washes text; the coloured
+   segment keeps its hue (its own rule wins on source order) and gains an ink
+   ring, so brushing a slack limit or a priced segment always shows a change. */
+.s4-stack-seg.is-lit { box-shadow: inset 0 0 0 2px var(--ink); }
+.s4-stack-lab.is-lit { color: var(--h); text-decoration: underline; text-underline-offset: 2px; }
+
 /* Value function (upgrade C): the con:3 shadow price drawn as a slope. A full
    width panel below the two-panel grid. Colour comes only from tokens; --h
    holds con:3's hue, set inline on the panel, so both themes recolour for free
@@ -1530,6 +1699,149 @@ a:focus-visible { outline-offset: 3px; }
   min-height: 1.2em;
 }
 
+/* Bland's walk as a divergence-aware ghost on the cube. Distinct from the
+   Dantzig primary (--trail, solid) in both hue and stroke: teal and dashed, so on
+   the four shared edges the offset pair reads as two lines, never one. */
+.km-ghost {
+  stroke: var(--constraint-3);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 7 4;
+  fill: none;
+  opacity: 0.95;
+}
+
+/* The rig card: the three rigged constraints copied from the trace, plus
+   the bait line and who built the cube. Figure apparatus, not body prose, so it
+   never counts against the S5 word cap. */
+.km-rig {
+  margin: var(--sp-4) 0 var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--constraint-1);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  max-width: 42rem;
+}
+.km-rig-lead, .km-rig-bait {
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.km-rig-lead b { font-family: var(--font-mono); color: var(--ink); }
+.km-rig-stack {
+  list-style: none;
+  margin: var(--sp-2) 0;
+  padding: 0;
+  display: grid;
+  gap: 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+.km-rig-bait { margin-top: var(--sp-2); color: var(--faint); }
+
+/* fig:cycling  (S5 second exhibit, Chvatal 1983; mounted by kleeminty.js) --- */
+/* The naive tie-break's basis loops with period six; Bland's rule escapes. The
+   loop panel is the PRIMARY visual, the objective strip is the secondary read.
+   Colour only from tokens: constraint-1 (vermillion) carries the stuck naive
+   lane, constraint-3 (teal) the escaping Bland lane, matching the ghost on the
+   cube above, so both themes recolour for free. */
+.cyc-figure { margin-top: var(--sp-5); }
+.cyc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-4);
+  align-items: start;
+}
+@media (min-width: 820px) {
+  .cyc-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); }
+}
+.cyc-panel { min-width: 0; }
+.cyc-loop-title, .cyc-strip-title {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin: var(--sp-2) 0 0;
+}
+.cyc-readout {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  color: var(--faint);
+  margin: var(--sp-2) 0 0;
+}
+.cyc-controls:empty { display: none; }
+.cyc-scrub-row { display: flex; align-items: center; gap: var(--sp-2); margin-top: var(--sp-2); }
+.cyc-scrub { flex: 1 1 auto; min-width: 0; }
+.cyc-caption {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin-top: var(--sp-3);
+  max-width: 42rem;
+}
+
+/* Loop ring: six bases, arrows between, the sixth arrow closing back to pivot 0 */
+.cyc-arc { stroke: var(--faint); stroke-width: 1.4; fill: none; }
+.cyc-arc-close { stroke: var(--constraint-1); stroke-width: 2.4; }
+.cyc-arrow-head { fill: var(--faint); }
+.cyc-arc-label {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  fill: var(--faint);
+}
+.cyc-arc-label-close { fill: var(--constraint-1); font-weight: 650; }
+.cyc-node-body {
+  fill: var(--surface-2);
+  stroke: var(--hairline-strong);
+  stroke-width: 1.2;
+}
+.cyc-node-basis {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 650;
+  fill: var(--ink);
+}
+.cyc-node-step {
+  font-family: var(--font-sans);
+  font-size: 8.5px;
+  fill: var(--faint);
+}
+.cyc-node.is-current .cyc-node-body {
+  fill: var(--constraint-1-fill);
+  stroke: var(--constraint-1);
+  stroke-width: 2.2;
+}
+.cyc-node.is-current .cyc-node-basis { fill: var(--constraint-1); }
+.cyc-loop-hub {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-style: italic;
+  fill: var(--faint);
+}
+
+/* Objective strip: naive flat at 0, Bland stepping out to 1 */
+.cyc-strip-axis { stroke: var(--hairline-strong); stroke-width: 1; }
+.cyc-strip-grid { stroke: var(--hairline); stroke-width: 1; stroke-dasharray: 3 3; }
+.cyc-strip-tick {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  fill: var(--faint);
+}
+.cyc-strip-axis-title {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  fill: var(--ink-soft);
+}
+.cyc-strip-naive { fill: none; stroke: var(--constraint-1); stroke-width: 2.6; }
+.cyc-strip-bland { fill: none; stroke: var(--constraint-3); stroke-width: 2.6; stroke-dasharray: 7 4; }
+.cyc-strip-lab { font-family: var(--font-sans); font-size: 9.5px; font-weight: 600; }
+.cyc-strip-lab-naive { fill: var(--constraint-1); }
+.cyc-strip-lab-bland { fill: var(--constraint-3); }
+
 /* fig:maxflow  (S6, data-figure="maxflow")  ------------------------------- */
 /* Owner: S6 implementer. A source to sink network beside its linear program.
    Both panels share the data-key brush from fig:sync: HTML cells light with the
@@ -1663,6 +1975,18 @@ a:focus-visible { outline-offset: 3px; }
 .mf-col-head.is-cut { box-shadow: inset 0 -2px 0 0 var(--objective); }
 .mf-flow-row td { color: var(--ink); font-weight: 700; }
 .mf-matrix td.is-saturated { color: var(--constraint-1); font-weight: 800; }
+/* structural nonzeros promoted to full ink so the zeros fade, mirroring the
+   sibling shortest-path matrix (.sp-matrix td.is-nz). */
+.mf-matrix td.is-nz { color: var(--ink); font-weight: 650; }
+/* the row-wise right-hand side column: a faint relation header aligned with the
+   column names, mirroring the sibling .sp-bound-head. */
+.mf-bound-head { color: var(--faint); vertical-align: bottom; }
+/* the tenth (bound) column pushes the matrix past a narrow panel; tighten the
+   cell gutters on small viewports so the whole table and its caption fit the
+   scroll wrapper without a scrollbar. Desktop keeps the roomier gutters. */
+@media (max-width: 460px) {
+  .mf-matrix th, .mf-matrix td { padding-left: 0.34em; padding-right: 0.34em; }
+}
 .mf-col-head:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -2px;

@@ -274,7 +274,7 @@
                makes the handles draggable and re-solves the corner live. -->
           <div class="figure-box" data-figure="hero" data-fixture="statquest" style="--fig-ar: 16 / 10;">
             <svg class="fig-svg" viewBox="0 0 640 400" role="img"
-                 aria-label="A two variable feasible region. Two constraint lines cross a shaded four sided region. An objective arrow points up and to the right. The best point sits on the corner at x1 equals 4, x2 equals 0, where the feedstock line meets the floor x2 equals 0 and the objective reaches 12.">
+                 aria-label="A two variable feasible region. Two constraint lines cross a shaded four sided region. An objective arrow points up and to the right. A dashed level line marks where the objective equals 6, crossing the mid region. The best point sits on the corner at x1 equals 4, x2 equals 0, where the feedstock line meets the floor x2 equals 0 and the objective reaches 12.">
               <defs>
                 <marker id="arrow-axis" viewBox="0 0 10 10" refX="8" refY="5"
                         markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -320,6 +320,18 @@
                 <line x1="56" y1="352" x2="56" y2="12" marker-end="url(#arrow-axis)"></line>
               </g>
 
+              <!-- isoprofit level line at rest (isoF 0.5, objective value 6),
+                   crossing the mid region. Dashed so it reads apart from the
+                   solid objective arrow where the two same hue strokes cross;
+                   the hydrated first paint draws this same line, knob, and
+                   label in lockstep so caption, still, and hydration agree. -->
+              <line x1="56" y1="72" x2="279.689" y2="352"
+                    style="stroke: var(--objective); stroke-width: 1.6; stroke-dasharray: 6 5; opacity: 0.85;"></line>
+              <circle cx="56" cy="72" r="4.5"
+                      style="fill: var(--surface); stroke: var(--objective); stroke-width: 2; stroke-dasharray: 3 2.4;"></circle>
+              <text x="64" y="64"
+                    style="font-size: 12px; font-weight: 650; fill: var(--objective);">objective = 6</text>
+
               <!-- vertices -->
               <g style="fill: var(--trail);">
                 <circle cx="56" cy="352" r="4"></circle>
@@ -343,8 +355,8 @@
                 <text x="48" y="168" text-anchor="end">2</text>
                 <text x="48" y="75" text-anchor="end">3</text>
               </g>
-              <text x="150" y="60" style="font-size: 12px; fill: var(--constraint-1);">x1 + x2 = 4</text>
-              <text x="470" y="300" style="font-size: 12px; fill: var(--constraint-2);">x1 + 3 x2 = 6</text>
+              <text x="106.7" y="32" style="font-size: 12px; fill: var(--constraint-1);">x1 + x2 &le; 4</text>
+              <text x="62" y="159.3" style="font-size: 12px; fill: var(--constraint-2);">x1 + 3 x2 &le; 6</text>
               <text x="360" y="210" style="font-size: 12px; fill: var(--objective);">objective</text>
               <text x="516" y="338" style="font-size: 12px; font-weight: 650; fill: var(--objective);">best corner (4, 0)</text>
             </svg>
@@ -655,6 +667,40 @@
           <p class="notice">One scrubber moves both views. The corner that lights up on
             the left is the same pivot highlighted on the right.</p>
 
+          <!-- Manifest card: names each resource limit and its slack sN with the
+               inequality and hue the tableau and the S4 list share, so s1..s5 are
+               not anonymous a section before S4 names them. dualview.js rewrites each
+               inequality from the live model, so the card follows the what-if slider
+               instead of asserting a stale right-hand side. -->
+          <ul class="dv-manifest" data-role="dualview-manifest"
+              aria-label="The five resource limits, each named with its slack variable, inequality, and hue.">
+            <li class="dv-manifest-row" data-con="1" style="--h: var(--constraint-1);">
+              <span class="dv-manifest-slot">s1</span>
+              <span class="dv-manifest-name">antimatter budget</span>
+              <span class="dv-manifest-ineq">-x1 + x2 &le; 5</span>
+            </li>
+            <li class="dv-manifest-row" data-con="2" style="--h: var(--constraint-2);">
+              <span class="dv-manifest-slot">s2</span>
+              <span class="dv-manifest-name">chargrid hours</span>
+              <span class="dv-manifest-ineq">x1 + 4 x2 &le; 45</span>
+            </li>
+            <li class="dv-manifest-row" data-con="3" style="--h: var(--constraint-3);">
+              <span class="dv-manifest-slot">s3</span>
+              <span class="dv-manifest-name">hull-frame stock</span>
+              <span class="dv-manifest-ineq">2 x1 + x2 &le; 27</span>
+            </li>
+            <li class="dv-manifest-row" data-con="4" style="--h: var(--constraint-4);">
+              <span class="dv-manifest-slot">s4</span>
+              <span class="dv-manifest-name">stabilizer mass</span>
+              <span class="dv-manifest-ineq">3 x1 - 4 x2 &le; 24</span>
+            </li>
+            <li class="dv-manifest-row" data-con="5" style="--h: var(--constraint-5);">
+              <span class="dv-manifest-slot">s5</span>
+              <span class="dv-manifest-name">crystal chamber cap</span>
+              <span class="dv-manifest-ineq">x3 &le; 4</span>
+            </li>
+          </ul>
+
           <!-- Synchronized dual view. The still below stands alone with no JS: it is
                the finished walk and the tableau at the optimum, replayed from the
                topic21 trace. On scroll, dualview.js swaps the still for the live pair
@@ -720,6 +766,7 @@
               </svg>
             </div>
 
+            <div class="dualview-right">
             <div class="tableau-panel" data-role="dualview-tableau">
               <div class="tableau-scroll">
             <table class="tableau" role="img" aria-label="The simplex tableau at the optimal corner, objective 22.">
@@ -741,25 +788,25 @@
                 <tr>
                   <th scope="row" class="dv-row-head" style="color:var(--constraint-1);">s1</th>
                   <td data-var="0">0</td><td data-var="1">0</td><td data-var="2">0</td>
-                  <td data-var="3">1</td><td data-var="4">-0.43</td><td data-var="5">0.71</td>
+                  <td data-var="3">1</td><td data-var="4">-3/7</td><td data-var="5">5/7</td>
                   <td data-var="6">0</td><td data-var="7">0</td><td data-var="8">5</td>
                 </tr>
                 <tr>
                   <th scope="row" class="dv-row-head" style="color:var(--constraint-4);">s4</th>
                   <td data-var="0">0</td><td data-var="1">0</td><td data-var="2">0</td>
-                  <td data-var="3">0</td><td data-var="4">1.57</td><td data-var="5">-2.29</td>
+                  <td data-var="3">0</td><td data-var="4">11/7</td><td data-var="5">-16/7</td>
                   <td data-var="6">1</td><td data-var="7">0</td><td data-var="8">33</td>
                 </tr>
                 <tr>
                   <th scope="row" class="dv-row-head" style="color:var(--ink);">x2</th>
                   <td data-var="0">0</td><td data-var="1">1</td><td data-var="2">0</td>
-                  <td data-var="3">0</td><td data-var="4">0.29</td><td data-var="5">-0.14</td>
+                  <td data-var="3">0</td><td data-var="4">2/7</td><td data-var="5">-1/7</td>
                   <td data-var="6">0</td><td data-var="7">0</td><td data-var="8">9</td>
                 </tr>
                 <tr>
                   <th scope="row" class="dv-row-head" style="color:var(--ink);">x1</th>
                   <td data-var="0">1</td><td data-var="1">0</td><td data-var="2">0</td>
-                  <td data-var="3">0</td><td data-var="4">-0.14</td><td data-var="5">0.57</td>
+                  <td data-var="3">0</td><td data-var="4">-1/7</td><td data-var="5">4/7</td>
                   <td data-var="6">0</td><td data-var="7">0</td><td data-var="8">9</td>
                 </tr>
                 <tr>
@@ -771,14 +818,29 @@
                 <tr class="dv-obj-row">
                   <th scope="row" class="dv-row-head" style="color:var(--faint);" data-key="pivot:4">z</th>
                   <td data-var="0">0</td><td data-var="1">0</td><td data-var="2">0</td>
-                  <td data-var="3">0</td><td data-var="4">-0.14</td><td data-var="5">-0.43</td>
+                  <td data-var="3">0</td><td data-var="4">-1/7</td><td data-var="5">-3/7</td>
                   <td data-var="6">0</td><td data-var="7">-1</td><td data-var="8">-22</td>
                 </tr>
               </tbody>
             </table>
               </div>
             </div>
+            <!-- Objective staircase: the authored no-JS state for the wide layout,
+                 hidden below 820px via CSS alone (the two-column dead space under
+                 the tableau only exists at 820px and up). dualview.js rebuilds this
+                 SVG from the live model's climb; this committed-walk markup matches
+                 that output so still and hydrated first paint agree. -->
+            <div class="dv-staircase" data-role="dualview-staircase">
+              <p class="dv-stair-cap">Objective after each pivot</p>
+              <svg class="dv-stair-svg" viewBox="0 0 252 112" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Objective value after each pivot: 0, 8, 15, 19, 22. A step climb to the best corner."><line class="dv-stair-axis" x1="16" y1="88" x2="236" y2="88"></line><g class="dv-stair-step" data-key="pivot:0" data-value="0"><line class="dv-stair-tread" x1="16" y1="88" x2="60" y2="88"></line><circle class="dv-stair-dot" cx="38" cy="88" r="3"></circle><text class="dv-stair-val" x="38" y="81" text-anchor="middle">0</text></g> <g class="dv-stair-step" data-key="pivot:1" data-value="8"><line class="dv-stair-riser" x1="60" y1="88" x2="60" y2="64"></line><line class="dv-stair-tread" x1="60" y1="64" x2="104" y2="64"></line><circle class="dv-stair-dot" cx="82" cy="64" r="3"></circle><text class="dv-stair-val" x="82" y="57" text-anchor="middle">8</text></g> <g class="dv-stair-step" data-key="pivot:2" data-value="15"><line class="dv-stair-riser" x1="104" y1="64" x2="104" y2="43"></line><line class="dv-stair-tread" x1="104" y1="43" x2="148" y2="43"></line><circle class="dv-stair-dot" cx="126" cy="43" r="3"></circle><text class="dv-stair-val" x="126" y="36" text-anchor="middle">15</text></g> <g class="dv-stair-step" data-key="pivot:3" data-value="19"><line class="dv-stair-riser" x1="148" y1="43" x2="148" y2="31"></line><line class="dv-stair-tread" x1="148" y1="31" x2="192" y2="31"></line><circle class="dv-stair-dot" cx="170" cy="31" r="3"></circle><text class="dv-stair-val" x="170" y="24" text-anchor="middle">19</text></g> <g class="dv-stair-step is-current" data-key="pivot:4" data-value="22"><line class="dv-stair-riser" x1="192" y1="31" x2="192" y2="22"></line><line class="dv-stair-tread" x1="192" y1="22" x2="236" y2="22"></line><circle class="dv-stair-dot" cx="214" cy="22" r="3"></circle><text class="dv-stair-val" x="214" y="15" text-anchor="middle">22</text></g></svg>
+            </div>
+            </div>
           </div>
+
+          <!-- Identity line: the z row read in exact fractions IS the
+               S4 price list, computed as a by-product of the walk. -->
+          <p class="fig-sub dv-identity">Read in exact fractions, the z row's slack prices are the
+            same shadow prices S4 charges for one more unit, computed here as the walk runs.</p>
 
           <div class="scrubber-row dv-controls" data-role="dualview-controls"></div>
 
@@ -925,7 +987,6 @@
                 <text x="352" y="204" text-anchor="end" style="font-size: 12px; font-weight: 700; fill: var(--constraint-5);">1</text>
                 <rect x="8" y="209" width="344" height="10" rx="5" style="fill: var(--surface-2); stroke: var(--hairline);"></rect>
                 <rect x="8" y="209" width="344" height="10" rx="5" style="fill: var(--constraint-5);"></rect>
-                <text x="8" y="240" style="font-size: 11px; fill: var(--ink);">priced out, the resources are worth 22, the primal optimum</text>
               </svg>
               </div>
             </div>
@@ -988,6 +1049,44 @@
             </div>
           </div>
 
+          <!-- S4 strong-duality certificate, drawn. Weak duality first: any
+               feasible pricing bounds the profit from above, so a pricing that
+               meets the primal at the same number pins both sides. Then the
+               stacked contribution bar: each binding limit priced by its shadow
+               price times its right-hand side, the three products stacking to
+               the twin best-profit bar. Slack limits add 0. duality.js
+               recomputes the segment widths from the trace duals and the
+               constraint rhs on hydration; the numbers here are the JS-off
+               state and match. -->
+          <p class="s4-weak">Any feasible set of prices that covers every product is an
+            upper bound on the profit the ship can earn. So once a pricing meets the primal
+            walk at the same figure, neither side can move any further and that figure is
+            certified optimal. Both sides meet here, and the priced stack below reaches
+            exactly that height.</p>
+
+          <div class="s4-stack" data-role="duality-stack">
+            <p class="s4-stack-head">The binding limits, priced and stacked to the profit</p>
+            <div class="s4-stack-bar s4-stack-priced" role="img"
+                 aria-label="The three binding limits priced by their shadow prices and stacked left to right: chargrid hours one seventh times forty five, hull-frame stock three sevenths times twenty seven, crystal chamber cap one times four. Together they stack to the total profit below.">
+              <span class="s4-stack-seg" data-key="con:2" style="--w: 90; --h: var(--constraint-2);"></span>
+              <span class="s4-stack-seg" data-key="con:3" style="--w: 162; --h: var(--constraint-3);"></span>
+              <span class="s4-stack-seg" data-key="con:5" style="--w: 56; --h: var(--constraint-5);"></span>
+            </div>
+            <div class="s4-stack-legend" aria-hidden="true">
+              <span class="s4-stack-lab" data-key="con:2" style="--w: 90; --h: var(--constraint-2);">(1/7)(45)</span>
+              <span class="s4-stack-lab" data-key="con:3" style="--w: 162; --h: var(--constraint-3);">(3/7)(27)</span>
+              <span class="s4-stack-lab" data-key="con:5" style="--w: 56; --h: var(--constraint-5);">(1)(4)</span>
+            </div>
+            <div class="s4-stack-total" data-role="duality-stack-total" style="--w: 308;">
+              <span class="s4-stack-total-lab">best profit 22</span>
+              <span class="s4-stack-total-bar" style="background: var(--objective);"></span>
+            </div>
+            <p class="s4-stack-slacks">
+              <span class="s4-stack-slack" data-key="con:1" style="--w: 0;">antimatter budget is slack, so it adds 0</span>
+              <span class="s4-stack-slack" data-key="con:4" style="--w: 0;">stabilizer mass is slack, so it adds 0</span>
+            </p>
+          </div>
+
           <p class="readout" data-role="duality-readout">
             Strong duality, an equality you can check: price each binding limit by its
             shadow price and add them up, <b>(1/7)(45) + (3/7)(27) + (1)(4) = 22</b>, the
@@ -998,7 +1097,9 @@
           <div class="badge-row">
             <span class="engine-badge" data-engine="trace" data-role="duality-engine">replaying trace</span>
             <span class="fig-sub">The shadow prices are read straight off the trace our
-              reference solver produced; an independent solver lands on the same values.</span>
+              reference solver produced; an independent solver lands on the same values. The
+              value-function breakpoints were computed against the scipy HiGHS oracle and
+              cross-checked against the reference simplex.</span>
           </div>
 
           <figcaption>
@@ -1161,11 +1262,26 @@
                 All 8 corners visited; optimum (0, 0, 10000), objective 10000.
               </p>
               <div class="km-bet" data-role="km-bet">
-                <p class="km-bet-q">Place your bet: how many of the cube's 8 corners does the greedy rule touch before it exits?</p>
-                <p class="km-bet-msg">The greedy rule is rigged to touch all 8 corners, every one, before it exits at (0, 0, 10000).</p>
+                <p class="km-bet-q">The chart and every readout above already say it: all 8 corners.</p>
+                <p class="km-bet-msg">The only thing left to wager is whether you believed a manifold could really
+                  drag the greedy rule across every last corner before the exit at (0, 0, 10000). The rig did.</p>
               </div>
             </div>
           </div>
+
+          <aside class="km-rig" aria-label="The rigged program, and who built it">
+            <p class="km-rig-lead">Victor Klee and George Minty built this cube in 1972 to make a greedy
+              pivot rule pay for its haste. The manifold maximizes <b>100 x1 + 10 x2 + x3</b> under three
+              tilted ceilings, copied straight from the trace:</p>
+            <ul class="km-rig-stack">
+              <li>x1 &le; 1</li>
+              <li>20 x1 + x2 &le; 100</li>
+              <li>200 x1 + 20 x2 + x3 &le; 10000</li>
+            </ul>
+            <p class="km-rig-bait">The bait sits in the coefficients: x1 pays 100 per unit, the loudest term,
+              so a greedy rule seizes it first, yet the real prize is the 10000 ceiling on x3, reachable only
+              after the tour has been dragged through every corner.</p>
+          </aside>
 
           <div class="badge-row">
             <span class="engine-badge" data-engine="trace" data-role="km-engine">replaying trace</span>
@@ -1189,6 +1305,129 @@
         </figure>
       </div>
 
+      <!-- Second exhibit: Chvatal's 1983 cycling program. The naive
+           tie-break loops forever; Bland's rule walks out. PRIMARY visual is the
+           basis-recurrence loop; the objective strip is secondary. All words live
+           in figure space, so the S5 body word cap is untouched. The naive lane is
+           never re-solved live (the engine offers only dantzig and bland), so the
+           badge is a static "replaying trace". cycling.js enriches the loop with a
+           step control; with scripts off this authored SVG is the whole exhibit. -->
+      <div class="l-page">
+        <figure class="cyc-figure">
+          <p class="notice">A smaller, meaner trap sits one rule change away. Read the very same
+            tableau two ways: a naive tie-break loops forever, while Bland's rule walks out.</p>
+
+          <div class="cyc-grid">
+            <div class="cyc-panel">
+              <div class="figure-box cyc-loop-box" data-role="cyc-loop-box" data-fixture="degenerate1-naive"
+                   style="--fig-ar: 380 / 300;">
+                <svg class="fig-svg cyc-loop-svg" viewBox="0 0 380 300"
+                     preserveAspectRatio="xMidYMid meet" role="img"
+                     aria-label="A ring of six bases. The naive tie-break cycles, its basis returning to the start every six pivots while the objective stays stuck at 0, whereas Bland's rule leaves the loop and reaches the optimum 1 in eight pivots.">
+                  <defs>
+                    <marker id="cyc-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                      <path class="cyc-arrow-head" d="M1,1 L9,5 L1,9 Z"></path>
+                    </marker>
+                  </defs>
+                  <line class="cyc-arc" x1="222.04" y1="60.5" x2="241.1" y2="71.5" marker-end="url(#cyc-arrow)"></line>
+                  <text class="cyc-arc-label" x="239.07" y="56.01" text-anchor="middle">enter x1</text>
+                  <line class="cyc-arc" x1="273.14" y1="127" x2="273.14" y2="149" marker-end="url(#cyc-arrow)"></line>
+                  <text class="cyc-arc-label" x="288.14" y="141" text-anchor="middle">enter x2</text>
+                  <line class="cyc-arc" x1="241.1" y1="204.5" x2="222.04" y2="215.5" marker-end="url(#cyc-arrow)"></line>
+                  <text class="cyc-arc-label" x="239.07" y="225.99" text-anchor="middle">enter x3</text>
+                  <line class="cyc-arc" x1="157.96" y1="215.5" x2="138.9" y2="204.5" marker-end="url(#cyc-arrow)"></line>
+                  <text class="cyc-arc-label" x="140.93" y="225.99" text-anchor="middle">enter x4</text>
+                  <line class="cyc-arc" x1="106.86" y1="149" x2="106.86" y2="127" marker-end="url(#cyc-arrow)"></line>
+                  <text class="cyc-arc-label" x="91.86" y="141" text-anchor="middle">enter s1</text>
+                  <line class="cyc-arc cyc-arc-close" x1="138.9" y1="71.5" x2="157.96" y2="60.5" marker-end="url(#cyc-arrow)"></line>
+                  <text class="cyc-arc-label cyc-arc-label-close" x="140.93" y="56.01" text-anchor="middle">enter s2</text>
+                  <g class="cyc-node" data-pivot="0" data-basis="4-5-6">
+                    <ellipse class="cyc-node-body" cx="190" cy="42" rx="33" ry="19"></ellipse>
+                    <text class="cyc-node-basis" x="190" y="40" text-anchor="middle">s1 s2 s3</text>
+                    <text class="cyc-node-step" x="190" y="53" text-anchor="middle">pivot 0</text>
+                  </g>
+                  <g class="cyc-node" data-pivot="1" data-basis="0-5-6">
+                    <ellipse class="cyc-node-body" cx="273.14" cy="90" rx="33" ry="19"></ellipse>
+                    <text class="cyc-node-basis" x="273.14" y="88" text-anchor="middle">x1 s2 s3</text>
+                    <text class="cyc-node-step" x="273.14" y="101" text-anchor="middle">pivot 1</text>
+                  </g>
+                  <g class="cyc-node" data-pivot="2" data-basis="0-1-6">
+                    <ellipse class="cyc-node-body" cx="273.14" cy="186" rx="33" ry="19"></ellipse>
+                    <text class="cyc-node-basis" x="273.14" y="184" text-anchor="middle">x1 x2 s3</text>
+                    <text class="cyc-node-step" x="273.14" y="197" text-anchor="middle">pivot 2</text>
+                  </g>
+                  <g class="cyc-node" data-pivot="3" data-basis="1-2-6">
+                    <ellipse class="cyc-node-body" cx="190" cy="234" rx="33" ry="19"></ellipse>
+                    <text class="cyc-node-basis" x="190" y="232" text-anchor="middle">x3 x2 s3</text>
+                    <text class="cyc-node-step" x="190" y="245" text-anchor="middle">pivot 3</text>
+                  </g>
+                  <g class="cyc-node" data-pivot="4" data-basis="2-3-6">
+                    <ellipse class="cyc-node-body" cx="106.86" cy="186" rx="33" ry="19"></ellipse>
+                    <text class="cyc-node-basis" x="106.86" y="184" text-anchor="middle">x3 x4 s3</text>
+                    <text class="cyc-node-step" x="106.86" y="197" text-anchor="middle">pivot 4</text>
+                  </g>
+                  <g class="cyc-node" data-pivot="5" data-basis="3-4-6">
+                    <ellipse class="cyc-node-body" cx="106.86" cy="90" rx="33" ry="19"></ellipse>
+                    <text class="cyc-node-basis" x="106.86" y="88" text-anchor="middle">s1 x4 s3</text>
+                    <text class="cyc-node-step" x="106.86" y="101" text-anchor="middle">pivot 5</text>
+                  </g>
+                  <text class="cyc-loop-hub" x="190" y="132" text-anchor="middle">pivot 6 lands</text>
+                  <text class="cyc-loop-hub" x="190" y="147" text-anchor="middle">back on pivot 0</text>
+                </svg>
+              </div>
+              <p class="fig-sub cyc-loop-title">Naive tie-break: the basis returns to pivot 0's basis
+                every six pivots, a closed loop that never escapes.</p>
+              <div class="cyc-controls" data-role="cyc-controls"></div>
+              <p class="readout cyc-readout" aria-live="polite" data-role="cyc-readout">The naive lane never
+                leaves this loop: 31 recorded pivots, every basis a repeat of the one six pivots earlier, the
+                objective pinned at 0.</p>
+            </div>
+
+            <div class="cyc-panel cyc-panel-strip">
+              <div class="figure-box cyc-strip-box" style="--fig-ar: 380 / 150;">
+                <svg class="fig-svg cyc-strip-svg" viewBox="0 0 380 150"
+                     preserveAspectRatio="xMidYMid meet" role="img"
+                     aria-label="A step chart of objective value per pivot. The naive lane stays flat at 0 across every pivot; Bland's lane holds at 0 then jumps to 1 as it escapes.">
+                  <line class="cyc-strip-axis" x1="44" y1="16" x2="44" y2="116"></line>
+                  <line class="cyc-strip-axis" x1="44" y1="116" x2="366" y2="116"></line>
+                  <text class="cyc-strip-tick" x="38" y="119.5" text-anchor="end">0</text>
+                  <text class="cyc-strip-tick" x="38" y="37.5" text-anchor="end">1</text>
+                  <line class="cyc-strip-grid" x1="44" y1="34" x2="366" y2="34"></line>
+                  <text class="cyc-strip-tick" x="44" y="130" text-anchor="middle">0</text>
+                  <text class="cyc-strip-tick" x="106.32" y="130" text-anchor="middle">6</text>
+                  <text class="cyc-strip-tick" x="168.65" y="130" text-anchor="middle">12</text>
+                  <text class="cyc-strip-tick" x="230.97" y="130" text-anchor="middle">18</text>
+                  <text class="cyc-strip-tick" x="293.29" y="130" text-anchor="middle">24</text>
+                  <text class="cyc-strip-tick" x="355.61" y="130" text-anchor="middle">30</text>
+                  <text class="cyc-strip-axis-title" x="205" y="147" text-anchor="middle">pivot</text>
+                  <polyline class="cyc-strip-naive" points="44,116 355.61,116"></polyline>
+                  <polyline class="cyc-strip-bland" points="44,116 106.32,116 106.32,34 127.1,34"></polyline>
+                  <text class="cyc-strip-lab cyc-strip-lab-naive" x="199.81" y="110" text-anchor="middle">naive, stuck at 0 for all 31 pivots</text>
+                  <text class="cyc-strip-lab cyc-strip-lab-bland" x="137.48" y="28" text-anchor="start">Bland escapes to 1</text>
+                </svg>
+              </div>
+              <p class="fig-sub cyc-strip-title">Objective per pivot, the secondary read: both lanes sit at
+                0 until Bland breaks out to 1.</p>
+            </div>
+          </div>
+
+          <div class="badge-row">
+            <span class="engine-badge" data-engine="trace">replaying trace</span>
+            <span class="fig-sub" data-role="cyc-provenance">Both lanes replay recorded traces: the runaway
+              lane runs the dantzig-naive tie-break for 31 pivots, exactly as each step's rule field logs it,
+              and the escaping lane runs the bland rule to the exit. The live engine offers only the dantzig
+              and bland rules, so the naive lane is never re-solved in your browser.</span>
+          </div>
+
+          <figcaption class="cyc-caption">
+            This is Chvatal's 1983 cycling example. At the sixth pivot both rules read the same tableau but
+            choose different entering variables outright: the naive rule grabs the largest coefficient and
+            loops, while Bland takes the lowest index and leaves. Bland's rule guarantees the walk is finite,
+            not that it is fast.
+          </figcaption>
+        </figure>
+      </div>
+
       <div class="l-body">
         <p class="vignette">Corner Case was built to visit corners. Someone, it seems, has
           now built the corners for it: this cargo manifold is skewed just enough that the
@@ -1198,8 +1437,12 @@
           <b>100 x1 + 10 x2 + x3</b> under three tilted limits,
           and Dantzig's rule marches through all <b>2&#179; = 8</b> corners before it
           lands at <b>(0, 0, 10000)</b>. Stretch the same construction to <b>n = 200</b>
-          and the tour runs to about <b>2 to the 200</b> pivots. The worst case is not
-          rare, it is constructed.</p>
+          and the tour runs to about <b>2 to the 200</b> pivots.</p>
+        <p>So why is simplex still the workhorse? Because a manifold this hostile has to be
+          built on purpose. On the average case, and on the programs shipping crews actually
+          solve, the greedy rule finishes in a handful of pivots. When a program is large
+          enough to fear the worst case, the interior-point method the next section races takes
+          a different road to the same optimum. The worst case is not rare, it is constructed.</p>
       </div>
     </section>
 
@@ -1260,40 +1503,45 @@
                   <thead>
                     <tr>
                       <th scope="col" class="mf-rowhead"></th>
-                      <th scope="col" class="mf-col-head"><span class="mf-col-name">fsa</span></th>
-                      <th scope="col" class="mf-col-head is-cut"><span class="mf-col-name">fsb</span><span class="mf-cut-tag">cut</span></th>
-                      <th scope="col" class="mf-col-head is-cut"><span class="mf-col-name">fac</span><span class="mf-cut-tag">cut</span></th>
-                      <th scope="col" class="mf-col-head"><span class="mf-col-name">fda</span></th>
-                      <th scope="col" class="mf-col-head"><span class="mf-col-name">fbd</span></th>
-                      <th scope="col" class="mf-col-head"><span class="mf-col-name">fcb</span></th>
-                      <th scope="col" class="mf-col-head"><span class="mf-col-name">fct</span></th>
-                      <th scope="col" class="mf-col-head"><span class="mf-col-name">fdt</span></th>
+                      <th scope="col" class="mf-col-head" data-key="var:fsa" tabindex="0" role="img" aria-label="Column fsa, arc s to a, flow 6 of 8"><span class="mf-col-name">fsa</span></th>
+                      <th scope="col" class="mf-col-head is-cut" data-key="var:fsb" tabindex="0" role="img" aria-label="Column fsb, arc s to b, flow 2 of 2, a minimum cut arc"><span class="mf-col-name">fsb</span><span class="mf-cut-tag">cut</span></th>
+                      <th scope="col" class="mf-col-head is-cut" data-key="var:fac" tabindex="0" role="img" aria-label="Column fac, arc a to c, flow 6 of 6, a minimum cut arc"><span class="mf-col-name">fac</span><span class="mf-cut-tag">cut</span></th>
+                      <th scope="col" class="mf-col-head" data-key="var:fda" tabindex="0" role="img" aria-label="Column fda, arc d to a, flow 0 of 3"><span class="mf-col-name">fda</span></th>
+                      <th scope="col" class="mf-col-head" data-key="var:fbd" tabindex="0" role="img" aria-label="Column fbd, arc b to d, flow 4 of 5"><span class="mf-col-name">fbd</span></th>
+                      <th scope="col" class="mf-col-head" data-key="var:fcb" tabindex="0" role="img" aria-label="Column fcb, arc c to b, flow 2 of 2"><span class="mf-col-name">fcb</span></th>
+                      <th scope="col" class="mf-col-head" data-key="var:fct" tabindex="0" role="img" aria-label="Column fct, arc c to t, flow 4 of 4"><span class="mf-col-name">fct</span></th>
+                      <th scope="col" class="mf-col-head" data-key="var:fdt" tabindex="0" role="img" aria-label="Column fdt, arc d to t, flow 4 of 5"><span class="mf-col-name">fdt</span></th>
+                      <th scope="col" class="mf-bound-head">=</th>
                     </tr>
                   </thead>
                   <tbody>
+                    <tr class="mf-obj-row">
+                      <th scope="row" class="mf-rowhead" aria-label="Objective, maximize fsa plus fsb">max</th>
+                      <td data-key="var:fsa" class="is-nz">1</td><td data-key="var:fsb" class="is-nz">1</td><td data-key="var:fac" class="">0</td><td data-key="var:fda" class="">0</td><td data-key="var:fbd" class="">0</td><td data-key="var:fcb" class="">0</td><td data-key="var:fct" class="">0</td><td data-key="var:fdt" class="">0</td><td class="mf-bound"></td>
+                    </tr>
                     <tr class="mf-flow-row">
                       <th scope="row" class="mf-rowhead">flow</th>
-                      <td>6</td><td class="is-saturated">2</td><td class="is-saturated">6</td><td>0</td><td>4</td><td class="is-saturated">2</td><td class="is-saturated">4</td><td>4</td>
+                      <td data-key="var:fsa" class="">6</td><td data-key="var:fsb" class="is-saturated">2</td><td data-key="var:fac" class="is-saturated">6</td><td data-key="var:fda" class="">0</td><td data-key="var:fbd" class="">4</td><td data-key="var:fcb" class="is-saturated">2</td><td data-key="var:fct" class="is-saturated">4</td><td data-key="var:fdt" class="">4</td><td class="mf-bound"></td>
                     </tr>
                     <tr class="mf-cap-row">
                       <th scope="row" class="mf-rowhead">cap</th>
-                      <td>8</td><td class="is-saturated">2</td><td class="is-saturated">6</td><td>3</td><td>5</td><td class="is-saturated">2</td><td class="is-saturated">4</td><td>5</td>
+                      <td data-key="var:fsa" class="">8</td><td data-key="var:fsb" class="is-saturated">2</td><td data-key="var:fac" class="is-saturated">6</td><td data-key="var:fda" class="">3</td><td data-key="var:fbd" class="">5</td><td data-key="var:fcb" class="is-saturated">2</td><td data-key="var:fct" class="is-saturated">4</td><td data-key="var:fdt" class="">5</td><td class="mf-bound"></td>
                     </tr>
                     <tr>
                       <th scope="row" class="mf-rowhead">net a</th>
-                      <td>1</td><td>0</td><td>-1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td>
+                      <td data-key="var:fsa" class="is-nz">1</td><td data-key="var:fsb" class="">0</td><td data-key="var:fac" class="is-nz">-1</td><td data-key="var:fda" class="is-nz">1</td><td data-key="var:fbd" class="">0</td><td data-key="var:fcb" class="">0</td><td data-key="var:fct" class="">0</td><td data-key="var:fdt" class="">0</td><td class="mf-bound">0</td>
                     </tr>
                     <tr>
                       <th scope="row" class="mf-rowhead">net b</th>
-                      <td>0</td><td>1</td><td>0</td><td>0</td><td>-1</td><td>1</td><td>0</td><td>0</td>
+                      <td data-key="var:fsa" class="">0</td><td data-key="var:fsb" class="is-nz">1</td><td data-key="var:fac" class="">0</td><td data-key="var:fda" class="">0</td><td data-key="var:fbd" class="is-nz">-1</td><td data-key="var:fcb" class="is-nz">1</td><td data-key="var:fct" class="">0</td><td data-key="var:fdt" class="">0</td><td class="mf-bound">0</td>
                     </tr>
                     <tr>
                       <th scope="row" class="mf-rowhead">net c</th>
-                      <td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>-1</td><td>-1</td><td>0</td>
+                      <td data-key="var:fsa" class="">0</td><td data-key="var:fsb" class="">0</td><td data-key="var:fac" class="is-nz">1</td><td data-key="var:fda" class="">0</td><td data-key="var:fbd" class="">0</td><td data-key="var:fcb" class="is-nz">-1</td><td data-key="var:fct" class="is-nz">-1</td><td data-key="var:fdt" class="">0</td><td class="mf-bound">0</td>
                     </tr>
                     <tr>
                       <th scope="row" class="mf-rowhead">net d</th>
-                      <td>0</td><td>0</td><td>0</td><td>-1</td><td>1</td><td>0</td><td>0</td><td>-1</td>
+                      <td data-key="var:fsa" class="">0</td><td data-key="var:fsb" class="">0</td><td data-key="var:fac" class="">0</td><td data-key="var:fda" class="is-nz">-1</td><td data-key="var:fbd" class="is-nz">1</td><td data-key="var:fcb" class="">0</td><td data-key="var:fct" class="">0</td><td data-key="var:fdt" class="is-nz">-1</td><td class="mf-bound">0</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1344,12 +1592,17 @@
           <figcaption>
             A source to sink network at its maximum flow of <b>8</b>. Each arrow reads flow over
             capacity, four arcs run full, and the minimum cut, <b>s to b</b> and <b>a to c</b>,
-            sums to <b>8</b> as well. The matrix beside it is the very same eight numbers written
-            as a linear program. The card above reads a second network as node potentials: pin the
-            source at <b>0</b>, and the farthest the sink can be pushed is <b>dt = 4</b>, the length
-            of the shortest route. Those potentials are the shortest-path echo of the shadow prices
-            from Section 04, a price read straight off the optimum, distance from the source standing
-            in for what one more unit is worth.
+            sums to <b>8</b> as well. The matrix beside it writes those eight numbers as a linear
+            program: a top row to maximize, the capacities as upper bounds, and four net rows that
+            are balance equalities, each fixed to <b>= 0</b> in the new bound column. Max-flow
+            min-cut is Section 04's strong duality restated, an equality where the maximum flow and
+            the minimum cut meet at the same number the shadow prices spell out there. The card
+            above reads a second network as node potentials: pin the source at <b>0</b>, and the
+            farthest the sink can be pushed is <b>dt = 4</b>, the length of the shortest route. We
+            maximize because the all-zero potentials are already feasible, a trivial answer that
+            collapses every distance to zero, so we raise dt until the edge bounds stop it. Those
+            potentials are the shortest-path echo of Section 04's shadow prices, distance from the
+            source standing in for what one more unit is worth.
           </figcaption>
         </figure>
 
@@ -1415,8 +1668,9 @@
             The race on one cargo polytope: Corner Case hops the boundary corner to corner, five
             recorded vertices from the topic21 trace, while Strictly Feasible threads the interior
             along the recorded central path, 24 logged points converging on the shared arrival
-            <b>(9, 9, 4)</b> as mu falls. Interior points are strictly feasible points, which is how
-            the rival earns its name.
+            <b>(9, 9, 4)</b> as mu falls. The two racers are paired by journey fraction, not by wall
+            clock. Interior points are strictly feasible points, which is how the rival earns its
+            name.
           </figcaption>
         </figure>
       </div>
@@ -1493,6 +1747,17 @@
             problem of Sections 01 and 02 is an instance of the classic
             two-variable product-mix exercise found in any linear programming text.
             <a href="https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/">MIT Press</a>.
+          </li>
+          <li>
+            <span class="src-tag">Klee and Minty.</span> Victor Klee and George Minty,
+            <em>How good is the simplex algorithm?</em>, in Inequalities III, 1972. The
+            skewed cube of Section 05, whose corners a greedy pivot rule is lured through
+            in full.
+          </li>
+          <li>
+            <span class="src-tag">Chvatal.</span> Vasek Chvatal,
+            <em>Linear Programming</em>, W. H. Freeman, 1983. The small degenerate program
+            of Section 05 whose naive tie-break cycles, and Bland's rule as the finite escape.
           </li>
           <li>
             <span class="src-tag">Prior art: minilp.</span> The pure-Rust LP solver
