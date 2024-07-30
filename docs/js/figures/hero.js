@@ -41,6 +41,14 @@ const Y_TICKS = [1, 2, 3];
 const OBJ_BASE = { x: 1.25, y: 0.55 };
 const OBJ_LEN = 1.55; // arrow length in data units
 
+// Edge tie detection. The tie fires on |sin(angle)| between the gradient
+// and a binding edge normal, gated with hysteresis: a tight threshold turns it
+// on, a looser one releases it, so a small jitter at the parallel heading can
+// never flicker the announcement. TIE_S_ON is sin of about 0.46 degrees,
+// TIE_S_OFF sin of about 1.15 degrees.
+const TIE_S_ON = 0.008;
+const TIE_S_OFF = 0.02;
+
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 // Lazy-load d3 as a global. Resolves window.d3 or rejects so the still stays.
@@ -197,6 +205,10 @@ export default async function mount(el, ctx) {
     // region's lowest objective value (0) to the optimum's value (1). At rest it
     // rides mid region so the reader can sweep it up and feel it stop at a corner.
     isoF: 0.5,
+    // Edge tie: true while the objective runs parallel to a binding edge,
+    // so the whole edge ties for best. tieName freezes at the on transition.
+    tieActive: false,
+    tieName: "",
   };
 
   // ---- scales ----------------------------------------------------------
@@ -484,11 +496,62 @@ export default async function mount(el, ctx) {
     return out;
   }
 
+  // Write the readout only when its content actually changes. A held state (the
+  // tie sentence, repeated every redraw while the objective stays parallel to an
+  // edge) is then announced once, not spammed into the aria-live region frame by
+  // frame (no aria spam). Normal drags still refresh every frame because the
+  // corner and value genuinely change.
+  let lastReadout = null;
+  function setReadout(html) {
+    if (!readout || html === lastReadout) return;
+    lastReadout = html;
+    readout.innerHTML = html;
+  }
+
+  // Edge tie detection. When the objective runs parallel to a binding edge,
+  // that whole edge ties for best, not a single corner. Score each up facing
+  // binding constraint by |sin(angle)| between the gradient and its normal, then
+  // gate the smallest with hysteresis so a jitter at the parallel heading cannot
+  // toggle it. tieName is frozen at the on transition, keeping the sentence
+  // stable for the length of the tie (one announcement, not a per frame rewrite).
+  function updateTie(opt, cx, cy) {
+    let best = null;
+    if (opt) {
+      const gmag = Math.hypot(cx, cy) || 1;
+      constraints.forEach((k, i) => {
+        const bind = Math.abs(k.a * opt.point[0] + k.b * opt.point[1] - k.c) < 1e-6;
+        const up = cx * k.a + cy * k.b > 1e-9;
+        if (!bind || !up) return;
+        const nmag = Math.hypot(k.a, k.b) || 1;
+        const s = Math.abs(cx * k.b - cy * k.a) / (gmag * nmag);
+        if (!best || s < best.s)
+          best = { s, name: LIMIT_NAMES[i] || `the limit ${k.termStr}` };
+      });
+    }
+    if (!best) {
+      state.tieActive = false;
+    } else if (!state.tieActive && best.s < TIE_S_ON) {
+      state.tieActive = true;
+      state.tieName = best.name;
+    } else if (state.tieActive && best.s > TIE_S_OFF) {
+      state.tieActive = false;
+    }
+  }
+
   // Write the readout + aria-label from a point/value pair, whatever its source
   // (the geometric argmax, or a live solve when the badge is live). The corner
   // count is a geometric property of the TRUE region, never the frame clip.
-  // When the corner sits past the frame the wording says so honestly.
+  // When the corner sits past the frame the wording says so honestly. When
+  // the objective ties along an edge, the single-corner line would be misleading,
+  // so the honest edge tie sentence takes its place.
   function writeReadout(point, value, n) {
+    if (state.tieActive) {
+      const msg =
+        `Every point of this edge ties for best: the objective now runs parallel to ${state.tieName}, so the whole edge shares the highest value.`;
+      svg.attr("aria-label", msg);
+      setReadout(msg);
+      return;
+    }
     const px = fmt(point[0]);
     const py = fmt(point[1]);
     const val = fmt(value);
@@ -503,10 +566,9 @@ export default async function mount(el, ctx) {
       "aria-label",
       `Feasible region with ${n} corners. The objective points ${dirWord(state.theta)}. Its best corner is ${xname} = ${px}, ${yname} = ${py}, where the objective value is ${val}.${formed}${cont}`
     );
-    if (readout) {
-      readout.innerHTML =
-        `Best corner <b>(${px}, ${py})</b>, objective <b>${val}</b>. Feasible region has <b>${n}</b> corners.${formed}${cont}`;
-    }
+    setReadout(
+      `Best corner <b>(${px}, ${py})</b>, objective <b>${val}</b>. Feasible region has <b>${n}</b> corners.${formed}${cont}`
+    );
   }
 
   function updateReadout(nCorners, opt, unbounded) {
@@ -514,13 +576,13 @@ export default async function mount(el, ctx) {
       const msg =
         "These limits leave the region open in the objective direction, so the value can grow without end and no corner is best.";
       svg.attr("aria-label", msg);
-      if (readout) readout.textContent = msg;
+      setReadout(msg);
       return;
     }
     if (!opt) {
       const msg = "The limits leave no points in common, so there is no feasible region.";
       svg.attr("aria-label", msg);
-      if (readout) readout.textContent = msg;
+      setReadout(msg);
       return;
     }
     writeReadout(opt.point, opt.value, nCorners);
@@ -726,6 +788,9 @@ export default async function mount(el, ctx) {
       .attr("aria-valuenow", fmt(isoV))
       .attr("aria-valuetext", isoValueText(isoV, atMax));
 
+    // Resolve the edge tie state before the readout reads it, so both the
+    // geometric draw and any later live solve write the same honest sentence.
+    updateTie(opt, cx, cy);
     updateReadout(verts.length, opt, unbounded);
   }
 
