@@ -335,6 +335,61 @@ function tocScrollSpy() {
   links.forEach((_, section) => io.observe(section));
 }
 
+// ---- deep-anchor re-landing after hydration -----------------------------
+// The concept map mints many deep anchors, and hash navigation
+// across still-unhydrated figures lands short: figures above the target reserve
+// one height as authored stills, then grow or shrink as they hydrate, sliding
+// the target away from where the browser first scrolled. After any hash jump we
+// re-land the target as the layout settles, over a bounded window, then release
+// so a later manual scroll is never fought. This only re-scrolls, it never
+// brushes: no ".is-lit" is added, so a map link navigates and nothing else.
+function reAnchorOnHash() {
+  let timers = [];
+  let ro = null;
+  const release = () => {
+    timers.forEach(clearTimeout);
+    timers = [];
+    if (ro) { ro.disconnect(); ro = null; }
+  };
+  const land = () => {
+    let id = "";
+    try { id = decodeURIComponent((location.hash || "").slice(1)); }
+    catch (e) { id = (location.hash || "").slice(1); }
+    if (!id) return;
+    const exists = document.getElementById(id);
+    if (!exists) return;
+    release();
+    // Land the target's top flush with its own scroll-margin-top, computed
+    // directly rather than via scrollIntoView so the page's scroll-padding does
+    // not add an offset, and instantly so no smooth animation is mid-flight when
+    // the layout is measured.
+    const scroll = () => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const smt = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+      const dy = el.getBoundingClientRect().top - smt;
+      if (Math.abs(dy) > 1) {
+        window.scrollTo({ top: window.scrollY + dy, left: window.scrollX, behavior: "instant" });
+      }
+    };
+    scroll();
+    // Re-land whenever the page height changes (an intervening figure
+    // hydrating), plus a few fixed backstops, all inside ~1.9s, then stop.
+    if ("ResizeObserver" in window) {
+      ro = new ResizeObserver(scroll);
+      try { ro.observe(document.body); } catch (e) { ro = null; }
+    }
+    [150, 400, 800, 1300, 1900].forEach((t) => timers.push(setTimeout(scroll, t)));
+    timers.push(setTimeout(release, 2100));
+  };
+  // A user-initiated scroll gesture during the window cancels the re-landing.
+  const cancelOnGesture = () => release();
+  window.addEventListener("wheel", cancelOnGesture, { passive: true });
+  window.addEventListener("touchmove", cancelOnGesture, { passive: true });
+  window.addEventListener("hashchange", land);
+  if (location.hash) land();
+}
+
 // ---- theme toggle -------------------------------------------------------
 // Light is canonical for everyone; this is the explicit opt-in that
 // sets data-theme="dark" on <html> and remembers the choice in localStorage.
@@ -369,12 +424,55 @@ function themeToggle() {
   });
 }
 
+// ---- first-use gloss dismissal ----------------------------
+// The gloss reveal is pure CSS (:hover / :focus-within); only WCAG 1.4.13
+// "Dismissible" needs script: Escape must hide the open definition WITHOUT
+// moving focus off the trigger, which CSS cannot express. We add is-dismissed
+// on Escape (hiding the def while focus stays) and clear it when focus leaves
+// the trigger, so a later focus reopens it. No title attributes, ever.
+function glossDismiss() {
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const g = e.target && e.target.closest ? e.target.closest(".gloss") : null;
+    if (g) g.classList.add("is-dismissed");
+  });
+  document.addEventListener("focusout", (e) => {
+    const g = e.target && e.target.closest ? e.target.closest(".gloss") : null;
+    if (g) g.classList.remove("is-dismissed");
+  });
+}
+
+// ---- gloss edge-aware anchoring ---------------------------
+// Above the mobile card breakpoint the definition is absolutely positioned and
+// opens rightward from the trigger (left:0). A trigger in the right of a line
+// then pushes a wide definition past the page edge, where body{overflow-x:clip}
+// cuts it off mid word. CSS cannot know a trigger's horizontal position, so on
+// reveal we flip the definition to open leftward (the .opens-left class sets
+// right:0) whenever the trigger sits in the right half of the viewport. The
+// definition is narrower than half the smallest desktop viewport, so the side
+// with more room always fits it. Below the card breakpoint the fixed centered
+// card wins and this class is inert.
+function glossAnchor() {
+  const place = (g) => {
+    const r = g.getBoundingClientRect();
+    const mid = r.left + r.width / 2;
+    g.classList.toggle("opens-left", mid > document.documentElement.clientWidth / 2);
+  };
+  document.querySelectorAll(".gloss").forEach((g) => {
+    g.addEventListener("pointerenter", () => place(g));
+    g.addEventListener("focusin", () => place(g));
+  });
+}
+
 // ---- boot ---------------------------------------------------------------
 function boot() {
   themeToggle();
   observeFigures();
   observeMath();
   tocScrollSpy();
+  reAnchorOnHash();
+  glossDismiss();
+  glossAnchor();
 }
 
 if (document.readyState === "loading") {

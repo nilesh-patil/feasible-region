@@ -68,6 +68,9 @@
   --accent-soft: #4a7fc0;
   --accent-contrast: #ffffff;
   --focus-ring: rgba(38, 96, 164, 0.42);
+  /* First-use gloss underline. Dotted term affordance; ratio 6.4:1 on the
+     light surface, well past the 3:1 non-text floor of WCAG 1.4.13. */
+  --gloss-underline: #2660a4;
   --shadow: 0 6px 20px -8px rgba(24, 26, 34, 0.22);
 
   /* ======================================================================
@@ -125,6 +128,8 @@ html[data-theme="dark"] {
     --accent-soft: #c4d5f5;
     --accent-contrast: #0e1015;
     --focus-ring: rgba(159, 186, 240, 0.5);
+    /* Lifted for deep charcoal; ratio near 9.8:1 on the dark surface. */
+    --gloss-underline: #9fbaf0;
     --shadow: 0 8px 26px -10px rgba(0, 0, 0, 0.7);
 
     /* Same hues, lifted for contrast on deep charcoal. */
@@ -1038,10 +1043,62 @@ td.hood-pivot { box-shadow: inset 0 0 0 2px var(--objective); }
   font-weight: 650;
 }
 /* The TOC only leaves the reading flow once there is gutter room for a left
-   rail (>= 1400px, where .toc-nav below repositions it into the margin). Below
-   that it stays a quiet inline nav, so it never pins over the centred column. */
-@media (min-width: 1400px) {
+   rail (>= 1460px, where .toc-nav below repositions it into the margin). Below
+   that it stays a quiet inline nav, so it never pins over the centred column.
+   The page width did not clear a rail at 1400px, so the trigger moved out. */
+@media (min-width: 1460px) {
   .toc.is-sticky { position: sticky; top: 1.5rem; }
+}
+
+/* TOC wayfinding tags: seven neutral small-caps tokens in the
+   eyebrow idiom, no pill and no data hue. They sit in the DOM on every tagged
+   row; the inline nav shows them on all rows, and the wide margin rail keeps
+   them only on the active entry so the fixed rail stays quiet. */
+.toc-tags {
+  display: flex; flex-wrap: wrap; gap: 0.2em 0.55em;
+  margin: 0.1em 0 0.35em 0.7em;
+}
+.toc-tag {
+  font-family: var(--font-sans);
+  font-size: 0.58rem; font-weight: 650;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--faint);
+}
+@media (min-width: 1460px) {
+  .toc-nav.is-sticky .toc-tags { display: none; }
+  .toc-nav.is-sticky li:has(a.is-active) .toc-tags,
+  .toc-nav.is-sticky li:has(a[aria-current]) .toc-tags { display: flex; }
+}
+
+/* Concept map ("Docking"): the closing index of every idea on the
+   page. One row per concept, each a name, a one-sentence definition, and links
+   to the section and figure where it lives. These definitions are the single
+   source the first-use glosses quote, so they never fork. Rows link with plain
+   anchors; there is no page-level brush bus. */
+#concept-map .concept-intro { color: var(--ink-soft); max-width: var(--measure); }
+.concept-list { list-style: none; padding: 0; margin: var(--sp-5) 0 0; }
+.concept-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.15em 1.2rem;
+  padding: var(--sp-3) 0;
+  border-top: 1px solid var(--hairline);
+}
+.concept-row:last-child { border-bottom: 1px solid var(--hairline); }
+.concept-name { font-family: var(--font-sans); font-weight: 650; color: var(--ink); }
+.concept-def { color: var(--ink-soft); }
+.concept-links {
+  display: flex; flex-wrap: wrap; gap: 0.4em 1.1em;
+  font-family: var(--font-sans); font-size: 0.82rem;
+}
+.concept-links a { color: var(--faint); text-decoration: none; }
+.concept-links a:hover { color: var(--accent); }
+@media (min-width: 720px) {
+  .concept-row {
+    grid-template-columns: 11rem 1fr 11rem;
+    align-items: baseline;
+    gap: 0 1.4rem;
+  }
 }
 
 /* 10. FOCUS / REDUCED MOTION / PRINT  ===================================== */
@@ -2205,3 +2262,108 @@ a:focus-visible { outline-offset: 3px; }
   margin-top: var(--sp-3);
 }
 .race-cue b { color: var(--ink); }
+
+/* ==========================================================================
+ First-use glosses and the static glossary.
+ A gloss is an inline term carrying a dotted underline; on hover or keyboard
+ focus it reveals a one-sentence definition quoted verbatim from the concept
+ map. The component satisfies WCAG 1.4.13: it is keyboard focusable, the
+ definition is dismissible with Escape (main.js adds is-dismissed on Escape
+ without moving focus), it stays open while the pointer rests on it, and the
+ dotted affordance clears 3:1 non-text contrast in both themes via
+ --gloss-underline. No title attribute is used anywhere; the definition is a
+ nested role="tooltip" element also referenced by aria-describedby.
+ ========================================================================== */
+.gloss {
+ position: relative;
+ color: inherit;
+ cursor: help;
+ text-decoration-line: underline;
+ text-decoration-style: dotted;
+ text-decoration-color: var(--gloss-underline);
+ text-decoration-thickness: 1px;
+ text-underline-offset: 0.18em;
+}
+.gloss-def {
+ display: none;
+ position: absolute;
+ left: 0;
+ top: calc(100% + 0.4em);
+ z-index: 40;
+ width: max-content;
+ max-width: min(22rem, 78vw);
+ padding: 0.55rem 0.75rem;
+ font-family: var(--font-sans);
+ font-size: 0.82rem;
+ font-weight: 400;
+ font-style: normal;
+ line-height: 1.45;
+ text-align: left;
+ text-decoration: none;
+ color: var(--ink);
+ background: var(--surface);
+ border: 1px solid var(--hairline-strong);
+ border-radius: var(--radius);
+ box-shadow: var(--shadow);
+}
+.gloss:hover > .gloss-def,
+.gloss:focus-within > .gloss-def {
+ display: block;
+}
+/* Edge-aware flip (main.js adds .opens-left when the trigger is in the right
+ half of the viewport): open the definition leftward so a wide card near the
+ right of a line stays on screen instead of being clipped. Scoped above the
+ mobile breakpoint so the fixed viewport-foot card below still wins there. */
+@media (min-width: 48.0625rem) {
+ .gloss.opens-left > .gloss-def {
+  left: auto;
+  right: 0;
+ }
+}
+/* Escape dismissal (main.js) must win even while the trigger keeps focus. This
+ rule follows the reveal rules so, at equal specificity, source order hides. */
+.gloss.is-dismissed > .gloss-def {
+ display: none;
+}
+/* Narrow viewports: the reading column fills the screen, so a definition
+ tethered to a trigger on the right of a line would run off the edge and
+ body{overflow-x:clip} would cut its text off mid word. Below the reading
+ measure, dock the definition to the foot of the viewport as a centered card.
+ position:fixed references the viewport and escapes the body clip, so the
+ whole definition stays on screen and wraps within the width. This is pure CSS
+ and works with scripts off, so a phone reader still gets the full sentence. */
+@media (max-width: 48rem) {
+ .gloss-def {
+  position: fixed;
+  left: 50%;
+  right: auto;
+  top: auto;
+  bottom: 0.9rem;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(32rem, calc(100vw - 1.5rem));
+ }
+}
+
+/* Static glossary block: serves readers without scripts and carries the two
+ words that cannot take an inline gloss (reduced cost, rhs). Its faith-word
+ definitions are string-identical to the concept map rows they source. */
+#glossary .glossary-intro { color: var(--ink-soft); max-width: var(--measure); }
+.glossary-list { list-style: none; padding: 0; margin: var(--sp-5) 0 0; }
+.glossary-row {
+ display: grid;
+ grid-template-columns: 1fr;
+ gap: 0.15em 1.2rem;
+ padding: var(--sp-3) 0;
+ border-top: 1px solid var(--hairline);
+}
+.glossary-row:last-child { border-bottom: 1px solid var(--hairline); }
+.glossary-name { font-family: var(--font-sans); font-weight: 650; color: var(--ink); }
+.glossary-def { color: var(--ink-soft); }
+@media (min-width: 720px) {
+ .glossary-row {
+ grid-template-columns: 11rem 1fr;
+ align-items: baseline;
+ gap: 0 1.4rem;
+ }
+}

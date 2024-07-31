@@ -114,11 +114,12 @@
       text-transform: uppercase; letter-spacing: 0.16em;
       color: var(--faint); margin-bottom: var(--sp-2);
     }
-    /* At >= 1400px the TOC leaves the flow for a fixed left rail in the margin.
+    /* At >= 1460px the TOC leaves the flow for a fixed left rail in the margin.
        Selector matches .toc.is-sticky specificity and, being later in source,
        wins so the rail is truly fixed (not the sticky fallback) and sits beside
-       the reading column instead of over it. */
-    @media (min-width: 1400px) {
+       the reading column instead of over it. The page width did not clear a
+       rail at 1400px, so the trigger moved out to about 1460px. */
+    @media (min-width: 1460px) {
       .toc-nav.is-sticky {
         position: fixed; top: 6.5rem; left: calc((100vw - var(--page-w)) / 2 - 11.5rem);
         width: 10.5rem; margin: 0; z-index: 20;
@@ -142,6 +143,15 @@
       font-family: var(--font-sans); font-size: 0.9rem;
       color: var(--ink-soft); max-width: 30rem;
     }
+    /* Every figure carries a stable number. A quiet caption label
+       that reads as a figure number, not an eyebrow. */
+    .fig-num {
+      font-family: var(--font-sans); font-weight: 650;
+      color: var(--ink-soft); margin-right: 0.4em;
+    }
+    /* Figures are anchor targets from the concept map; give a figure link the
+       same landing breathing room a section gets. */
+    figure[id] { scroll-margin-top: 5rem; }
     .badge-row {
       display: flex; align-items: center; gap: var(--sp-3);
       flex-wrap: wrap; margin-top: var(--sp-3);
@@ -216,13 +226,20 @@
     <div class="l-body">
       <p class="toc-title">Contents</p>
       <ol>
-        <li><a href="#cold-open">Cold open: a diet by hand</a></li>
-        <li><a href="#s1">1. The feasible region</a></li>
-        <li><a href="#s2">2. From words to a tableau</a></li>
-        <li><a href="#s3">3. Walking the corners</a></li>
-        <li><a href="#s4">4. What one more unit is worth</a></li>
-        <li><a href="#s5">5. The worst case, built on purpose</a></li>
-        <li><a href="#s6">6. Networks and the race</a></li>
+        <li><a href="#cold-open">Cold open: a diet by hand</a>
+          <span class="toc-tags"><span class="toc-tag">modeling</span></span></li>
+        <li><a href="#s1">1. The feasible region</a>
+          <span class="toc-tags"><span class="toc-tag">geometry</span></span></li>
+        <li><a href="#s2">2. From words to a tableau</a>
+          <span class="toc-tags"><span class="toc-tag">modeling</span> <span class="toc-tag">algebra</span></span></li>
+        <li><a href="#s3">3. Walking the corners</a>
+          <span class="toc-tags"><span class="toc-tag">geometry</span> <span class="toc-tag">algebra</span></span></li>
+        <li><a href="#s4">4. What one more unit is worth</a>
+          <span class="toc-tags"><span class="toc-tag">duality</span> <span class="toc-tag">sensitivity</span></span></li>
+        <li><a href="#s5">5. The worst case, built on purpose</a>
+          <span class="toc-tags"><span class="toc-tag">complexity</span></span></li>
+        <li><a href="#s6">6. Networks and the race</a>
+          <span class="toc-tags"><span class="toc-tag">reductions</span> <span class="toc-tag">duality</span></span></li>
         <li><a href="#colophon">Colophon and sources</a></li>
       </ol>
     </div>
@@ -246,9 +263,9 @@
           published the figure in 1945, and freely admitted he could not prove it
           the true minimum. A method that could prove it existed nowhere yet;
           measured from those 1939 prices, it was still nearly a decade off. It
-          arrived in 1947, when nine clerks at the National Bureau of Standards
-          ran it for some 120 person-days and settled the question at $39.69,
-          twenty-four cents under his guess.</p>
+          arrived in 1947, when George Dantzig's simplex method had nine clerks
+          at the National Bureau of Standards run it for some 120 person-days,
+          settling the question at $39.69, twenty-four cents under his guess.</p>
         <p>Ten thousand years later, that same mathematics has become plumbing. The
           General Systems Vehicle Marginal Utility provisions itself every few
           milliseconds: what to fabricate, what to spend, what to keep in reserve,
@@ -265,7 +282,7 @@
       </div>
 
       <div class="l-page">
-        <figure>
+        <figure id="fig-hero">
           <p class="notice">What to notice: a best point always sits on the
             boundary, and a corner always ties for best.</p>
 
@@ -370,7 +387,7 @@
           </div>
 
           <figcaption>
-            The program is maximize
+            <span class="fig-num">Figure 1.</span> The program is maximize
             <b>3 x1 + 2 x2</b> subject to feedstock <b>x1 + x2 &le; 4</b> and
             press time <b>x1 + 3 x2 &le; 6</b>, both variables at least zero.
             Slide either line, or turn the objective, and the shaded region and
@@ -404,7 +421,7 @@
         <p>Underneath, two variables: maximize <b>3 x1 + 2 x2</b> subject to
           <b>x1 + x2 &le; 4</b> and <b>x1 + 3 x2 &le; 6</b>, both nonnegative.
           Nonnegativity is not fine print but a constraint like any other: at the
-          resting corner <b>(4, 0)</b> the feedstock budget is spent to its last
+          resting corner <b>(4, 0)</b>, the optimum a solver labels <span class="gloss" data-term="x*" tabindex="0" aria-describedby="gd-xstar">x*<span class="gloss-def" role="tooltip" id="gd-xstar" aria-hidden="true">The optimal point a solver returns, the corner where the objective reaches its best value.</span></span>, the feedstock budget is spent to its last
           unit and the floor <b>x2 = 0</b> supplies the other wall. Press time is
           not even full; it has room to spare, a slack of <b>2</b>, and a budget
           with slack buys the objective nothing extra at the margin. Section 04
@@ -433,7 +450,7 @@
       </div>
 
       <div class="l-page">
-        <figure>
+        <figure id="fig-formulation">
           <p class="notice">Click a limit to carve it into the region; each one adds a
             row and a slack that names the room left over.</p>
 
@@ -560,7 +577,7 @@
           </div>
 
           <figcaption>
-            Three stages turn the fab-bay mix into a tableau: sentences become inequalities, each
+            <span class="fig-num">Figure 2.</span> Three stages turn the fab-bay mix into a <span class="gloss" data-term="tableau" tabindex="0" aria-describedby="gd-tableau">tableau<span class="gloss-def" role="tooltip" id="gd-tableau" aria-hidden="true">The grid of coefficients a solver pivots on, one row per constraint above a row for the objective.</span></span>: sentences become inequalities, each
             <b>&le;</b> gains a slack named for the room it leaves, and the equalities
             stack into the first simplex tableau. Click a limit to carve it into the
             region; the standard form grows a row beside it, and the best corner re-solves
@@ -603,7 +620,7 @@
           </ul>
         </div>
 
-        <figure class="s2-first-tableau" style="margin: var(--sp-5) 0 var(--sp-6);">
+        <figure id="fig-first-tableau" class="s2-first-tableau" style="margin: var(--sp-5) 0 var(--sp-6);">
           <div class="tableau-scroll">
             <table class="tableau" style="max-width: 24rem;">
               <thead>
@@ -633,8 +650,8 @@
             </table>
           </div>
           <figcaption>
-            The first tableau, copied from the recorded walk before any pivot. The slacks
-            hold the whole basis, s1 = 4 and s2 = 6, the z row still reads the raw objective,
+            <span class="fig-num">Figure 3.</span> The first tableau, copied from the recorded walk before any pivot. The slacks
+            hold the whole <span class="gloss" data-term="basis" tabindex="0" aria-describedby="gd-basis">basis<span class="gloss-def" role="tooltip" id="gd-basis" aria-hidden="true">The set of variables held nonzero at a corner, one for each row of the tableau.</span></span>, s1 = 4 and s2 = 6, the z row still reads the raw objective,
             and the score stands at 0. This exhibit is pinned to the both-limits pose and
             never changes; carve the panel above however you like, these cells stay put.
           </figcaption>
@@ -663,7 +680,7 @@
       </div>
 
       <div class="l-page">
-        <figure>
+        <figure id="fig-dualview">
           <p class="notice">One scrubber moves both views. The corner that lights up on
             the left is the same pivot highlighted on the right.</p>
 
@@ -867,10 +884,10 @@
           </p>
 
           <figcaption>
-            <span data-role="dualview-walkcaption">Corner Case walks the cargo polytope <b>(0,0,0)</b> to
+            <span class="fig-num">Figure 4.</span> <span data-role="dualview-walkcaption">Corner Case walks the cargo polytope <b>(0,0,0)</b> to
             <b>(8,0,0)</b> to <b>(12,3,0)</b> to <b>(12,3,4)</b> to <b>(9,9,4)</b> while the
             tableau mirrors every hop, and the objective climbs <b>0, 8, 15, 19, 22</b>. </span>Move
-            the scrubber and the vertex lit on the left is the same entering column and leaving
+            the scrubber and the vertex lit on the left is the same <span class="gloss" data-term="entering" tabindex="0" aria-describedby="gd-entering">entering<span class="gloss-def" role="tooltip" id="gd-entering" aria-hidden="true">The variable a pivot brings into the basis, the column chosen to grow.</span></span> column and <span class="gloss" data-term="leaving" tabindex="0" aria-describedby="gd-leaving">leaving<span class="gloss-def" role="tooltip" id="gd-leaving" aria-hidden="true">The variable a pivot sends out of the basis, the row that reaches zero first.</span></span>
             row lit on the right.
           </figcaption>
         </figure>
@@ -916,7 +933,7 @@
       </div>
 
       <div class="l-page">
-        <figure>
+        <figure id="fig-duality">
           <p class="notice">What is one more unit worth? Hover or focus a resource to read
             its shadow price.</p>
 
@@ -927,7 +944,7 @@
                the brushing so lighting a resource lights its limit and its price together. -->
           <div class="s4-grid">
             <div class="s4-panel">
-              <p class="s4-head">The resource limits (primal)</p>
+              <p class="s4-head">The resource limits (<span class="gloss" data-term="primal" tabindex="0" aria-describedby="gd-primal">primal<span class="gloss-def" role="tooltip" id="gd-primal" aria-hidden="true">The original program, maximizing the objective under the resource limits.</span></span>)</p>
               <ul class="s4-list" aria-label="The five resource limits at the optimum, which bind and which have room to spare.">
                 <li class="s4-cx" data-key="con:1" style="--h: var(--constraint-1);">
                   <span class="s4-cx-name">antimatter budget</span>
@@ -958,7 +975,7 @@
             </div>
 
             <div class="s4-panel s4-dual">
-              <p class="s4-head">What one more unit is worth (dual)</p>
+              <p class="s4-head">What one more unit is worth (<span class="gloss" data-term="dual" tabindex="0" aria-describedby="gd-dual">dual<span class="gloss-def" role="tooltip" id="gd-dual" aria-hidden="true">The shadow price on each constraint, what one more unit of that resource is worth to the objective.</span></span>)</p>
               <div class="figure-box" data-figure="duality" data-fixture="topic21"
                    style="--fig-ar: 360 / 250;">
               <svg class="fig-svg s4-still" viewBox="0 0 360 250" preserveAspectRatio="xMidYMid meet"
@@ -1103,7 +1120,7 @@
           </div>
 
           <figcaption>
-            Each resource carries a shadow price, what one
+            <span class="fig-num">Figure 5.</span> Each resource carries a shadow price, what one
             more unit of it is worth to the objective. Three limits bind at the optimum:
             chargrid hours is worth <b>1/7</b>, hull-frame stock <b>3/7</b>, and the
             crystal chamber cap a full <b>1</b>. The two with room to spare are worth
@@ -1139,7 +1156,7 @@
       </div>
 
       <div class="l-page">
-        <figure>
+        <figure id="fig-kleeminty">
           <p class="notice">On a log scale the worst case is a straight climb, doubling with
             every dimension; the little cube on the right is one rung of it.</p>
 
@@ -1296,7 +1313,7 @@
           </p>
 
           <figcaption>
-            A hostile cargo manifold, rigged so the greedy rule tours every corner. For the
+            <span class="fig-num">Figure 6.</span> A hostile cargo manifold, rigged so the greedy rule tours every corner. For the
             three variable cube that is all <b>8</b>, and the objective creeps
             <b>0, 100, 900, 1000, 9000, 9100, 9900, 10000</b> before it exits at
             <b>(0, 0, 10000)</b>. Extend the same trick to <b>n = 200</b> and the count reaches
@@ -1313,7 +1330,7 @@
            badge is a static "replaying trace". cycling.js enriches the loop with a
            step control; with scripts off this authored SVG is the whole exhibit. -->
       <div class="l-page">
-        <figure class="cyc-figure">
+        <figure id="fig-cycling" class="cyc-figure">
           <p class="notice">A smaller, meaner trap sits one rule change away. Read the very same
             tableau two ways: a naive tie-break loops forever, while Bland's rule walks out.</p>
 
@@ -1420,7 +1437,7 @@
           </div>
 
           <figcaption class="cyc-caption">
-            This is Chvatal's 1983 cycling example. At the sixth pivot both rules read the same tableau but
+            <span class="fig-num">Figure 7.</span> This is Chvatal's 1983 cycling example. At the sixth pivot both rules read the same tableau but
             choose different entering variables outright: the naive rule grabs the largest coefficient and
             loops, while Bland takes the lowest index and leaves. Bland's rule guarantees the walk is finite,
             not that it is fast.
@@ -1454,7 +1471,7 @@
       </div>
 
       <div class="l-page">
-        <figure>
+        <figure id="fig-network">
           <p class="notice">A network flow and a linear program are the same eight numbers;
             hover or focus an edge to light its column in the matrix.</p>
 
@@ -1590,7 +1607,7 @@
           </div>
 
           <figcaption>
-            A source to sink network at its maximum flow of <b>8</b>. Each arrow reads flow over
+            <span class="fig-num">Figure 8.</span> A source to sink network at its maximum flow of <b>8</b>. Each arrow reads flow over
             capacity, four arcs run full, and the minimum cut, <b>s to b</b> and <b>a to c</b>,
             sums to <b>8</b> as well. The matrix beside it writes those eight numbers as a linear
             program: a top row to maximize, the capacities as upper bounds, and four net rows that
@@ -1606,7 +1623,7 @@
           </figcaption>
         </figure>
 
-        <figure>
+        <figure id="fig-race">
           <p class="notice">One polytope, two racers; scrub the slider to send Corner Case corner
             to corner along the boundary while Strictly Feasible threads the interior.</p>
           <!-- The race. The still below stands alone with no JS: the recorded boundary walk of
@@ -1650,7 +1667,7 @@
             </ul>
             <p class="race-cue" data-role="race-cue">Recorded on both sides: Corner Case replays the
               boundary walk, Strictly Feasible replays the interior <b>central path</b> (all 24 logged
-              points, <b>mu</b> from 45 toward zero) to the shared arrival <b>(9, 9, 4)</b>. Neither
+              points, <span class="gloss" data-term="mu" tabindex="0" aria-describedby="gd-mu"><b>mu</b><span class="gloss-def" role="tooltip" id="gd-mu" aria-hidden="true">The barrier parameter an interior path drives toward zero as it approaches the optimum.</span></span> from 45 toward zero) to the shared arrival <b>(9, 9, 4)</b>. Neither
               is a live solve.</p>
             <div class="badge-row">
               <span class="engine-badge" data-engine="trace" data-role="race-engine">replaying trace</span>
@@ -1665,7 +1682,7 @@
             </p>
           </div>
           <figcaption>
-            The race on one cargo polytope: Corner Case hops the boundary corner to corner, five
+            <span class="fig-num">Figure 9.</span> The race on one cargo polytope: Corner Case hops the boundary corner to corner, five
             recorded vertices from the topic21 trace, while Strictly Feasible threads the interior
             along the recorded central path, 24 logged points converging on the shared arrival
             <b>(9, 9, 4)</b> as mu falls. The two racers are paired by journey fraction, not by wall
@@ -1749,6 +1766,12 @@
             <a href="https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/">MIT Press</a>.
           </li>
           <li>
+            <span class="src-tag">Dantzig.</span> George Dantzig devised the simplex
+            method in 1947 and set it out in <em>Linear Programming and Extensions</em>,
+            Princeton University Press, 1963, the source behind the cold open's
+            nine-clerk diet run.
+          </li>
+          <li>
             <span class="src-tag">Klee and Minty.</span> Victor Klee and George Minty,
             <em>How good is the simplex algorithm?</em>, in Inequalities III, 1972. The
             skewed cube of Section 05, whose corners a greedy pivot rule is lured through
@@ -1778,6 +1801,167 @@
             and served exactly as vendored: no CDN, no bundler, no build step.
           </li>
         </ul>
+      </div>
+    </section>
+
+    <!-- ================= GLOSSARY ================= -->
+    <!-- A static reference for readers without scripts, and the home of the two
+         words that cannot take an inline gloss: "reduced cost" lives only in the
+         injected hood narration, and "rhs" only as a column header. The faith
+         word rows are string-identical to the concept map they source, so a
+         definition never forks. This block is not article prose; the first-use
+         scan skips it, so the faith words inside these definitions never count
+         as first uses. -->
+    <section id="glossary" class="glossary" aria-labelledby="glossary-h">
+      <div class="l-body">
+        <p class="eyebrow">Docking</p>
+        <h2 id="glossary-h">The glossary</h2>
+        <p class="glossary-intro">The working words of the walk, each defined in a
+          sentence. The eight underlined terms in the sections above reveal these
+          same definitions on hover or keyboard focus; two more, reduced cost and
+          rhs, appear only in places a dotted underline cannot reach, so they live
+          here alone.</p>
+        <ol class="glossary-list">
+          <li class="glossary-row" data-term="tableau">
+            <span class="glossary-name">Tableau</span>
+            <span class="glossary-def">The grid of coefficients a solver pivots on, one row per constraint above a row for the objective.</span>
+          </li>
+          <li class="glossary-row" data-term="basis">
+            <span class="glossary-name">Basis</span>
+            <span class="glossary-def">The set of variables held nonzero at a corner, one for each row of the tableau.</span>
+          </li>
+          <li class="glossary-row" data-term="entering">
+            <span class="glossary-name">Entering</span>
+            <span class="glossary-def">The variable a pivot brings into the basis, the column chosen to grow.</span>
+          </li>
+          <li class="glossary-row" data-term="leaving">
+            <span class="glossary-name">Leaving</span>
+            <span class="glossary-def">The variable a pivot sends out of the basis, the row that reaches zero first.</span>
+          </li>
+          <li class="glossary-row" data-term="primal">
+            <span class="glossary-name">Primal</span>
+            <span class="glossary-def">The original program, maximizing the objective under the resource limits.</span>
+          </li>
+          <li class="glossary-row" data-term="dual">
+            <span class="glossary-name">Dual</span>
+            <span class="glossary-def">The shadow price on each constraint, what one more unit of that resource is worth to the objective.</span>
+          </li>
+          <li class="glossary-row" data-term="x*">
+            <span class="glossary-name">x*</span>
+            <span class="glossary-def">The optimal point a solver returns, the corner where the objective reaches its best value.</span>
+          </li>
+          <li class="glossary-row" data-term="mu">
+            <span class="glossary-name">mu</span>
+            <span class="glossary-def">The barrier parameter an interior path drives toward zero as it approaches the optimum.</span>
+          </li>
+          <li class="glossary-row" data-term="reduced cost">
+            <span class="glossary-name">Reduced cost</span>
+            <span class="glossary-def">How much the objective would improve per unit if a variable currently out of the basis were brought in.</span>
+          </li>
+          <li class="glossary-row" data-term="rhs">
+            <span class="glossary-name">rhs</span>
+            <span class="glossary-def">The right-hand side column of the tableau, the amount of each resource its constraint still allows.</span>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ================= DOCKING: THE CONCEPT MAP ================= -->
+    <!-- The closing index. One row per concept: a name, a
+         one-sentence definition, and links to the section and figure where it
+         lives. These definitions are the single source the first-use glosses
+         quote. Rows link with plain anchors only; there is no page-level brush
+         bus, so a click navigates and never lights a distant figure. -->
+    <section id="concept-map" class="concept-map" aria-labelledby="concept-map-h">
+      <div class="l-body">
+        <p class="eyebrow">Docking</p>
+        <h2 id="concept-map-h">The concept map</h2>
+        <p class="concept-intro">Every idea this page builds, gathered in one
+          place. Each row names a concept, defines it in a sentence, and links to
+          the section and the figure where it lives. The
+          <a href="#colophon">sources</a> sit in the colophon.</p>
+        <ol class="concept-list">
+          <li class="concept-row">
+            <span class="concept-name">Feasible region</span>
+            <span class="concept-def">The set of points that satisfy every constraint at once, the shaded area a solver is free to search.</span>
+            <span class="concept-links"><a href="#s1">Section 01</a> <a href="#fig-hero">Figure 1</a></span>
+          </li>
+          <li class="concept-row">
+            <span class="concept-name">Corner</span>
+            <span class="concept-def">A point where enough constraints meet to pin it in place, and where an optimum can always be found.</span>
+            <span class="concept-links"><a href="#s1">Section 01</a> <a href="#fig-hero">Figure 1</a></span>
+          </li>
+          <li class="concept-row">
+            <span class="concept-name">Objective</span>
+            <span class="concept-def">The linear quantity being maximized, drawn as an arrow pointing the way the score grows.</span>
+            <span class="concept-links"><a href="#s1">Section 01</a> <a href="#fig-hero">Figure 1</a></span>
+          </li>
+          <li class="concept-row">
+            <span class="concept-name">Slack</span>
+            <span class="concept-def">The room left under an at-most limit, added as its own variable so the limit reads as an exact equation.</span>
+            <span class="concept-links"><a href="#s2">Section 02</a> <a href="#fig-formulation">Figure 2</a></span>
+          </li>
+          <li class="concept-row" data-term="tableau">
+            <span class="concept-name">Tableau</span>
+            <span class="concept-def">The grid of coefficients a solver pivots on, one row per constraint above a row for the objective.</span>
+            <span class="concept-links"><a href="#s2">Section 02</a> <a href="#fig-first-tableau">Figure 3</a></span>
+          </li>
+          <li class="concept-row" data-term="basis">
+            <span class="concept-name">Basis</span>
+            <span class="concept-def">The set of variables held nonzero at a corner, one for each row of the tableau.</span>
+            <span class="concept-links"><a href="#s3">Section 03</a> <a href="#fig-dualview">Figure 4</a></span>
+          </li>
+          <li class="concept-row" data-term="entering">
+            <span class="concept-name">Entering</span>
+            <span class="concept-def">The variable a pivot brings into the basis, the column chosen to grow.</span>
+            <span class="concept-links"><a href="#s3">Section 03</a> <a href="#fig-dualview">Figure 4</a></span>
+          </li>
+          <li class="concept-row" data-term="leaving">
+            <span class="concept-name">Leaving</span>
+            <span class="concept-def">The variable a pivot sends out of the basis, the row that reaches zero first.</span>
+            <span class="concept-links"><a href="#s3">Section 03</a> <a href="#fig-dualview">Figure 4</a></span>
+          </li>
+          <li class="concept-row" data-term="primal">
+            <span class="concept-name">Primal</span>
+            <span class="concept-def">The original program, maximizing the objective under the resource limits.</span>
+            <span class="concept-links"><a href="#s4">Section 04</a> <a href="#fig-duality">Figure 5</a></span>
+          </li>
+          <li class="concept-row" data-term="dual">
+            <span class="concept-name">Dual</span>
+            <span class="concept-def">The shadow price on each constraint, what one more unit of that resource is worth to the objective.</span>
+            <span class="concept-links"><a href="#s4">Section 04</a> <a href="#fig-duality">Figure 5</a></span>
+          </li>
+          <li class="concept-row">
+            <span class="concept-name">Strong duality</span>
+            <span class="concept-def">The best primal value and the best dual value meet at one number, each certifying the other.</span>
+            <span class="concept-links"><a href="#s4">Section 04</a> <a href="#fig-duality">Figure 5</a></span>
+          </li>
+          <li class="concept-row">
+            <span class="concept-name">Complexity</span>
+            <span class="concept-def">How the pivot count grows with problem size, a built worst case against the handful of steps a typical program needs.</span>
+            <span class="concept-links"><a href="#s5">Section 05</a> <a href="#fig-kleeminty">Figure 6</a></span>
+          </li>
+          <li class="concept-row">
+            <span class="concept-name">Cycling</span>
+            <span class="concept-def">A pivot rule returning to a basis it already held, so the walk loops without ever improving.</span>
+            <span class="concept-links"><a href="#s5">Section 05</a> <a href="#fig-cycling">Figure 7</a></span>
+          </li>
+          <li class="concept-row">
+            <span class="concept-name">Bland's rule</span>
+            <span class="concept-def">The lowest-index tie-break that keeps the walk finite, though not that it is fast.</span>
+            <span class="concept-links"><a href="#s5">Section 05</a> <a href="#fig-cycling">Figure 7</a></span>
+          </li>
+          <li class="concept-row" data-term="mu">
+            <span class="concept-name">mu</span>
+            <span class="concept-def">The barrier parameter an interior path drives toward zero as it approaches the optimum.</span>
+            <span class="concept-links"><a href="#s6">Section 06</a> <a href="#fig-race">Figure 9</a></span>
+          </li>
+          <li class="concept-row">
+            <span class="concept-name">Max-flow min-cut</span>
+            <span class="concept-def">Section 04's strong duality on a network, where the largest flow equals the lightest cut.</span>
+            <span class="concept-links"><a href="#s6">Section 06</a> <a href="#fig-network">Figure 8</a></span>
+          </li>
+        </ol>
       </div>
     </section>
 
