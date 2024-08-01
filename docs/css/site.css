@@ -523,25 +523,42 @@ figcaption strong, figcaption b { color: var(--ink-soft); font-weight: 650; }
 .swatch[data-c="obj"] { background: var(--objective); border-radius: 50%; }
 .swatch[data-c="trail"] { background: var(--trail); border-radius: 50%; }
 
-/* Engine badge: tiny monospace pill telling the truth about the live engine
-   Three states: live (WASM), trace (replay), geometric (from the
-   trace geometry). A status dot inherits the state color. */
-.engine-badge {
+/* Legend glyphs: constraints read as lines and the objective as an arrow,
+   matching the on-chart color language; corners stay the round .swatch dot. */
+.legend-glyph { width: 1.55em; height: 0.72em; flex: none; overflow: visible; }
+.legend-glyph line { stroke-width: 2.2; stroke-linecap: round; }
+.legend-glyph[data-c="1"] line { stroke: var(--constraint-1); }
+.legend-glyph[data-c="2"] line { stroke: var(--constraint-2); }
+.legend-glyph[data-c="obj"] line { stroke: var(--objective); }
+.legend-glyph[data-c="obj"] polygon { fill: var(--objective); }
+
+/* One pill primitive. The status and chrome pills collapse onto this
+   single boxed chrome: the engine badge, the oracle badge, and the hood chip
+   all carry .pill and add only their own type and color. The data-bearing
+   constraint-hued tags (fm-slack, mf-cut, sp-route) are a deliberately distinct
+   second family and keep their own hue rules. */
+.pill {
   display: inline-flex;
   align-items: center;
+  line-height: 1;
+  white-space: nowrap;
+  padding: 0.32em 0.65em;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: var(--surface-2);
+}
+
+/* Engine badge: tiny monospace pill telling the truth about the live engine
+   Three states: live (WASM), trace (replay), geometric (from the
+   trace geometry). A status dot inherits the state color. Chrome from .pill. */
+.engine-badge {
   gap: 0.45em;
   font-family: var(--font-mono);
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  line-height: 1;
-  padding: 0.32em 0.65em;
-  border-radius: 999px;
-  border: 1px solid currentColor;
-  background: var(--surface-2);
   color: var(--faint);
-  white-space: nowrap;
 }
 .engine-badge::before {
   content: "";
@@ -555,17 +572,14 @@ figcaption strong, figcaption b { color: var(--ink-soft); font-weight: 650; }
 .engine-badge[data-engine="trace"] { color: var(--constraint-5); }
 .engine-badge[data-engine="geometric"] { color: var(--objective); }
 
-/* Oracle-verified trust badge for the colophon */
+/* Oracle-verified trust badge for the colophon. Chrome from .pill;
+   this rule sets only its own type, color, and slightly wider padding. */
 .oracle-badge {
-  display: inline-flex;
-  align-items: center;
   gap: 0.5em;
   font-family: var(--font-sans);
   font-size: 0.82rem;
   font-weight: 600;
   padding: 0.4em 0.8em;
-  border-radius: 999px;
-  border: 1px solid var(--constraint-3);
   color: var(--constraint-3);
   background: var(--surface);
   text-decoration: none;
@@ -715,7 +729,7 @@ input[type="range"].whatif-range:disabled { cursor: not-allowed; opacity: 0.5; }
 .dv-current-ring { fill: none; stroke: var(--objective); stroke-width: 2; opacity: 0.5; }
 .dv-current-label {
   font-family: var(--font-sans);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 650;
   fill: var(--objective);
 }
@@ -869,14 +883,14 @@ table.tableau tr.is-leaving > td.is-entering {
 .hood { font-family: var(--font-sans); }
 .hood-bar { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
 .hood-toggle { flex: none; }
+/* Hood chip: chrome from .pill; a quiet surface fill and a neutral border. */
 .hood-chip {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   color: var(--faint);
   padding: 0.2em 0.55em;
-  border: 1px solid var(--hairline-strong);
-  border-radius: 999px;
-  white-space: nowrap;
+  background: var(--surface);
+  border-color: var(--hairline-strong);
 }
 
 /* Visually hidden live region: announced, never seen, never shifts layout. */
@@ -1597,8 +1611,8 @@ a:focus-visible { outline-offset: 3px; }
    in --ink / --faint tokens (>= 4.5). No transition, so reduced motion needs
    nothing and the point snaps instantly on each keystroke or drag. */
 .vf-axis { stroke: var(--hairline-strong); stroke-width: 1; }
-.vf-grid { stroke: var(--hairline); stroke-width: 1; stroke-dasharray: 3 3; }
-.vf-tick { font-family: var(--font-sans); font-size: 9px; fill: var(--faint); }
+.vf-grid { stroke: var(--hairline); stroke-width: 1; }
+.vf-tick { font-family: var(--font-sans); font-size: 10px; fill: var(--faint); }
 .vf-tick-rest { fill: var(--accent); font-weight: 700; }
 .vf-axis-title { font-family: var(--font-sans); font-size: 10px; font-weight: 600; fill: var(--faint); }
 .vf-curve { fill: none; stroke: var(--faint); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
@@ -1847,7 +1861,7 @@ a:focus-visible { outline-offset: 3px; }
 .cyc-arrow-head { fill: var(--faint); }
 .cyc-arc-label {
   font-family: var(--font-sans);
-  font-size: 9px;
+  font-size: 10px;
   fill: var(--faint);
 }
 .cyc-arc-label-close { fill: var(--constraint-1); font-weight: 650; }
@@ -1864,7 +1878,7 @@ a:focus-visible { outline-offset: 3px; }
 }
 .cyc-node-step {
   font-family: var(--font-sans);
-  font-size: 8.5px;
+  font-size: 10px;
   fill: var(--faint);
 }
 .cyc-node.is-current .cyc-node-body {
@@ -1875,27 +1889,27 @@ a:focus-visible { outline-offset: 3px; }
 .cyc-node.is-current .cyc-node-basis { fill: var(--constraint-1); }
 .cyc-loop-hub {
   font-family: var(--font-sans);
-  font-size: 9px;
+  font-size: 10px;
   font-style: italic;
   fill: var(--faint);
 }
 
 /* Objective strip: naive flat at 0, Bland stepping out to 1 */
 .cyc-strip-axis { stroke: var(--hairline-strong); stroke-width: 1; }
-.cyc-strip-grid { stroke: var(--hairline); stroke-width: 1; stroke-dasharray: 3 3; }
+.cyc-strip-grid { stroke: var(--hairline); stroke-width: 1; }
 .cyc-strip-tick {
   font-family: var(--font-sans);
-  font-size: 9px;
+  font-size: 11px;
   fill: var(--faint);
 }
 .cyc-strip-axis-title {
   font-family: var(--font-sans);
-  font-size: 9px;
+  font-size: 11px;
   fill: var(--ink-soft);
 }
 .cyc-strip-naive { fill: none; stroke: var(--constraint-1); stroke-width: 2.6; }
 .cyc-strip-bland { fill: none; stroke: var(--constraint-3); stroke-width: 2.6; stroke-dasharray: 7 4; }
-.cyc-strip-lab { font-family: var(--font-sans); font-size: 9.5px; font-weight: 600; }
+.cyc-strip-lab { font-family: var(--font-sans); font-size: 11px; font-weight: 600; }
 .cyc-strip-lab-naive { fill: var(--constraint-1); }
 .cyc-strip-lab-bland { fill: var(--constraint-3); }
 
@@ -1927,7 +1941,7 @@ a:focus-visible { outline-offset: 3px; }
   transition: stroke 0.12s ease, stroke-width 0.12s ease;
 }
 .mf-flabel {
-  font-size: 0.74rem;
+  font-size: 12.4px;
   font-weight: 600;
   fill: var(--faint);
   paint-order: stroke;
@@ -1959,7 +1973,7 @@ a:focus-visible { outline-offset: 3px; }
 }
 .mf-cut-label {
   fill: var(--objective);
-  font-size: 0.72rem;
+  font-size: 12.4px;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
@@ -1971,11 +1985,11 @@ a:focus-visible { outline-offset: 3px; }
 }
 .mf-node text {
   fill: var(--ink);
-  font-size: 0.92rem;
+  font-size: 13px;
   font-weight: 700;
 }
 .mf-node.is-terminal circle { fill: var(--surface-2); stroke: var(--accent); stroke-width: 2.4; }
-.mf-node .mf-node-cap { fill: var(--faint); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.08em; }
+.mf-node .mf-node-cap { fill: var(--faint); font-size: 12.4px; font-weight: 600; letter-spacing: 0.08em; }
 
 /* matrix panel ------------------------------------------------------------ */
 .mf-matrix-panel { min-width: 0; }
@@ -2083,7 +2097,7 @@ a:focus-visible { outline-offset: 3px; }
 }
 .sp-wlabel {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 12px;
   font-weight: 600;
   fill: var(--faint);
   paint-order: stroke;
@@ -2104,8 +2118,8 @@ a:focus-visible { outline-offset: 3px; }
 
 .sp-node circle { fill: var(--surface); stroke: var(--hairline-strong); stroke-width: 1.6; }
 .sp-node.is-terminal circle { fill: var(--surface-2); stroke: var(--accent); stroke-width: 2.4; }
-.sp-node-id { fill: var(--ink); font-size: 0.92rem; font-weight: 700; }
-.sp-pot { fill: var(--faint); font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; }
+.sp-node-id { fill: var(--ink); font-size: 12px; font-weight: 700; }
+.sp-pot { fill: var(--faint); font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; }
 .sp-node { cursor: default; }
 .sp-node:focus { outline: none; }
 .sp-node.is-lit circle,
@@ -2224,7 +2238,7 @@ a:focus-visible { outline-offset: 3px; }
 .race-arrival-label {
   fill: var(--objective);
   font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: 12.5px;
   font-weight: 700;
   paint-order: stroke;
   stroke: var(--surface);
@@ -2367,3 +2381,44 @@ a:focus-visible { outline-offset: 3px; }
  gap: 0 1.4rem;
  }
 }
+
+/* ===================================================================== */
+/* One instrument: hold every in-SVG label in an 11 to 13px rendered      */
+/* band at the wide desktop column while staying above the 8.5px floor at */
+/* 380px. Two levers, both double entry (they move the authored still and */
+/* the hydrated paint together, and never touch a coordinate): a max-width */
+/* cap on the over-stretched figure boxes caps the viewBox-to-viewport    */
+/* scale so the desktop render lands in band, and a font override on the  */
+/* two inline-styled figures (hero, formulation, and the value-function   */
+/* still) lifts the narrow render above the floor. Caps do not bind at    */
+/* 380px, where every box already sits under its cap. */
+
+/* Caps: the figure box shrinks with its reserved space, centered in the
+   wide column. Each value is tuned from the measured scale so the figure's
+   own font set renders inside 11 to 13px at 1280. */
+.figure-box[data-figure="hero"] { max-width: 465px; margin-inline: auto; }
+.figure-box[data-figure="formulation"] { max-width: 465px; margin-inline: auto; }
+.figure-box[data-figure="duality"] { max-width: 375px; margin-inline: auto; }
+.vf-box { max-width: 432px; margin-inline: auto; }
+.km-box { max-width: 395px; margin-inline: auto; }
+.cyc-loop-box { max-width: 432px; margin-inline: auto; }
+.figure-box[data-figure="maxflow"] { max-width: 460px; margin-inline: auto; }
+.sp-graph-box { max-width: 350px; margin-inline: auto; }
+.race-box { max-width: 470px; margin-inline: auto; }
+.dv-stair-svg { max-width: 335px; margin-inline: auto; display: block; }
+
+/* Font overrides for the inline-styled figures. Hero and formulation carry
+   font-size on each text node; the value-function still does too. Overriding
+   here lifts the rendered label without editing the inline style, so the
+   still and the hydrated paint keep byte-identical style attributes and the
+   lockstep parity holds. */
+.figure-box[data-figure="hero"] svg.fig-svg text,
+.figure-box[data-figure="formulation"] svg.fig-svg text { font-size: 16.5px !important; }
+svg.vf-still text { font-size: 10px !important; }
+
+/* The shared iso triad and origin labels are 11px, which lands in band on
+   the S3 polytope and the S5 cube once those are capped. The race stage is
+   the widest wireframe; give its triad and origin their own size so they
+   clear the 8.5px floor at 380px. */
+.race-stage-svg .iso-triad-label,
+.race-stage-svg .iso-origin { font-size: 12.5px; }

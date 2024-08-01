@@ -49,7 +49,7 @@ export default function mountHood(scope, ctx, meta) {
   toggle.type = "button";
   toggle.setAttribute("aria-expanded", "false");
   toggle.setAttribute("aria-controls", panelId);
-  const chip = el("span", "hood-chip", "pivot step 0");
+  const chip = el("span", "pill hood-chip", "pivot step 0");
   chip.setAttribute("aria-hidden", "true");
   chip.setAttribute("data-key", "pivot:0");
   bar.append(toggle, chip);

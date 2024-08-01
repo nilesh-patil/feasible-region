@@ -380,7 +380,7 @@
           </div>
 
           <div class="badge-row">
-            <span class="engine-badge" data-engine="trace" data-role="hero-engine">replaying trace</span>
+            <span class="pill engine-badge" data-engine="trace" title="The badge names the engine behind this figure's numbers: a recorded solver trace, replayed and checked against exact geometry." data-role="hero-engine">replaying trace</span>
             <span class="fig-sub" data-role="hero-provenance">The badge is a promise, not
               decoration: with scripts off, the corner shown at rest is replayed from a
               trace our reference solver recorded, then checked against an independent solver.</span>
@@ -398,9 +398,9 @@
             go and it settles on that same corner, lighting the feedstock line
             it rests against.
             <ul class="legend" aria-hidden="true">
-              <li><span class="swatch" data-c="1"></span> x1 + x2 limit</li>
-              <li><span class="swatch" data-c="2"></span> x1 + 3 x2 limit</li>
-              <li><span class="swatch" data-c="obj"></span> objective</li>
+              <li><svg class="legend-glyph" data-c="1" viewBox="0 0 24 10" aria-hidden="true"><line x1="1" y1="5" x2="23" y2="5"></line></svg> x1 + x2 limit</li>
+              <li><svg class="legend-glyph" data-c="2" viewBox="0 0 24 10" aria-hidden="true"><line x1="1" y1="5" x2="23" y2="5"></line></svg> x1 + 3 x2 limit</li>
+              <li><svg class="legend-glyph legend-arrow" data-c="obj" viewBox="0 0 24 10" aria-hidden="true"><line x1="1" y1="5" x2="17" y2="5"></line><polygon points="15,1.6 23,5 15,8.4"></polygon></svg> objective</li>
               <li><span class="swatch" data-c="trail"></span> corners</li>
             </ul>
           </figcaption>
@@ -570,7 +570,7 @@
           </div>
 
           <div class="badge-row">
-            <span class="engine-badge" data-engine="trace">replaying trace</span>
+            <span class="pill engine-badge" data-engine="trace" title="The badge names the engine behind this figure's numbers: a recorded solver trace, replayed and checked against exact geometry.">replaying trace</span>
             <span class="fig-sub" data-role="fm-provenance">With scripts off, the standard
               form and its best corner hold steady: our reference solver recorded them for
               this mix, and an independent check agrees on the optimum.</span>
@@ -583,9 +583,9 @@
             region; the standard form grows a row beside it, and the best corner re-solves
             on every move.
             <ul class="legend" aria-hidden="true">
-              <li><span class="swatch" data-c="1"></span> feedstock limit</li>
-              <li><span class="swatch" data-c="2"></span> press-time limit</li>
-              <li><span class="swatch" data-c="obj"></span> objective</li>
+              <li><svg class="legend-glyph" data-c="1" viewBox="0 0 24 10" aria-hidden="true"><line x1="1" y1="5" x2="23" y2="5"></line></svg> feedstock limit</li>
+              <li><svg class="legend-glyph" data-c="2" viewBox="0 0 24 10" aria-hidden="true"><line x1="1" y1="5" x2="23" y2="5"></line></svg> press-time limit</li>
+              <li><svg class="legend-glyph legend-arrow" data-c="obj" viewBox="0 0 24 10" aria-hidden="true"><line x1="1" y1="5" x2="17" y2="5"></line><polygon points="15,1.6 23,5 15,8.4"></polygon></svg> objective</li>
               <li><span class="swatch" data-c="trail"></span> corners</li>
             </ul>
           </figcaption>
@@ -872,7 +872,7 @@
           <div class="scrubber-row whatif-row" data-role="dualview-whatif"></div>
 
           <div class="badge-row">
-            <span class="engine-badge" data-engine="trace" data-role="dualview-engine">replaying trace</span>
+            <span class="pill engine-badge" data-engine="trace" title="The badge names the engine behind this figure's numbers: a recorded solver trace, replayed and checked against exact geometry." data-role="dualview-engine">replaying trace</span>
             <span class="fig-sub" data-role="dualview-provenance">Every number in both panels replays the topic21 trace our
               reference solver wrote, step for step; scipy's HiGHS confirms the same optimum.
               The scrubber only chooses which recorded step to show.</span>
@@ -1027,9 +1027,9 @@
                 <line x1="44" y1="188" x2="346" y2="188" style="stroke: var(--hairline-strong); stroke-width: 1;"></line>
                 <line x1="44" y1="20" x2="44" y2="188" style="stroke: var(--hairline-strong); stroke-width: 1;"></line>
                 <!-- z gridlines + ticks -->
-                <line x1="44" y1="167" x2="346" y2="167" style="stroke: var(--hairline); stroke-width: 1; stroke-dasharray: 3 3;"></line>
-                <line x1="44" y1="114.5" x2="346" y2="114.5" style="stroke: var(--hairline); stroke-width: 1; stroke-dasharray: 3 3;"></line>
-                <line x1="44" y1="62" x2="346" y2="62" style="stroke: var(--hairline); stroke-width: 1; stroke-dasharray: 3 3;"></line>
+                <line x1="44" y1="167" x2="346" y2="167" style="stroke: var(--hairline); stroke-width: 1;"></line>
+                <line x1="44" y1="114.5" x2="346" y2="114.5" style="stroke: var(--hairline); stroke-width: 1;"></line>
+                <line x1="44" y1="62" x2="346" y2="62" style="stroke: var(--hairline); stroke-width: 1;"></line>
                 <text x="38" y="170" text-anchor="end" style="font-size: 9px; fill: var(--faint);">15</text>
                 <text x="38" y="117.5" text-anchor="end" style="font-size: 9px; fill: var(--faint);">20</text>
                 <text x="38" y="65" text-anchor="end" style="font-size: 9px; fill: var(--faint);">25</text>
@@ -1112,7 +1112,7 @@
           </p>
 
           <div class="badge-row">
-            <span class="engine-badge" data-engine="trace" data-role="duality-engine">replaying trace</span>
+            <span class="pill engine-badge" data-engine="trace" title="The badge names the engine behind this figure's numbers: a recorded solver trace, replayed and checked against exact geometry." data-role="duality-engine">replaying trace</span>
             <span class="fig-sub">The shadow prices are read straight off the trace our
               reference solver produced; an independent solver lands on the same values. The
               value-function breakpoints were computed against the scipy HiGHS oracle and
@@ -1301,7 +1301,7 @@
           </aside>
 
           <div class="badge-row">
-            <span class="engine-badge" data-engine="trace" data-role="km-engine">replaying trace</span>
+            <span class="pill engine-badge" data-engine="trace" title="The badge names the engine behind this figure's numbers: a recorded solver trace, replayed and checked against exact geometry." data-role="km-engine">replaying trace</span>
             <span class="fig-sub" data-role="km-provenance">Both panels replay the kleeminty3 trace,
               corner for corner as our reference solver logged it; an independent solver reached the
               same optimum.</span>
@@ -1429,7 +1429,7 @@
           </div>
 
           <div class="badge-row">
-            <span class="engine-badge" data-engine="trace">replaying trace</span>
+            <span class="pill engine-badge" data-engine="trace" title="The badge names the engine behind this figure's numbers: a recorded solver trace, replayed and checked against exact geometry.">replaying trace</span>
             <span class="fig-sub" data-role="cyc-provenance">Both lanes replay recorded traces: the runaway
               lane runs the dantzig-naive tie-break for 31 pivots, exactly as each step's rule field logs it,
               and the escaping lane runs the bland rule to the exit. The live engine offers only the dantzig
@@ -1567,7 +1567,7 @@
           </div>
 
           <div class="badge-row">
-            <span class="engine-badge" data-engine="trace" data-role="maxflow-engine">replaying trace</span>
+            <span class="pill engine-badge" data-engine="trace" title="The badge names the engine behind this figure's numbers: a recorded solver trace, replayed and checked against exact geometry." data-role="maxflow-engine">replaying trace</span>
             <span class="fig-sub">The maxflow trace our reference solver wrote fixes every flow
               and capacity here, and an independent solver agrees on the total. The arc
               directions come from the variable names and the cut from the capacity duals.</span>
@@ -1594,7 +1594,7 @@
               </div>
             </div>
             <div class="badge-row">
-              <span class="engine-badge" data-engine="trace" data-role="sp-engine">replaying trace</span>
+              <span class="pill engine-badge" data-engine="trace" title="The badge names the engine behind this figure's numbers: a recorded solver trace, replayed and checked against exact geometry." data-role="sp-engine">replaying trace</span>
               <span class="fig-sub" data-role="sp-provenance">The shortestpath trace the reference
                 solver recorded fixes every length and potential here. In this recorded solve the
                 three binding edges each carry a positive dual, and together they spell out the
@@ -1670,7 +1670,7 @@
               points, <span class="gloss" data-term="mu" tabindex="0" aria-describedby="gd-mu"><b>mu</b><span class="gloss-def" role="tooltip" id="gd-mu" aria-hidden="true">The barrier parameter an interior path drives toward zero as it approaches the optimum.</span></span> from 45 toward zero) to the shared arrival <b>(9, 9, 4)</b>. Neither
               is a live solve.</p>
             <div class="badge-row">
-              <span class="engine-badge" data-engine="trace" data-role="race-engine">replaying trace</span>
+              <span class="pill engine-badge" data-engine="trace" title="The badge names the engine behind this figure's numbers: a recorded solver trace, replayed and checked against exact geometry." data-role="race-engine">replaying trace</span>
               <span class="fig-sub" data-role="race-provenance">The corner walk is replayed vertex by
                 vertex from the topic21 trace; the interior racer replays the recorded central path
                 from the centralpath-topic21 sidecar, point by point as mu falls. Both are trace
@@ -1725,7 +1725,8 @@
         <h2 id="colophon-h">How this was checked, and where it comes from</h2>
 
         <p class="colophon-verify">
-          <a class="oracle-badge"
+          <a class="pill oracle-badge"
+             title="Every fixture optimum on this page was cross-checked against an independent solver; this link shows exactly how that check runs."
              href="https://github.com/nilesh-patil/feasible-region/blob/main/tests/test_oracle.py">Oracle-verified</a>
         </p>
         <p>Every fixture optimum on this page is cross-checked against scipy's HiGHS solver
