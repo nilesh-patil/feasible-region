@@ -925,6 +925,109 @@
       </div>
     </section>
 
+    <!-- ================= ANOMALIES GALLERY =================
+         A three-panel small-multiples strip on the hero 2D chassis, seated at
+         the post-S3 offramp seam. The offramp says what the reader can now do;
+         these panels say what the solver reports when the answer is that no
+         plan exists, or that the ceiling is missing. Every panel is a fully
+         static inline-SVG still: it is the no-JS state and the primary render,
+         with all wording in the captions (no hover-revealed content). Each SVG
+         is drawn straight from its own geometry, so the badge reads drawn from
+         geometry on all three; the recorded oracle statuses are quoted in the
+         captions as trace fact. The two variable chassis, the constraint hues,
+         the violet objective, and the warm corner dot are the hero's tokens. -->
+    <section id="anomalies" class="anomaly-gallery" aria-labelledby="anomalies-h">
+      <div class="l-body">
+        <p class="eyebrow">Three anomalies</p>
+        <h2 id="anomalies-h">When a program has no best corner</h2>
+        <p>The walk you just watched always found a corner to stop at. Not every
+          program is so lucky. Here are three that are not, each drawn straight
+          from its own geometry on the same two-variable chassis as the hero:
+          one with no feasible point at all, one that climbs forever, and one
+          carrying a limit that does no work.</p>
+      </div>
+
+      <div class="l-page">
+        <div class="anomaly-strip" id="fig-anomalies">
+
+          <figure class="anomaly-panel" data-anomaly="infeasible" data-fixture="infeasible1" data-problem='{"direction": "maximize", "objective": [1.0, 1.0], "constraints": [{"coeffs": [1.0, 1.0], "op": "le", "rhs": 2.0}, {"coeffs": [1.0, 1.0], "op": "ge", "rhs": 6.0}], "var_names": ["x1", "x2"]}'>
+            <svg class="anomaly-svg" viewBox="0 0 168 168" role="img" aria-label="Two limits, x1 plus x2 at most 2 and x1 plus x2 at least 6, shade opposite corners with an empty band between them, so no point satisfies both.">
+              <polygon class="anomaly-halfplane" data-c="1" points="20,148 59.43,148 20,108.57"></polygon>
+              <polygon class="anomaly-halfplane" data-c="2" points="138.29,148 158,148 158,10 20,10 20,29.71"></polygon>
+              <line class="anomaly-axis" x1="20" y1="148" x2="158" y2="148"></line>
+              <line class="anomaly-axis" x1="20" y1="148" x2="20" y2="10"></line>
+              <line class="anomaly-constraint" data-c="1" x1="59.43" y1="148" x2="20" y2="108.57"></line>
+              <line class="anomaly-constraint" data-c="2" x1="138.29" y1="148" x2="20" y2="29.71"></line>
+            </svg>
+            <span class="pill engine-badge" data-engine="geometric">drawn from geometry</span>
+            <figcaption><span class="anomaly-title">Infeasible.</span> One limit asks for
+              x1 + x2 at most 2, the other for at least 6. Their shaded half-planes never
+              meet, so no point obeys both. Our reference solver recorded this program's
+              status as "infeasible".</figcaption>
+          </figure>
+
+          <figure class="anomaly-panel" data-anomaly="unbounded" data-fixture="unbounded1" data-problem='{"direction": "maximize", "objective": [1.0, 1.0], "constraints": [{"coeffs": [1.0, -1.0], "op": "le", "rhs": 1.0}, {"coeffs": [-1.0, 1.0], "op": "le", "rhs": 1.0}], "var_names": ["x1", "x2"]}'>
+            <svg class="anomaly-svg" viewBox="0 0 168 168" role="img" aria-label="An open strip between two parallel limits runs off the upper right corner with no ceiling; the objective arrow climbs the same way, so the best value has no bound.">
+              <defs>
+                <marker id="anom-arrow-u" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,1 L9,5 L0,9 Z" style="fill: var(--objective);"></path>
+                </marker>
+              </defs>
+              <polygon class="anomaly-region" points="20,148 39.71,148 158,29.71 158,10 138.29,10 20,128.29"></polygon>
+              <line class="anomaly-axis" x1="20" y1="148" x2="158" y2="148"></line>
+              <line class="anomaly-axis" x1="20" y1="148" x2="20" y2="10"></line>
+              <line class="anomaly-constraint" data-c="1" x1="39.71" y1="148" x2="158" y2="29.71"></line>
+              <line class="anomaly-constraint" data-c="2" x1="20" y1="128.29" x2="138.29" y2="10"></line>
+              <line class="anomaly-objective" x1="67.31" y1="100.69" x2="126.46" y2="41.54" marker-end="url(#anom-arrow-u)"></line>
+            </svg>
+            <span class="pill engine-badge" data-engine="geometric">drawn from geometry</span>
+            <figcaption><span class="anomaly-title">Unbounded.</span> The region is open: it
+              runs off the upper right with no ceiling, and the objective arrow climbs with
+              it. Raise x1 + x2 as high as you like and nothing stops you. Our reference
+              solver recorded this program's status as "unbounded".</figcaption>
+          </figure>
+
+          <figure class="anomaly-panel" data-anomaly="redundant" data-problem='{"direction": "maximize", "objective": [1.0, 1.0], "constraints": [{"coeffs": [1.0, 2.0], "op": "le", "rhs": 6.0}, {"coeffs": [2.0, 1.0], "op": "le", "rhs": 6.0}, {"coeffs": [1.0, 1.0], "op": "le", "rhs": 6.0}], "var_names": ["x1", "x2"]}'>
+            <svg class="anomaly-svg" viewBox="0 0 168 168" role="img" aria-label="Two limits carve a small region near the origin; a third dashed limit sits far outside and never touches it, so removing it leaves the best corner at (2, 2) unchanged.">
+              <defs>
+                <marker id="anom-arrow-r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,1 L9,5 L0,9 Z" style="fill: var(--objective);"></path>
+                </marker>
+              </defs>
+              <polygon class="anomaly-region" points="20,148 79.14,148 59.43,108.57 20,88.86"></polygon>
+              <line class="anomaly-axis" x1="20" y1="148" x2="158" y2="148"></line>
+              <line class="anomaly-axis" x1="20" y1="148" x2="20" y2="10"></line>
+              <line class="anomaly-constraint" data-c="1" x1="20" y1="88.86" x2="138.29" y2="148"></line>
+              <line class="anomaly-constraint" data-c="2" x1="20" y1="29.71" x2="79.14" y2="148"></line>
+              <line class="anomaly-constraint is-redundant" data-c="3" x1="138.29" y1="148" x2="20" y2="29.71"></line>
+              <line class="anomaly-objective" x1="33.8" y1="134.2" x2="56.47" y2="111.53" marker-end="url(#anom-arrow-r)"></line>
+              <circle class="anomaly-opt" cx="59.43" cy="108.57" r="3.2"></circle>
+            </svg>
+            <span class="pill engine-badge" data-engine="geometric">drawn from geometry</span>
+            <figcaption><span class="anomaly-title">Redundant.</span> All three limits are
+              honest, but the dashed one, x1 + x2 at most 6, sits so far out it never touches
+              the region the other two carve. Drop it and the best corner at (2, 2) does not
+              move. A limit that never binds is redundant, and geometry alone shows it.</figcaption>
+          </figure>
+
+        </div>
+
+        <p class="anomaly-cap"><span class="fig-num">Figure 5.</span> Three programs the
+          fab-bay solver cannot answer with a single corner. Each panel is drawn from its
+          own geometry, not replayed from a recorded walk, so every badge reads drawn from
+          geometry. The infeasible and unbounded panels quote the status our reference solver
+          recorded for them; the redundant case is read straight from the lines. The
+          constraint hues, the violet objective arrow, and the warm corner dot are the
+          hero's, kept throughout.</p>
+        <ul class="legend" aria-hidden="true">
+          <li><svg class="legend-glyph" data-c="1" viewBox="0 0 24 10" aria-hidden="true"><line x1="1" y1="5" x2="23" y2="5"></line></svg> a limit</li>
+          <li><svg class="legend-glyph legend-arrow" data-c="obj" viewBox="0 0 24 10" aria-hidden="true"><line x1="1" y1="5" x2="17" y2="5"></line><polygon points="15,1.6 23,5 15,8.4"></polygon></svg> objective</li>
+          <li><span class="swatch" data-c="region"></span> feasible region</li>
+          <li><span class="swatch" data-c="trail"></span> best corner</li>
+        </ul>
+      </div>
+    </section>
+
     <!-- ================= S4: DUALITY ================= -->
     <section id="s4" aria-labelledby="s4-h">
       <div class="l-body">
@@ -1120,7 +1223,7 @@
           </div>
 
           <figcaption>
-            <span class="fig-num">Figure 5.</span> Each resource carries a shadow price, what one
+            <span class="fig-num">Figure 6.</span> Each resource carries a shadow price, what one
             more unit of it is worth to the objective. Three limits bind at the optimum:
             chargrid hours is worth <b>1/7</b>, hull-frame stock <b>3/7</b>, and the
             crystal chamber cap a full <b>1</b>. The two with room to spare are worth
@@ -1175,9 +1278,9 @@
                     <line class="km-gridline" x1="46" y1="102.62" x2="362" y2="102.62"></line>
                     <line class="km-gridline" x1="46" y1="23.93" x2="362" y2="23.93"></line>
                     <text class="km-tick-label km-tick-y" x="40" y="263.5">1</text>
-                    <text class="km-tick-label km-tick-y" x="40" y="184.81">10<tspan baseline-shift="super" font-size="0.72em">20</tspan></text>
-                    <text class="km-tick-label km-tick-y" x="40" y="106.12">10<tspan baseline-shift="super" font-size="0.72em">40</tspan></text>
-                    <text class="km-tick-label km-tick-y" x="40" y="27.43">10<tspan baseline-shift="super" font-size="0.72em">60</tspan></text>
+                    <text class="km-tick-label km-tick-y" x="40" y="184.81">10<tspan baseline-shift="super" font-size="0.82em">20</tspan></text>
+                    <text class="km-tick-label km-tick-y" x="40" y="106.12">10<tspan baseline-shift="super" font-size="0.82em">40</tspan></text>
+                    <text class="km-tick-label km-tick-y" x="40" y="27.43">10<tspan baseline-shift="super" font-size="0.82em">60</tspan></text>
                   </g>
                   <g class="km-axis">
                     <line class="km-axis-line" x1="46" y1="20" x2="46" y2="260"></line>
@@ -1313,7 +1416,7 @@
           </p>
 
           <figcaption>
-            <span class="fig-num">Figure 6.</span> A hostile cargo manifold, rigged so the greedy rule tours every corner. For the
+            <span class="fig-num">Figure 7.</span> A hostile cargo manifold, rigged so the greedy rule tours every corner. For the
             three variable cube that is all <b>8</b>, and the objective creeps
             <b>0, 100, 900, 1000, 9000, 9100, 9900, 10000</b> before it exits at
             <b>(0, 0, 10000)</b>. Extend the same trick to <b>n = 200</b> and the count reaches
@@ -1437,7 +1540,7 @@
           </div>
 
           <figcaption class="cyc-caption">
-            <span class="fig-num">Figure 7.</span> This is Chvatal's 1983 cycling example. At the sixth pivot both rules read the same tableau but
+            <span class="fig-num">Figure 8.</span> This is Chvatal's 1983 cycling example. At the sixth pivot both rules read the same tableau but
             choose different entering variables outright: the naive rule grabs the largest coefficient and
             loops, while Bland takes the lowest index and leaves. Bland's rule guarantees the walk is finite,
             not that it is fast.
@@ -1607,7 +1710,7 @@
           </div>
 
           <figcaption>
-            <span class="fig-num">Figure 8.</span> A source to sink network at its maximum flow of <b>8</b>. Each arrow reads flow over
+            <span class="fig-num">Figure 9.</span> A source to sink network at its maximum flow of <b>8</b>. Each arrow reads flow over
             capacity, four arcs run full, and the minimum cut, <b>s to b</b> and <b>a to c</b>,
             sums to <b>8</b> as well. The matrix beside it writes those eight numbers as a linear
             program: a top row to maximize, the capacities as upper bounds, and four net rows that
@@ -1682,7 +1785,7 @@
             </p>
           </div>
           <figcaption>
-            <span class="fig-num">Figure 9.</span> The race on one cargo polytope: Corner Case hops the boundary corner to corner, five
+            <span class="fig-num">Figure 10.</span> The race on one cargo polytope: Corner Case hops the boundary corner to corner, five
             recorded vertices from the topic21 trace, while Strictly Feasible threads the interior
             along the recorded central path, 24 logged points converging on the shared arrival
             <b>(9, 9, 4)</b> as mu falls. The two racers are paired by journey fraction, not by wall
@@ -1922,45 +2025,50 @@
             <span class="concept-def">The variable a pivot sends out of the basis, the row that reaches zero first.</span>
             <span class="concept-links"><a href="#s3">Section 03</a> <a href="#fig-dualview">Figure 4</a></span>
           </li>
+          <li class="concept-row">
+            <span class="concept-name">Infeasible</span>
+            <span class="concept-def">A program whose limits leave no point that satisfies them all, so the solver reports that no plan exists.</span>
+            <span class="concept-links"><a href="#anomalies">After Section 03</a> <a href="#fig-anomalies">Figure 5</a></span>
+          </li>
           <li class="concept-row" data-term="primal">
             <span class="concept-name">Primal</span>
             <span class="concept-def">The original program, maximizing the objective under the resource limits.</span>
-            <span class="concept-links"><a href="#s4">Section 04</a> <a href="#fig-duality">Figure 5</a></span>
+            <span class="concept-links"><a href="#s4">Section 04</a> <a href="#fig-duality">Figure 6</a></span>
           </li>
           <li class="concept-row" data-term="dual">
             <span class="concept-name">Dual</span>
             <span class="concept-def">The shadow price on each constraint, what one more unit of that resource is worth to the objective.</span>
-            <span class="concept-links"><a href="#s4">Section 04</a> <a href="#fig-duality">Figure 5</a></span>
+            <span class="concept-links"><a href="#s4">Section 04</a> <a href="#fig-duality">Figure 6</a></span>
           </li>
           <li class="concept-row">
             <span class="concept-name">Strong duality</span>
             <span class="concept-def">The best primal value and the best dual value meet at one number, each certifying the other.</span>
-            <span class="concept-links"><a href="#s4">Section 04</a> <a href="#fig-duality">Figure 5</a></span>
+            <span class="concept-links"><a href="#s4">Section 04</a> <a href="#fig-duality">Figure 6</a></span>
           </li>
           <li class="concept-row">
             <span class="concept-name">Complexity</span>
             <span class="concept-def">How the pivot count grows with problem size, a built worst case against the handful of steps a typical program needs.</span>
-            <span class="concept-links"><a href="#s5">Section 05</a> <a href="#fig-kleeminty">Figure 6</a></span>
+            <span class="concept-links"><a href="#s5">Section 05</a> <a href="#fig-kleeminty">Figure 7</a></span>
           </li>
           <li class="concept-row">
             <span class="concept-name">Cycling</span>
             <span class="concept-def">A pivot rule returning to a basis it already held, so the walk loops without ever improving.</span>
-            <span class="concept-links"><a href="#s5">Section 05</a> <a href="#fig-cycling">Figure 7</a></span>
+            <span class="concept-links"><a href="#s5">Section 05</a> <a href="#fig-cycling">Figure 8</a></span>
           </li>
           <li class="concept-row">
             <span class="concept-name">Bland's rule</span>
             <span class="concept-def">The lowest-index tie-break that keeps the walk finite, though not that it is fast.</span>
-            <span class="concept-links"><a href="#s5">Section 05</a> <a href="#fig-cycling">Figure 7</a></span>
+            <span class="concept-links"><a href="#s5">Section 05</a> <a href="#fig-cycling">Figure 8</a></span>
           </li>
           <li class="concept-row" data-term="mu">
             <span class="concept-name">mu</span>
             <span class="concept-def">The barrier parameter an interior path drives toward zero as it approaches the optimum.</span>
-            <span class="concept-links"><a href="#s6">Section 06</a> <a href="#fig-race">Figure 9</a></span>
+            <span class="concept-links"><a href="#s6">Section 06</a> <a href="#fig-race">Figure 10</a></span>
           </li>
           <li class="concept-row">
             <span class="concept-name">Max-flow min-cut</span>
             <span class="concept-def">Section 04's strong duality on a network, where the largest flow equals the lightest cut.</span>
-            <span class="concept-links"><a href="#s6">Section 06</a> <a href="#fig-network">Figure 8</a></span>
+            <span class="concept-links"><a href="#s6">Section 06</a> <a href="#fig-network">Figure 9</a></span>
           </li>
         </ol>
       </div>

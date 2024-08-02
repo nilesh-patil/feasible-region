@@ -77,7 +77,7 @@ function powerLabel(x, y, exp) {
     return t;
   }
   t.appendChild(document.createTextNode("10"));
-  const sup = svgEl("tspan", { "baseline-shift": "super", "font-size": "0.72em" });
+  const sup = svgEl("tspan", { "baseline-shift": "super", "font-size": "0.82em" });
   sup.textContent = String(exp);
   t.appendChild(sup);
   return t;
