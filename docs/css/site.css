@@ -2,7 +2,7 @@
    Feasible Region  .  site.css  .  the single stylesheet
    Distill-grade explainer, space-opera frame. Buildless, no CDN, no framework.
    Sections in this file:
-     1  Design tokens (light)         6  Vignette, ship-log, off-ramp, notes
+     1  Design tokens (light)         6  Vignette, signal, off-ramp, notes
      2  Dark theme override           7  Figures, figure-box, legend, badge
      3  Reset and base                8  Controls (scrubber, buttons)
      4  Typography and rhythm         9  Cite tooltips, TOC
@@ -269,7 +269,7 @@ section > h2 { margin-bottom: var(--sp-4); }
 .l-page { max-width: calc(var(--page-w) + var(--gutter) * 2); }
 .l-screen { width: 100%; margin-inline: 0; }
 
-/* 6. VIGNETTE / SHIP-LOG / OFF-RAMP / MARGIN NOTES  ======================= */
+/* 6. VIGNETTE / SIGNAL / OFF-RAMP / MARGIN NOTES  ========================= */
 
 /* Vignette: the 2 to 4 sentence italic opener for each S-section.
    Italic serif, subtly inset behind a hairline. A reader who skips every
@@ -286,28 +286,58 @@ section > h2 { margin-bottom: var(--sp-4); }
 }
 .vignette p + p { margin-top: var(--sp-3); }
 
-/* Ship-log: the Mind's one-liner, styled as a terse transmission line.
-   Monospace, small, tagged. At most one per section. */
-.ship-log {
+/* Signal traffic: ship-to-ship exchanges, styled as tight-beam transcripts.
+   One exchange per section at most. */
+.signal {
   font-family: var(--font-mono);
   font-size: 0.82em;
-  line-height: 1.5;
+  line-height: 1.55;
   letter-spacing: 0.01em;
   color: var(--ink-soft);
   background: var(--surface-2);
   border-left: 3px solid var(--accent);
   border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 0.7em 1em;
+  padding: 0.85em 1em;
   margin: var(--sp-5) 0;
+  max-width: 38rem;
 }
-.ship-log::before {
-  content: "\25B8 SHIP-LOG";
+
+.signal-head {
   display: block;
-  font-size: 0.82em;
-  font-weight: 650;
-  letter-spacing: 0.16em;
-  color: var(--accent);
-  margin-bottom: 0.35em;
+  padding-left: 1.65em;
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  font-weight: 600;
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.signal-mark {
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  margin-left: -1.65em;
+  margin-right: 0.55em;
+  vertical-align: -0.16em;
+  fill: var(--trail); /* var() cannot resolve in an SVG presentation attribute */
+}
+
+.signal-body {
+  display: block;
+  max-width: 34rem;
+  margin-top: 0.45em;
+  margin-left: 1.65em;
+  line-height: 1.6;
+  letter-spacing: 0;
+  color: var(--ink-soft);
+}
+
+.signal-msg + .signal-msg {
+  margin-top: 0.85em;
+  padding-top: 0.85em;
+  border-top: 1px solid var(--hairline-strong);
 }
 
 /* Off-ramp: the "if you stop here, you can already read a tableau" exit,
@@ -1169,7 +1199,7 @@ a:focus-visible { outline-offset: 3px; }
   .toc, .scrubber-row, .btn, input[type="range"].scrubber { display: none !important; }
   .margin-note { float: none; width: auto; margin: var(--sp-3) 0; }
   aside.frame-note { float: none; width: auto; margin: var(--sp-3) 0; }
-  figure, .figure-box, .offramp, .ship-log { break-inside: avoid; box-shadow: none; }
+  figure, .figure-box, .offramp, .signal { break-inside: avoid; box-shadow: none; }
   a { color: var(--ink); text-decoration-color: var(--hairline-strong); }
   .cite-tip { display: none; }
 }
