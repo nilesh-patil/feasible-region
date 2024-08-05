@@ -2413,15 +2413,18 @@ a:focus-visible { outline-offset: 3px; }
 }
 
 /* ===================================================================== */
-/* One instrument: hold every in-SVG label in an 11 to 13px rendered      */
-/* band at the wide desktop column while staying above the 8.5px floor at */
-/* 380px. Two levers, both double entry (they move the authored still and */
-/* the hydrated paint together, and never touch a coordinate): a max-width */
-/* cap on the over-stretched figure boxes caps the viewBox-to-viewport    */
-/* scale so the desktop render lands in band, and a font override on the  */
-/* two inline-styled figures (hero, formulation, and the value-function   */
-/* still) lifts the narrow render above the floor. Caps do not bind at    */
-/* 380px, where every box already sits under its cap. */
+/* One instrument, two column tiers now. Hold every in-SVG label in       */
+/* an 11 to 13px rendered band at the classic centered column, and in an  */
+/* 11 to 14px band at the wider three rail width above 1460px, both above */
+/* the 8.5px floor at 380px. Two levers, both double entry (they move the */
+/* authored still and the hydrated paint together, and never touch a      */
+/* coordinate): a max-width cap on each figure box caps the viewBox to     */
+/* viewport scale so the render lands in band, and a font override on the  */
+/* inline styled figures (hero, formulation, duality, and the value        */
+/* function still) trims or lifts the render into the band. The wide block */
+/* at the foot of this file retunes both levers inside the 1460px          */
+/* breakpoint, where a grid cell, not always the cap, sets the rendered    */
+/* scale. Caps do not bind at 380px, where every box sits under its cap.   */
 
 /* Caps: the figure box shrinks with its reserved space, centered in the
    wide column. Each value is tuned from the measured scale so the figure's
@@ -2528,3 +2531,111 @@ svg.vf-still text { font-size: 10px !important; }
 
 /* Region swatch for the shared legend (the other swatch hues already exist). */
 .swatch[data-c="region"] { background: var(--region-fill); border-radius: 3px; }
+
+/* ==========================================================================
+   Three rail composition (screen, 1460px and up). Below 1460px the page
+   is byte for byte the same as before: every rule here lives inside the
+   breakpoint and print never matches it, so the classic centered column and
+   the 42rem print measure are untouched. The reading column stays centered;
+   a fixed Contents rail is anchored to the left of it, the builder notes
+   widen into a right rail, and the figure blocks left align to the reading
+   column and reach across the center plus the right rail. See the note
+   above for the label band bookkeeping. Colours stay on the existing tokens,
+   no new hue, no JS, plain grid and calc only.
+   ========================================================================== */
+@media screen and (min-width: 1460px) {
+  :root {
+    --measure: 46rem;    /* center reading column, up from 42rem */
+    --page-w: 63rem;     /* figure column spans center plus right rail */
+    --note-w: 17rem;     /* right rail notes, up from 13.5rem */
+    --note-gap: 2rem;    /* clear gap between column and notes */
+    --toc-rail: 13rem;   /* left Contents rail width */
+    --toc-gap: 1.5rem;   /* clear gap between rail and column */
+  }
+
+  /* LEFT RAIL. The Contents nav is already a fixed rail here via the inline
+     head style, anchored to the figure column and 10.5rem wide. This rule
+     widens it to a real 13rem column and glues it beside the reading column
+     instead: left:50% plus a negative margin equal to half the column box,
+     the gap, and the rail width tracks the centered column at every width
+     past 1460px, never over the figures. The nav.toc-nav.is-sticky form is
+     (0,2,1), one step over the inline (0,2,0), so it wins wherever the two
+     overlap regardless of source order. The inner .l-body wrapper drops its
+     measure so the list fills the rail. Titles wrap and never clip; the
+     category tags keep the is-sticky rule above, shown on the active row. */
+  nav.toc-nav.is-sticky {
+    position: fixed;
+    top: 1.5rem;
+    left: 50%;
+    margin-left: calc(-1 * (var(--measure) / 2 + var(--gutter) + var(--toc-gap) + var(--toc-rail)));
+    width: var(--toc-rail);
+    margin-right: 0;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+  }
+  .toc-nav.is-sticky > .l-body {
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  /* CENTER plus RIGHT RAIL. The reading column keeps its own margin auto and
+     centres at the new 46rem measure. The figure blocks left align to that
+     column box and grow rightward to 63rem, so a figure reaches across the
+     center and the right rail and ends level with the widened notes. */
+  .l-page {
+    margin-left: calc(50% - var(--measure) / 2 - var(--gutter));
+    margin-right: auto;
+  }
+
+  /* Per figure caps, raised about 1.4x so each figure box fills more of the
+     wider column. A two column grid cell can bind before the raised cap does,
+     so the font compensation below is tuned to the real rendered width, cell
+     or cap, not to a flat 1.4x. */
+  .figure-box[data-figure="hero"] { max-width: 650px; }
+  .figure-box[data-figure="formulation"] { max-width: 650px; }
+  .figure-box[data-figure="duality"] { max-width: 525px; }
+  .vf-box { max-width: 600px; }
+  .km-box { max-width: 550px; }
+  .cyc-loop-box { max-width: 600px; }
+  .figure-box[data-figure="maxflow"] { max-width: 645px; }
+  .sp-graph-box { max-width: 490px; }
+  .race-box { max-width: 660px; }
+  .dv-stair-svg { max-width: 470px; }
+
+  /* Font compensation. Each rule trims the authored label so the render lands
+     near 12.7px at the figure's real width, inside the 11 to 14px rail band.
+     Two tier figures keep their ratio: both tiers scale by one factor, and the
+     km exponent tspans ride their parent em so they stay proportionally small.
+     Hero, formulation and duality carry inline sizes, so their rules keep the
+     important flag to win, matching the classic override mechanism. */
+  .figure-box[data-figure="hero"] svg.fig-svg text { font-size: 12.5px !important; }
+  .figure-box[data-figure="formulation"] svg.fig-svg text { font-size: 15.5px !important; }
+  .figure-box[data-figure="duality"] svg.fig-svg text { font-size: 9.2px !important; }
+  .vf-box svg.vf-still text { font-size: 7.6px !important; }
+  .vf-box .vf-tick,
+  .vf-box .vf-axis-title { font-size: 7.6px; }
+  .km-box .km-tick-label,
+  .km-box .km-axis-title,
+  .km-box .km-curve-label { font-size: 9.7px; }
+  .km-cube-svg .iso-triad-label,
+  .km-cube-svg .iso-origin { font-size: 9.35px; }
+  .km-cube-svg .km-current-label { font-size: 10.2px; }
+  .cyc-loop-box .cyc-node-basis { font-size: 8.4px; }
+  .cyc-loop-box .cyc-arc-label,
+  .cyc-loop-box .cyc-node-step,
+  .cyc-loop-box .cyc-loop-hub { font-size: 7.6px; }
+  .figure-box[data-figure="maxflow"] .mf-node text { font-size: 11.5px; }
+  .figure-box[data-figure="maxflow"] .mf-node .mf-node-cap,
+  .figure-box[data-figure="maxflow"] .mf-flabel,
+  .figure-box[data-figure="maxflow"] .mf-cut-label { font-size: 11px; }
+  .sp-graph-box .sp-wlabel,
+  .sp-graph-box .sp-node-id { font-size: 8.8px; }
+  .sp-graph-box .sp-pot { font-size: 8.4px; }
+  .race-box .race-arrival-label,
+  .race-box .iso-triad-label,
+  .race-box .iso-origin { font-size: 9.2px; }
+  .race-box .race-illus-label,
+  .race-box .race-schematic-tag { font-size: 7.8px; }
+  .dv-stair-svg .dv-stair-val { font-size: 6.8px; }
+}
