@@ -2,50 +2,56 @@
 
 *A visual field guide to linear programming.*
 
-Live at **https://nilesh-patil.github.io/feasible-region/**.
+It's live at https://www.nilesh42.science/feasible-region/.
 
-An interactive, [distill.pub](https://distill.pub)-style explainer of linear
-programming and the simplex method: how optimization problems become systems of
-linear constraints, why the optimum sits at a vertex of a convex polytope, and
-how simplex walks vertex to vertex until it arrives.
+An interactive, distill.pub-style explainer of linear programming and the
+simplex method. It starts from an ordinary word problem and turns it into a set
+of linear constraints, then shows why the best answer always lands on a corner
+of the feasible region. From there it walks those corners the way simplex does,
+one pivot at a time, and dragging a constraint re-solves the whole thing live.
+(The worked examples run from a plain diet problem to a starship's fabricator
+bay, so the math has something concrete to hang on.)
 
-## Architecture
+## how it fits together
 
-One simplex core, written in Rust in `crates/feasible-core/` and validated
-against a Python reference implementation. Three consumers read from it:
+There is one simplex solver, written in Rust under `crates/feasible-core`, and a
+pure-Python reference implementation in `python/feasible_region` that I check it
+against. Three things read from that core:
 
-- **`docs/`** (the browser, served on GitHub Pages): the core compiled to
-  WebAssembly via `crates/feasible-wasm/`, so readers can edit constraints and
-  watch pivots re-solve live.
-- **`python/feasible_region/`** (Python): PyO3 bindings through
-  `crates/feasible-py/`, alongside the reference implementation that both tests
-  the Rust core and records the traces.
-- **`traces/`** (precomputed pivots): the recorded solve of each figure, used as
-  the site's no-WASM fallback and as the test fixtures.
+- the site in `docs/`, running the core as WebAssembly built from
+  `crates/feasible-wasm`, so editing the constraints re-solves live in the page;
+- the Python package, which ships the pure-Python reference solver and can
+  optionally load the same Rust core as a native extension (PyO3, from
+  `crates/feasible-py`);
+- the recorded traces in `traces/`, a solved run for each figure, used as the
+  no-WASM fallback on the site and as the fixtures the tests run against.
 
-## Development
+The reference solver is also what records those traces, so the Python side ends
+up being both the checker for the Rust core and the thing that draws the figures.
 
-The whole project is driven by [pixi](https://pixi.sh):
+## running it
+
+Everything goes through [pixi](https://pixi.sh):
 
 ```sh
 pixi run test        # python + rust test suites
-pixi run traces      # regenerate pivot traces (fixtures + site fallback)
-pixi run serve       # site at http://localhost:8137
+pixi run traces      # regenerate the pivot traces (fixtures + site fallback)
+pixi run serve       # serve the site at http://localhost:8137
 pixi run build-wasm  # compile the solver into docs/wasm/
 ```
 
-`build-wasm` runs through a pinned Rust 1.67.1 toolchain. wasm-bindgen
-0.2.84 rejects newer compilers, so `pixi run setup-msrv` installs 1.67.1 and the
-committed `Cargo.lock` holds the proc-macro tree at versions that build on it.
+The WASM build is pinned to Rust 1.67.1. wasm-bindgen 0.2.84 refuses anything
+newer, so `pixi run setup-msrv` installs that toolchain and the committed
+`Cargo.lock` holds the proc-macro crates at versions old enough to build under
+it. (`build-wasm` runs setup-msrv for you.)
 
-## Sources
+## sources
 
-- **ICS311 Topic 21** (Dan Suthers, University of Hawaii, fall 2020 offering):
-  the worked cargo problem and the network formulations.
+- ICS311 Topic 21, Dan Suthers (University of Hawaii): the worked cargo problem
+  and the network formulations.
   https://www2.hawaii.edu/~suthers/courses/ics311f20/Notes/Topic-21.html
-- **CLRS**, *Introduction to Algorithms*: chapter 29 (linear programming) and
-  section 28.1 (the Gaussian elimination each pivot performs). The fab-bay
-  problem is an instance of the classic two-variable product-mix exercise
-  found in any linear programming text.
+- CLRS, *Introduction to Algorithms*: chapter 29 for linear programming and
+  section 28.1 for the Gaussian elimination each pivot is really doing. The
+  two-variable product-mix example is the standard one from any LP text.
 
 Released under the MIT License.
