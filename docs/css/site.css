@@ -287,7 +287,8 @@ section > h2 { margin-bottom: var(--sp-4); }
 .vignette p + p { margin-top: var(--sp-3); }
 
 /* Signal traffic: ship-to-ship exchanges, styled as tight-beam transcripts.
-   One exchange per section at most. */
+   One exchange per section, except the closing section, which carries two: the
+   race exchange and the docking sign-off. */
 .signal {
   font-family: var(--font-mono);
   font-size: 0.82em;
@@ -1023,15 +1024,23 @@ td.hood-pivot { box-shadow: inset 0 0 0 2px var(--objective); }
 }
 
 /* 9. CITE TOOLTIPS + TOC  ================================================= */
-/* Hover- and focus-revealed footnotes. The href still anchor-jumps
-   with JS off, so the tooltip is pure enhancement. */
+/* In text citation: a bracketed [n] link to its reference entry that floats the
+   reference short form on hover or keyboard focus. The [n] is the visible
+   academic marker, baseline not superscript, a touch smaller and in the sans
+   face so it reads as a citation and not as body text. The tooltip chrome below
+   (.cite-tip) is unchanged; it stays pure enhancement, since the href still
+   anchor jumps with scripts off. .cite had no uses before this, so moving its
+   visible form from a superscript to a bracket breaks nothing. The [n] prints
+   (only .cite-tip is dropped in print); a { color } already inks it on paper. */
 .cite {
   position: relative;
   color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 0.82em;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   text-decoration: none;
 }
-.cite > sup { font-size: 0.68em; vertical-align: super; line-height: 0; padding-left: 0.1em; }
 .cite-tip {
   position: absolute;
   left: 50%;
@@ -1114,34 +1123,52 @@ td.hood-pivot { box-shadow: inset 0 0 0 2px var(--objective); }
   .toc-nav.is-sticky li:has(a[aria-current]) .toc-tags { display: flex; }
 }
 
-/* Concept map ("Docking"): the closing index of every idea on the
-   page. One row per concept, each a name, a one-sentence definition, and links
-   to the section and figure where it lives. These definitions are the single
-   source the first-use glosses quote, so they never fork. Rows link with plain
-   anchors; there is no page-level brush bus. */
+/* Appendix B, the concept index. Each entry is an index line: the concept name
+   at the left, a dotted leader running across, and the Sec. / Fig. locators
+   right aligned, with the one sentence definition on the line below so the index
+   still teaches and does not only point. The definitions are the single source
+   the first use glosses quote, so they never fork. Rows link with plain anchors;
+   there is no page level brush bus. */
 #concept-map .concept-intro { color: var(--ink-soft); max-width: var(--measure); }
 .concept-list { list-style: none; padding: 0; margin: var(--sp-5) 0 0; }
 .concept-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.15em 1.2rem;
   padding: var(--sp-3) 0;
   border-top: 1px solid var(--hairline);
 }
 .concept-row:last-child { border-bottom: 1px solid var(--hairline); }
+
+/* Narrow first: name, then locators, then definition, all stacked; the leader is
+   a no op until there is width for a single line index row. */
+.concept-head { display: block; }
 .concept-name { font-family: var(--font-sans); font-weight: 650; color: var(--ink); }
-.concept-def { color: var(--ink-soft); }
+.concept-leader { display: none; }
 .concept-links {
   display: flex; flex-wrap: wrap; gap: 0.4em 1.1em;
+  margin-top: 0.1em;
   font-family: var(--font-sans); font-size: 0.82rem;
 }
 .concept-links a { color: var(--faint); text-decoration: none; }
 .concept-links a:hover { color: var(--accent); }
+.concept-def { display: block; color: var(--ink-soft); margin-top: 0.25em; }
+
 @media (min-width: 720px) {
-  .concept-row {
-    grid-template-columns: 11rem 1fr 11rem;
-    align-items: baseline;
-    gap: 0 1.4rem;
+  /* Wide: the head becomes one index line. The name holds its width, the leader
+     stretches to fill, the locators sit at the right margin. Dots ride the
+     baseline through a dotted border on the empty filler, visible in both themes
+     because hairline-strong lifts in the dark override. */
+  .concept-head { display: flex; align-items: baseline; gap: 0.6rem; }
+  .concept-name { flex: none; }
+  .concept-leader {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 1.5rem;
+    border-bottom: 1px dotted var(--hairline-strong);
+  }
+  .concept-links {
+    flex: none;
+    margin-top: 0;
+    justify-content: flex-end;
+    white-space: nowrap;
   }
 }
 
@@ -1202,6 +1229,11 @@ a:focus-visible { outline-offset: 3px; }
   figure, .figure-box, .offramp, .signal { break-inside: avoid; box-shadow: none; }
   a { color: var(--ink); text-decoration-color: var(--hairline-strong); }
   .cite-tip { display: none; }
+  /* Back matter prints as paper back matter. Keep a reference entry and a term
+     row whole on the page, and drop any transient :target wash from a click
+     made before printing. */
+  .ref-list > li, .glossary-row, .concept-row { break-inside: avoid; }
+  .ref-list > li:target { background: none; box-shadow: none; }
 }
 
 /* 11. MILESTONE B FIGURE BLOCKS  ==========================================
@@ -2389,27 +2421,34 @@ a:focus-visible { outline-offset: 3px; }
  }
 }
 
-/* Static glossary block: serves readers without scripts and carries the two
- words that cannot take an inline gloss (reduced cost, rhs). Its faith-word
- definitions are string-identical to the concept map rows they source. */
+/* Appendix A, the glossary. The two column term and definition rhythm holds,
+   tightened into the back matter register. The term reads in small caps sans, a
+   dictionary lead in; the definitions are string identical to the concept map
+   rows they source, so a definition never forks. */
 #glossary .glossary-intro { color: var(--ink-soft); max-width: var(--measure); }
 .glossary-list { list-style: none; padding: 0; margin: var(--sp-5) 0 0; }
 .glossary-row {
- display: grid;
- grid-template-columns: 1fr;
- gap: 0.15em 1.2rem;
- padding: var(--sp-3) 0;
- border-top: 1px solid var(--hairline);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.15em 1.2rem;
+  padding: var(--sp-3) 0;
+  border-top: 1px solid var(--hairline);
 }
 .glossary-row:last-child { border-bottom: 1px solid var(--hairline); }
-.glossary-name { font-family: var(--font-sans); font-weight: 650; color: var(--ink); }
+.glossary-name {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+}
 .glossary-def { color: var(--ink-soft); }
 @media (min-width: 720px) {
- .glossary-row {
- grid-template-columns: 11rem 1fr;
- align-items: baseline;
- gap: 0 1.4rem;
- }
+  .glossary-row {
+    grid-template-columns: 11rem 1fr;
+    align-items: baseline;
+    gap: 0 1.4rem;
+  }
 }
 
 /* ===================================================================== */
@@ -2638,4 +2677,70 @@ svg.vf-still text { font-size: 10px !important; }
   .race-box .race-illus-label,
   .race-box .race-schematic-tag { font-size: 7.8px; }
   .dv-stair-svg .dv-stair-val { font-size: 6.8px; }
+}
+
+/* 12. ACADEMIC BACK MATTER  (references, appendix a, appendix b)  ========= */
+/* The three closing sections read as paper back matter, one register below the
+   article: reduced body type in the existing small band, tighter paragraph air,
+   and the numbered heads carried by the eyebrow (Back matter, Appendix A,
+   Appendix B) over the plain h2 name. Set once here as a scope so the shift
+   reads as one deliberate step down. h2 and eyebrow keep the page scale, since
+   their sizes are absolute rem and do not inherit the scope; only running prose
+   drops to the small band. */
+.backmatter { font-size: var(--fs-small); line-height: 1.62; }
+.backmatter p + p { margin-top: var(--sp-3); }
+
+/* A hairline opens the back matter, the seam where the article ends and the
+   references begin. Put it on the first back matter section only. */
+.backmatter-open {
+  border-top: 1px solid var(--hairline-strong);
+  padding-top: var(--sp-7);
+}
+
+/* References: a numbered [N] hanging indent. The bracket is drawn from the
+   source order counter and sits flush left, the entry text is inset past it, so
+   a wrapped line clears the marker the way a paper reference does. Because [N]
+   is counted, each li id="ref-N" must match its position in the list. Top rule
+   per entry and a bottom rule on the last match the two index lists above. */
+.ref-list {
+  list-style: none;
+  counter-reset: ref;
+  padding: 0;
+  margin: var(--sp-5) 0 0;
+}
+.ref-list > li {
+  counter-increment: ref;
+  position: relative;
+  padding: var(--sp-3) 0 var(--sp-3) 2.4rem;
+  border-top: 1px solid var(--hairline);
+  line-height: 1.6;
+  scroll-margin-top: 5rem;   /* land clear of the sticky contents rail */
+}
+.ref-list > li + li { margin-top: 0; }
+.ref-list > li:last-child { border-bottom: 1px solid var(--hairline); }
+.ref-list > li::before {
+  content: "[" counter(ref) "]";
+  position: absolute;
+  left: 0;
+  top: var(--sp-3);
+  font-family: var(--font-sans);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+}
+/* The lead in label of a reference (author or short title), set in the sans face
+   so the eye finds the source before reading the note. Replaces the old .src-tag. */
+.ref-tag {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  color: var(--ink);
+}
+/* Clicking an in text [n] lands here: a warm wash and an accent left rule mark
+   the row without shifting it (inset shadow, not a border), and fade in so the
+   jump is felt. Same wash as the page brush and the text selection, no new hue. */
+.ref-list > li:target {
+  background: var(--wash);
+  box-shadow: inset 3px 0 0 var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  transition: background 0.3s ease;
 }

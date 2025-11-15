@@ -176,21 +176,6 @@
       color: var(--faint);
     }
 
-    .site-footer {
-      margin-top: var(--sp-8);
-      padding: var(--sp-6) 0 var(--sp-7);
-      border-top: 1px solid var(--hairline);
-    }
-    .site-footer p {
-      font-family: var(--font-sans); font-size: 0.85rem;
-      color: var(--faint);
-    }
-
-    .source-list { list-style: none; padding: 0; margin: var(--sp-4) 0 0; }
-    .source-list > li { margin-top: var(--sp-3); }
-    .source-list .src-tag {
-      font-family: var(--font-sans); font-weight: 650; color: var(--ink-soft);
-    }
     .colophon-verify {
       font-family: var(--font-sans); font-size: 0.92rem;
       color: var(--ink-soft); margin-top: var(--sp-3);
@@ -246,7 +231,9 @@
           <span class="toc-tags"><span class="toc-tag">complexity</span></span></li>
         <li><a href="#s6">6. Networks and the race</a>
           <span class="toc-tags"><span class="toc-tag">reductions</span> <span class="toc-tag">duality</span></span></li>
-        <li><a href="#colophon">Sources and colophon</a></li>
+        <li><a href="#references">References</a></li>
+        <li><a href="#glossary">Appendix A: Glossary</a></li>
+        <li><a href="#concept-map">Appendix B: Concept index</a></li>
       </ol>
     </div>
   </nav>
@@ -280,7 +267,7 @@
           measured from those 1939 prices, it was still nearly a decade off. It
           arrived in 1947, when George Dantzig's simplex method had nine clerks
           at the National Bureau of Standards run it for some 120 person-days,
-          settling the question at $39.69, twenty-four cents under his guess.</p>
+          settling the question at $39.69, twenty-four cents under his guess<a class="cite" href="#ref-1" aria-label="Reference 1: Dantzig 1963">[1]<span class="cite-tip" aria-hidden="true">G. B. Dantzig, Linear Programming and Extensions. Princeton University Press, 1963.</span></a>.</p>
         <p>Ten thousand years later, that same mathematics has become plumbing. The
           General Systems Vehicle Marginal Utility provisions itself every few
           milliseconds: what to fabricate, what to spend, what to keep in reserve,
@@ -694,7 +681,7 @@
         <p>The fab-bay mix stays maximize <b>3 x1 + 2 x2</b>, but each at-most limit becomes
           an exact equation once a slack is added: <b>x1 + x2 + s1 = 4</b> and
           <b>x1 + 3 x2 + s2 = 6</b>, where s1 and s2 hold the feedstock and press time still
-          to spare. Those equalities are the first rows of the tableau. Two products against
+          to spare. Those equalities are the first rows of the tableau<a class="cite" href="#ref-2" aria-label="Reference 2: Cormen, Leiserson, Rivest, and Stein">[2]<span class="cite-tip" aria-hidden="true">T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein, Introduction to Algorithms. MIT Press.</span></a>. Two products against
           two limits is all a plane can draw; the bay's real orders run longer, and the next
           section scales the same program up until the picture gives out.</p>
         <aside class="signal" aria-label="Signal traffic between the two ships">
@@ -934,10 +921,10 @@
         <p>Scaled up for a full cargo run, the fab-bay problem outgrows the plane that
           held it: a third product, phase-crystal, comes online as <b>x3</b>, and the ship
           restates the job for the bigger bay, maximize <b>x1 + x2 + x3</b> with each product
-          counted evenly, under five limits of its own. Its best corner sits at <b>(9, 9, 4)</b>
+          counted evenly, under five limits of its own<a class="cite" href="#ref-3" aria-label="Reference 3: Suthers, Topic 21 notes">[3]<span class="cite-tip" aria-hidden="true">D. Suthers, ICS 311 Topic 21 lecture notes. University of Hawaii, fall 2020.</span></a>. Its best corner sits at <b>(9, 9, 4)</b>
           with objective <b>22</b>. Every pivot on that walk is
           Gaussian elimination on the tableau: the entering column and the leaving row that
-          light up together are one step of row reduction. The walk also knows when to
+          light up together are one step of row reduction<a class="cite" href="#ref-2" aria-label="Reference 2: Cormen, Leiserson, Rivest, and Stein">[2]<span class="cite-tip" aria-hidden="true">T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein, Introduction to Algorithms. MIT Press.</span></a>. The walk also knows when to
           stop: a region with no dents under a flat objective has no false summits, so a
           corner with no better neighbor is best anywhere, not merely best nearby.</p>
         <p>A second knob sits under the walk. Drag the binding hull-frame stock limit off its
@@ -1435,7 +1422,7 @@
 
           <aside class="km-rig" aria-label="The rigged program, and who built it">
             <p class="km-rig-lead">Victor Klee and George Minty built this cube in 1972 to make a greedy
-              pivot rule pay for its haste. The manifold maximizes <b>100 x1 + 10 x2 + x3</b> under three
+              pivot rule pay for its haste<a class="cite" href="#ref-4" aria-label="Reference 4: Klee and Minty 1972">[4]<span class="cite-tip" aria-hidden="true">V. Klee and G. Minty, "How good is the simplex algorithm?," in Inequalities III, 1972.</span></a>. The manifold maximizes <b>100 x1 + 10 x2 + x3</b> under three
               tilted ceilings, copied straight from the trace:</p>
             <ul class="km-rig-stack">
               <li>x1 &le; 1</li>
@@ -1584,7 +1571,7 @@
           </div>
 
           <figcaption class="cyc-caption">
-            <span class="fig-num">Figure 8.</span> This is Chvatal's 1983 cycling example. At the sixth pivot both rules read the same tableau but
+            <span class="fig-num">Figure 8.</span> This is Chvatal's 1983 cycling example<a class="cite" href="#ref-5" aria-label="Reference 5: Chvatal 1983">[5]<span class="cite-tip" aria-hidden="true">V. Chvatal, Linear Programming. W. H. Freeman, 1983.</span></a>. At the sixth pivot both rules read the same tableau but
             choose different entering variables outright: the naive rule grabs the largest coefficient and
             loops, while Bland takes the lowest index and leaves. Bland's rule guarantees the walk is finite,
             not that it is fast.
@@ -1857,12 +1844,12 @@
           the recorded central path, replayed as the barrier parameter mu falls toward zero rather
           than solved live in your browser. Both network figures are linear programs in different
           clothes: read as node potentials a graph gives a shortest route of <b>dt = 4</b>, and
-          read as arc capacities a network pushes a maximum flow of <b>8</b>.</p>
+          read as arc capacities a network pushes a maximum flow of <b>8</b><a class="cite" href="#ref-3" aria-label="Reference 3: Suthers, Topic 21 notes">[3]<span class="cite-tip" aria-hidden="true">D. Suthers, ICS 311 Topic 21 lecture notes. University of Hawaii, fall 2020.</span></a>.</p>
         <!-- Typeset restatement of the node-potential program the shortest-path
              matrix above spells out cell by cell. The TeX lives in data-tex only,
              so without scripts this block is empty and the section reads exactly
              as before; with scripts the lazy KaTeX loader in main.js typesets it
-             in place. The colophon states this divergence. -->
+             in place. Scripts off, the display line does not appear. -->
         <div data-tex="\max\; d_t \quad \text{subject to} \quad d_j - d_i \le w_{ij}, \quad d_s = 0"></div>
         <aside class="signal" aria-label="Signal traffic between the two ships">
           <p class="signal-msg"><span class="signal-head"><svg class="signal-mark" viewBox="0 0 16 16" aria-hidden="true" fill="var(--trail)"><circle cx="3" cy="8" r="1.4"></circle><circle cx="8" cy="8" r="1.1"></circle><circle cx="13" cy="8" r="0.8"></circle></svg>(tight beam, M32.7)<br>xGCU Strictly Feasible<br>oGSV Marginal Utility</span>
@@ -1871,14 +1858,21 @@
           <span class="signal-body">And my walk docked holding its own bill of lading. You keep the glide; I keep the certificate the walk wrote. Worth it.</span></p>
         </aside>
         <p>The rival threads the interior and converges on the same corner without touching a wall. Different style, same arrival.</p>
+        <aside class="signal" aria-label="Signal traffic between the two ships">
+          <p class="signal-msg"><span class="signal-head"><svg class="signal-mark" viewBox="0 0 16 16" aria-hidden="true" fill="var(--trail)"><circle cx="3" cy="8" r="1.4"></circle><circle cx="8" cy="8" r="1.1"></circle><circle cx="13" cy="8" r="0.8"></circle></svg>(tight beam, M32.8)<br>xGCU Strictly Feasible<br>oGSV Marginal Utility</span>
+          <span class="signal-body">Rematch at the next hold, then. I will glide slower.</span></p>
+          <p class="signal-msg"><span class="signal-head">xGSV Marginal Utility<br>oGCU Strictly Feasible</span>
+          <span class="signal-body">Always. Your unpaid balance carries forward.</span></p>
+        </aside>
       </div>
     </section>
 
-    <!-- ================= COLOPHON ================= -->
-    <section id="colophon" aria-labelledby="colophon-h">
+    <!-- ================= REFERENCES ================= -->
+    <section id="references" class="backmatter backmatter-open" aria-labelledby="references-h">
       <div class="l-body">
-        <p class="eyebrow">Colophon</p>
-        <h2 id="colophon-h">How this was checked, and where it comes from</h2>
+        <span id="colophon"></span>
+        <p class="eyebrow">Back matter</p>
+        <h2 id="references-h">References</h2>
 
         <p class="colophon-verify">
           <a class="pill oracle-badge"
@@ -1886,9 +1880,13 @@
              href="https://github.com/nilesh-patil/feasible-region/blob/main/tests/test_oracle.py">Oracle-verified</a>
         </p>
         <p>Every fixture optimum on this page is cross-checked against scipy's HiGHS solver
-          (<span class="code-inline">scipy.optimize.linprog(method="highs")</span>,
-          which minimizes, so we negate the objective to maximize). The oracle badge links to
-          exactly how that check runs, so no number here asks to be taken on faith.</p>
+          (<span class="code-inline">scipy.optimize.linprog(method="highs")</span>, which minimizes,
+          so we negate the objective to maximize), and the oracle badge above links to exactly how
+          that check runs. Two solvers stand behind the figures: the reference solver wrote every
+          committed trace corner for corner, HiGHS independently confirms each optimum, and the live
+          panels re-solve the same simplex core, written in Rust and compiled to WebAssembly<a class="cite" href="#ref-6" aria-label="Reference 6: minilp">[6]<span class="cite-tip" aria-hidden="true">minilp: a pure-Rust linear programming solver, on crates.io.</span></a>,
+          in your browser when you drag the hero's limits or push the what-if in Section 03, landing on
+          the very corners the traces already recorded.</p>
 
         <!-- The negation identity that oracle check leans on. The ASCII line below
              is what readers without scripts see; with scripts the lazy KaTeX
@@ -1897,67 +1895,22 @@
            data-tex="\max\; c \cdot x \;=\; -\min\; ( -c \cdot x )">
           max c &middot; x = -min ( -c &middot; x )</p>
 
-        <p>Two solvers stand behind these figures. The reference solver wrote every committed
-          trace on this page, corner for corner, and scipy's HiGHS independently confirms each
-          optimum. The live figures add one more voice: the same simplex core, written in Rust
-          and compiled to WebAssembly, re-solves in your browser when you drag the hero's limits
-          or push the what-if in Section 03, and it lands on the very corners the traces already
-          recorded. The traces stay the reference solver's; the browser only checks the work
-          again, in real time.</p>
-
         <h3>Sources</h3>
-        <ul class="source-list">
-          <li>
-            <span class="src-tag">ICS311 Topic 21.</span> The worked cargo example
-            and the network formulations are drawn from Dan Suthers's University
-            of Hawaii ICS311 notes on linear programming, fall 2020 offering.
-            <a href="https://www2.hawaii.edu/~suthers/courses/ics311f20/Notes/Topic-21.html">Topic 21 notes</a>.
-          </li>
-          <li>
-            <span class="src-tag">CLRS.</span> Cormen, Leiserson, Rivest, and Stein,
-            <em>Introduction to Algorithms</em>, chapter 29 (linear programming) and
-            section 28.1 (solving systems of linear equations by Gaussian
-            elimination, the row reduction each simplex pivot performs). The fab-bay
-            problem of Sections 01 and 02 is an instance of the classic
-            two-variable product-mix exercise found in any linear programming text.
-            <a href="https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/">MIT Press</a>.
-          </li>
-          <li>
-            <span class="src-tag">Dantzig.</span> George Dantzig devised the simplex
-            method in 1947 and set it out in <em>Linear Programming and Extensions</em>,
-            Princeton University Press, 1963, the source behind the cold open's
-            nine-clerk diet run.
-          </li>
-          <li>
-            <span class="src-tag">Klee and Minty.</span> Victor Klee and George Minty,
-            <em>How good is the simplex algorithm?</em>, in Inequalities III, 1972. The
-            skewed cube of Section 05, whose corners a greedy pivot rule is lured through
-            in full.
-          </li>
-          <li>
-            <span class="src-tag">Chvatal.</span> Vasek Chvatal,
-            <em>Linear Programming</em>, W. H. Freeman, 1983. The small degenerate program
-            of Section 05 whose naive tie-break cycles, and Bland's rule as the finite escape.
-          </li>
-          <li>
-            <span class="src-tag">Prior art: minilp.</span> The pure-Rust LP solver
-            minilp is prior art for a small, embeddable simplex, and a useful
-            cross-reference for this core.
-            <a href="https://crates.io/crates/minilp">minilp on crates.io</a>.
-          </li>
-          <li>
-            <span class="src-tag">Vendored libraries.</span> Figures draw with d3
-            version 7. With scripts on, KaTeX 0.16 typesets the static display
-            blocks, the resource limits in Section 04, the node-potential program
-            in Section 06, and the identity above, while the interactive panels
-            write plain text so they can rewrite live. With scripts off nothing
-            is typeset: the static blocks keep their authored plain ASCII, and
-            the Section 06 display line does not appear at all. Both libraries
-            are committed under
-            <span class="code-inline">docs/vendor/</span>
-            and served exactly as vendored: no CDN, no bundler, no build step.
-          </li>
-        </ul>
+        <p class="ref-intro">The works the sections lean on, numbered in the order they first appear above.</p>
+        <ol class="ref-list">
+          <li id="ref-1"><span class="ref-tag">G. B. Dantzig</span>, <em>Linear Programming and Extensions</em>. Princeton University Press, 1963. Source behind the cold open's nine-clerk diet run; Dantzig devised the simplex method in 1947.</li>
+          <li id="ref-2"><span class="ref-tag">T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein</span>, <em>Introduction to Algorithms</em>. MIT Press. Chapter 29 (linear programming) and section 28.1 (Gaussian elimination, the row reduction each simplex pivot performs); the fab-bay program of Sections 01 and 02 is the classic two-variable product-mix exercise. <a href="https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/">MIT Press</a>.</li>
+          <li id="ref-3"><span class="ref-tag">D. Suthers</span>, "Linear programming," ICS 311 Topic 21 lecture notes, University of Hawaii, fall 2020. Source of the worked cargo program walked in Section 03 and the network formulations of Section 06. <a href="https://www2.hawaii.edu/~suthers/courses/ics311f20/Notes/Topic-21.html">Topic 21 notes</a>.</li>
+          <li id="ref-4"><span class="ref-tag">V. Klee and G. Minty</span>, "How good is the simplex algorithm?," in <em>Inequalities III</em>, O. Shisha, Ed. Academic Press, 1972. The skewed cube of Section 05, whose corners a greedy pivot rule is lured through in full.</li>
+          <li id="ref-5"><span class="ref-tag">V. Chvatal</span>, <em>Linear Programming</em>. W. H. Freeman, 1983. The small degenerate program of Section 05 whose naive tie-break cycles, and Bland's rule as the finite escape.</li>
+          <li id="ref-6"><span class="ref-tag">minilp</span>: a pure-Rust linear programming solver. crates.io. Prior art for a small, embeddable simplex, and a useful cross-reference for this core. <a href="https://crates.io/crates/minilp">minilp on crates.io</a>.</li>
+        </ol>
+        <p>Figures draw with d3 version 7, and with scripts on KaTeX 0.16 typesets the static display
+          blocks and the identity above while the interactive panels write plain text so they can rewrite
+          live; both libraries are committed under <span class="code-inline">docs/vendor/</span> and served
+          exactly as vendored, with no CDN, no bundler, and no build step. Source and MIT license live in
+          the repository, built buildless from hand-written HTML, one stylesheet, and ES modules:
+          <a href="https://github.com/nilesh-patil/feasible-region">github.com/nilesh-patil/feasible-region</a>.</p>
       </div>
     </section>
 
@@ -1969,15 +1922,11 @@
          definition never forks. This block is not article prose; the first-use
          scan skips it, so the faith words inside these definitions never count
          as first uses. -->
-    <section id="glossary" class="glossary" aria-labelledby="glossary-h">
+    <section id="glossary" class="glossary backmatter" aria-labelledby="glossary-h">
       <div class="l-body">
-        <p class="eyebrow">Docking</p>
+        <p class="eyebrow">Appendix A</p>
         <h2 id="glossary-h">The glossary</h2>
-        <p class="glossary-intro">The working words of the walk, each defined in a
-          sentence. The eight underlined terms in the sections above reveal these
-          same definitions on hover or keyboard focus; two more, reduced cost and
-          rhs, appear only in places a dotted underline cannot reach, so they live
-          here alone.</p>
+        <p class="glossary-intro">The working words of the walk, each defined in a sentence; the eight underlined terms above reveal these same definitions on hover or keyboard focus, and two more, reduced cost and rhs, live here alone.</p>
         <ol class="glossary-list">
           <li class="glossary-row" data-term="tableau">
             <span class="glossary-name">Tableau</span>
@@ -2029,119 +1978,153 @@
          lives. These definitions are the single source the first-use glosses
          quote. Rows link with plain anchors only; there is no page-level brush
          bus, so a click navigates and never lights a distant figure. -->
-    <section id="concept-map" class="concept-map" aria-labelledby="concept-map-h">
+    <section id="concept-map" class="concept-map backmatter" aria-labelledby="concept-map-h">
       <div class="l-body">
-        <p class="eyebrow">Docking</p>
+        <p class="eyebrow">Appendix B</p>
         <h2 id="concept-map-h">The concept map</h2>
-        <p class="concept-intro">Every idea this page builds, gathered in one
-          place. Each row names a concept, defines it in a sentence, and links to
-          the section and the figure where it lives. The
-          <a href="#colophon">sources</a> sit in the colophon.</p>
+        <p class="concept-intro">Every idea the page builds, gathered in one place, each named and defined in a sentence and linked to the section and figure where it lives.</p>
         <ol class="concept-list">
           <li class="concept-row">
-            <span class="concept-name">Feasible region</span>
+            <div class="concept-head">
+              <span class="concept-name">Feasible region</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s1">Sec. 01</a> <a href="#fig-hero">Fig. 1</a></span>
+            </div>
             <span class="concept-def">The set of points that satisfy every constraint at once, the shaded area a solver is free to search.</span>
-            <span class="concept-links"><a href="#s1">Section 01</a> <a href="#fig-hero">Figure 1</a></span>
           </li>
           <li class="concept-row">
-            <span class="concept-name">Corner</span>
+            <div class="concept-head">
+              <span class="concept-name">Corner</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s1">Sec. 01</a> <a href="#fig-hero">Fig. 1</a></span>
+            </div>
             <span class="concept-def">A point where enough constraints meet to pin it in place, and where an optimum can always be found.</span>
-            <span class="concept-links"><a href="#s1">Section 01</a> <a href="#fig-hero">Figure 1</a></span>
           </li>
           <li class="concept-row">
-            <span class="concept-name">Objective</span>
+            <div class="concept-head">
+              <span class="concept-name">Objective</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s1">Sec. 01</a> <a href="#fig-hero">Fig. 1</a></span>
+            </div>
             <span class="concept-def">The linear quantity being maximized, drawn as an arrow pointing the way the score grows.</span>
-            <span class="concept-links"><a href="#s1">Section 01</a> <a href="#fig-hero">Figure 1</a></span>
           </li>
           <li class="concept-row">
-            <span class="concept-name">Slack</span>
+            <div class="concept-head">
+              <span class="concept-name">Slack</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s2">Sec. 02</a> <a href="#fig-formulation">Fig. 2</a></span>
+            </div>
             <span class="concept-def">The room left under an at-most limit, added as its own variable so the limit reads as an exact equation.</span>
-            <span class="concept-links"><a href="#s2">Section 02</a> <a href="#fig-formulation">Figure 2</a></span>
           </li>
           <li class="concept-row" data-term="tableau">
-            <span class="concept-name">Tableau</span>
+            <div class="concept-head">
+              <span class="concept-name">Tableau</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s2">Sec. 02</a> <a href="#fig-first-tableau">Fig. 3</a></span>
+            </div>
             <span class="concept-def">The grid of coefficients a solver pivots on, one row per constraint above a row for the objective.</span>
-            <span class="concept-links"><a href="#s2">Section 02</a> <a href="#fig-first-tableau">Figure 3</a></span>
           </li>
           <li class="concept-row" data-term="basis">
-            <span class="concept-name">Basis</span>
+            <div class="concept-head">
+              <span class="concept-name">Basis</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s3">Sec. 03</a> <a href="#fig-dualview">Fig. 4</a></span>
+            </div>
             <span class="concept-def">The set of variables held nonzero at a corner, one for each row of the tableau.</span>
-            <span class="concept-links"><a href="#s3">Section 03</a> <a href="#fig-dualview">Figure 4</a></span>
           </li>
           <li class="concept-row" data-term="entering">
-            <span class="concept-name">Entering</span>
+            <div class="concept-head">
+              <span class="concept-name">Entering</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s3">Sec. 03</a> <a href="#fig-dualview">Fig. 4</a></span>
+            </div>
             <span class="concept-def">The variable a pivot brings into the basis, the column chosen to grow.</span>
-            <span class="concept-links"><a href="#s3">Section 03</a> <a href="#fig-dualview">Figure 4</a></span>
           </li>
           <li class="concept-row" data-term="leaving">
-            <span class="concept-name">Leaving</span>
+            <div class="concept-head">
+              <span class="concept-name">Leaving</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s3">Sec. 03</a> <a href="#fig-dualview">Fig. 4</a></span>
+            </div>
             <span class="concept-def">The variable a pivot sends out of the basis, the row that reaches zero first.</span>
-            <span class="concept-links"><a href="#s3">Section 03</a> <a href="#fig-dualview">Figure 4</a></span>
           </li>
           <li class="concept-row">
-            <span class="concept-name">Infeasible</span>
+            <div class="concept-head">
+              <span class="concept-name">Infeasible</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#anomalies">After Sec. 03</a> <a href="#fig-anomalies">Fig. 5</a></span>
+            </div>
             <span class="concept-def">A program whose limits leave no point that satisfies them all, so the solver reports that no plan exists.</span>
-            <span class="concept-links"><a href="#anomalies">After Section 03</a> <a href="#fig-anomalies">Figure 5</a></span>
           </li>
           <li class="concept-row" data-term="primal">
-            <span class="concept-name">Primal</span>
+            <div class="concept-head">
+              <span class="concept-name">Primal</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s4">Sec. 04</a> <a href="#fig-duality">Fig. 6</a></span>
+            </div>
             <span class="concept-def">The original program, maximizing the objective under the resource limits.</span>
-            <span class="concept-links"><a href="#s4">Section 04</a> <a href="#fig-duality">Figure 6</a></span>
           </li>
           <li class="concept-row" data-term="dual">
-            <span class="concept-name">Dual</span>
+            <div class="concept-head">
+              <span class="concept-name">Dual</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s4">Sec. 04</a> <a href="#fig-duality">Fig. 6</a></span>
+            </div>
             <span class="concept-def">The shadow price on each constraint, what one more unit of that resource is worth to the objective.</span>
-            <span class="concept-links"><a href="#s4">Section 04</a> <a href="#fig-duality">Figure 6</a></span>
           </li>
           <li class="concept-row">
-            <span class="concept-name">Strong duality</span>
+            <div class="concept-head">
+              <span class="concept-name">Strong duality</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s4">Sec. 04</a> <a href="#fig-duality">Fig. 6</a></span>
+            </div>
             <span class="concept-def">The best primal value and the best dual value meet at one number, each certifying the other.</span>
-            <span class="concept-links"><a href="#s4">Section 04</a> <a href="#fig-duality">Figure 6</a></span>
           </li>
           <li class="concept-row">
-            <span class="concept-name">Complexity</span>
+            <div class="concept-head">
+              <span class="concept-name">Complexity</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s5">Sec. 05</a> <a href="#fig-kleeminty">Fig. 7</a></span>
+            </div>
             <span class="concept-def">How the pivot count grows with problem size, a built worst case against the handful of steps a typical program needs.</span>
-            <span class="concept-links"><a href="#s5">Section 05</a> <a href="#fig-kleeminty">Figure 7</a></span>
           </li>
           <li class="concept-row">
-            <span class="concept-name">Cycling</span>
+            <div class="concept-head">
+              <span class="concept-name">Cycling</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s5">Sec. 05</a> <a href="#fig-cycling">Fig. 8</a></span>
+            </div>
             <span class="concept-def">A pivot rule returning to a basis it already held, so the walk loops without ever improving.</span>
-            <span class="concept-links"><a href="#s5">Section 05</a> <a href="#fig-cycling">Figure 8</a></span>
           </li>
           <li class="concept-row">
-            <span class="concept-name">Bland's rule</span>
+            <div class="concept-head">
+              <span class="concept-name">Bland's rule</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s5">Sec. 05</a> <a href="#fig-cycling">Fig. 8</a></span>
+            </div>
             <span class="concept-def">The lowest-index tie-break that keeps the walk finite, though not that it is fast.</span>
-            <span class="concept-links"><a href="#s5">Section 05</a> <a href="#fig-cycling">Figure 8</a></span>
           </li>
           <li class="concept-row" data-term="mu">
-            <span class="concept-name">mu</span>
+            <div class="concept-head">
+              <span class="concept-name">mu</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s6">Sec. 06</a> <a href="#fig-race">Fig. 10</a></span>
+            </div>
             <span class="concept-def">The barrier parameter an interior path drives toward zero as it approaches the optimum.</span>
-            <span class="concept-links"><a href="#s6">Section 06</a> <a href="#fig-race">Figure 10</a></span>
           </li>
           <li class="concept-row">
-            <span class="concept-name">Max-flow min-cut</span>
+            <div class="concept-head">
+              <span class="concept-name">Max-flow min-cut</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s6">Sec. 06</a> <a href="#fig-network">Fig. 9</a></span>
+            </div>
             <span class="concept-def">Section 04's strong duality on a network, where the largest flow equals the lightest cut.</span>
-            <span class="concept-links"><a href="#s6">Section 06</a> <a href="#fig-network">Figure 9</a></span>
           </li>
         </ol>
-        <aside class="signal" aria-label="Signal traffic between the two ships">
-          <p class="signal-msg"><span class="signal-head"><svg class="signal-mark" viewBox="0 0 16 16" aria-hidden="true" fill="var(--trail)"><circle cx="3" cy="8" r="1.4"></circle><circle cx="8" cy="8" r="1.1"></circle><circle cx="13" cy="8" r="0.8"></circle></svg>(tight beam, M32.8)<br>xGCU Strictly Feasible<br>oGSV Marginal Utility</span>
-          <span class="signal-body">Rematch at the next hold, then. I will glide slower.</span></p>
-          <p class="signal-msg"><span class="signal-head">xGSV Marginal Utility<br>oGCU Strictly Feasible</span>
-          <span class="signal-body">Always. Your unpaid balance carries forward.</span></p>
-        </aside>
       </div>
     </section>
 
   </main>
 
-  <footer class="site-footer">
-    <div class="l-body">
-      <p>Source and license live in the repository, released under the MIT License.
-        Built buildless: hand-written HTML, one stylesheet, ES modules, and vendored
-        d3 version 7 and KaTeX 0.16.
-        <a href="https://github.com/nilesh-patil/feasible-region">github.com/nilesh-patil/feasible-region</a>.</p>
-    </div>
-  </footer>
 </body>
 </html>
