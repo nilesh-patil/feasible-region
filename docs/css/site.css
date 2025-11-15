@@ -603,7 +603,7 @@ figcaption strong, figcaption b { color: var(--ink-soft); font-weight: 650; }
 .engine-badge[data-engine="trace"] { color: var(--constraint-5); }
 .engine-badge[data-engine="geometric"] { color: var(--objective); }
 
-/* Oracle-verified trust badge for the colophon. Chrome from .pill;
+/* Oracle-verified trust badge for the references section. Chrome from .pill;
    this rule sets only its own type, color, and slightly wider padding. */
 .oracle-badge {
   gap: 0.5em;
@@ -2696,6 +2696,10 @@ svg.vf-still text { font-size: 10px !important; }
   border-top: 1px solid var(--hairline-strong);
   padding-top: var(--sp-7);
 }
+
+/* The references lead-in line matches its two appendix siblings: soft ink,
+   held to the reading measure. */
+#references .ref-intro { color: var(--ink-soft); max-width: var(--measure); }
 
 /* References: a numbered [N] hanging indent. The bracket is drawn from the
    source order counter and sits flush left, the entry text is inset past it, so
