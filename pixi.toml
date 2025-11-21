@@ -28,6 +28,10 @@ traces-check = { cmd = "python -m feasible_region.traces --check --out traces/",
 serve = { cmd = "python -m http.server 8137 -d docs", description = "Serve the site locally at http://localhost:8137" }
 sync-site-data = { cmd = "mkdir -p docs/traces && cp traces/*.json docs/traces/", description = "Copy golden traces into docs/ (GitHub Pages serves docs/ only)" }
 
+# -- bench --
+bench-core = { cmd = "cargo build --release --example bench -p feasible-core", description = "Build the in-process core bench example (workspace release profile — the shipped opt-level=z build, deliberately not a speed-tuned one)." }
+bench = { cmd = "python -m feasible_region.bench --out bench/results.json --rust-bin target/release/examples/bench", env = { PYTHONPATH = "python" }, depends-on = ["build-py", "bench-core"], description = "Record bench/results.json: the reference, native and in-process-Rust engines over the seeded sweep plus every named fixture, parity-gated. Machine-dependent by design; commit a run only when the recorded machine block should change." }
+
 # -- native / packaging --
 # The wasm build always runs on the pinned toolchain: wasm-bindgen 0.2.84 is
 # matched to Rust 1.67.1 (the declared MSRV), and the committed Cargo.lock
