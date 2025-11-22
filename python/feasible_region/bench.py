@@ -24,8 +24,10 @@ drawn interior point ``x0``, the standard construction for guaranteed-feasible
 instances.
 
 Alongside ``--out`` this always writes ``problems.json``, the wire-format
-payload the ``feasible-core`` example binary (``--rust-bin``) replays for the
-in-process leg. Regenerable from the seeds, so never committed.
+payload the other two harness legs consume: the ``feasible-core`` example
+binary (``--rust-bin``) reads it here, and ``bench/wasm.mjs`` replays it
+through the browser build afterwards, merging an engine into the same
+record. Regenerable from the seeds, so never committed.
 
 Flags: ``--out FILE`` (required), ``--rust-bin PATH`` (the prebuilt
 ``feasible-core`` bench example; omit to record Python engines only),
