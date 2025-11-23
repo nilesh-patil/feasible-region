@@ -1,0 +1,1691 @@
+{
+  "schema": "feasible-bench/v1",
+  "machine": {
+    "os": "Darwin 25.5.0",
+    "arch": "arm64",
+    "python": "3.11.15",
+    "cpu": "Apple M4 Max",
+    "cores": "14",
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+    "rust_profile": "release (opt-level=z, lto, codegen-units=1)",
+    "node": "node v22.22.3, V8 12.4.254.21-node.56",
+    "wasm_binary_bytes": 120788
+  },
+  "method": {
+    "min_batch_ns": 10000000,
+    "samples": [
+      5,
+      20
+    ],
+    "statistic": "median with q1/q3 over batched samples, warmup discarded",
+    "parity_gate": "status, pivot count, objective within 1e-6"
+  },
+  "scaling": [
+    {
+      "name": "random-4x4-s1",
+      "m": 4,
+      "n": 4,
+      "seed": 1,
+      "status": "optimal",
+      "pivots": 2,
+      "engines": {
+        "reference": {
+          "median_ns": 16050.21142578125,
+          "q1_ns": 15821.8583984375,
+          "q3_ns": 16337.881103515625,
+          "loops": 1024,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 6662.67919921875,
+          "q1_ns": 6611.821533203125,
+          "q3_ns": 6699.7783203125,
+          "loops": 2048,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 689.050048828125,
+          "q1_ns": 677.7305603027344,
+          "q3_ns": 694.8095855712891,
+          "loops": 16384,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 6845.560546875,
+          "q1_ns": 6821.55859375,
+          "q3_ns": 6914.97802734375,
+          "loops": 2048,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-4x4-s2",
+      "m": 4,
+      "n": 4,
+      "seed": 2,
+      "status": "optimal",
+      "pivots": 3,
+      "engines": {
+        "reference": {
+          "median_ns": 20158.529296875,
+          "q1_ns": 20113.42431640625,
+          "q3_ns": 20273.2548828125,
+          "loops": 512,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 6843.8212890625,
+          "q1_ns": 6708.928466796875,
+          "q3_ns": 6898.5848388671875,
+          "loops": 2048,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 763.3641662597656,
+          "q1_ns": 750.8977508544922,
+          "q3_ns": 776.4180603027344,
+          "loops": 16384,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 7299.570556640625,
+          "q1_ns": 7247.7977294921875,
+          "q3_ns": 7368.2808837890625,
+          "loops": 2048,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-4x4-s3",
+      "m": 4,
+      "n": 4,
+      "seed": 3,
+      "status": "optimal",
+      "pivots": 3,
+      "engines": {
+        "reference": {
+          "median_ns": 20088.3388671875,
+          "q1_ns": 19911.05029296875,
+          "q3_ns": 20305.64453125,
+          "loops": 512,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 6747.100830078125,
+          "q1_ns": 6691.5384521484375,
+          "q3_ns": 6791.2752685546875,
+          "loops": 2048,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 755.7970886230469,
+          "q1_ns": 751.0076904296875,
+          "q3_ns": 766.8933715820312,
+          "loops": 16384,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 7274.617431640625,
+          "q1_ns": 7177.8868408203125,
+          "q3_ns": 7434.2242431640625,
+          "loops": 2048,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-8x8-s1",
+      "m": 8,
+      "n": 8,
+      "seed": 1,
+      "status": "optimal",
+      "pivots": 5,
+      "engines": {
+        "reference": {
+          "median_ns": 52382.40625,
+          "q1_ns": 52258.6259765625,
+          "q3_ns": 52544.8818359375,
+          "loops": 256,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 10816.99658203125,
+          "q1_ns": 10756.510009765625,
+          "q3_ns": 10904.520751953125,
+          "loops": 1024,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 1527.9744262695312,
+          "q1_ns": 1514.0419006347656,
+          "q3_ns": 1547.3849182128906,
+          "loops": 8192,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 15012.837890625,
+          "q1_ns": 14591.238037109375,
+          "q3_ns": 15315.175048828125,
+          "loops": 1024,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-8x8-s2",
+      "m": 8,
+      "n": 8,
+      "seed": 2,
+      "status": "optimal",
+      "pivots": 5,
+      "engines": {
+        "reference": {
+          "median_ns": 52680.33984375,
+          "q1_ns": 52464.72265625,
+          "q3_ns": 53174.6416015625,
+          "loops": 256,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 10829.6513671875,
+          "q1_ns": 10799.997802734375,
+          "q3_ns": 10856.089599609375,
+          "loops": 1024,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 1570.564208984375,
+          "q1_ns": 1567.9270324707031,
+          "q3_ns": 1585.1121826171875,
+          "loops": 8192,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 15395.89404296875,
+          "q1_ns": 15312.571044921875,
+          "q3_ns": 15699.890625,
+          "loops": 1024,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-8x8-s3",
+      "m": 8,
+      "n": 8,
+      "seed": 3,
+      "status": "optimal",
+      "pivots": 3,
+      "engines": {
+        "reference": {
+          "median_ns": 37567.4228515625,
+          "q1_ns": 37450.11376953125,
+          "q3_ns": 37660.6845703125,
+          "loops": 512,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 10499.59326171875,
+          "q1_ns": 10465.39306640625,
+          "q3_ns": 10598.24658203125,
+          "loops": 1024,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 1185.7579650878906,
+          "q1_ns": 1177.3675384521484,
+          "q3_ns": 1199.5010528564453,
+          "loops": 16384,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 14855.712890625,
+          "q1_ns": 14688.201904296875,
+          "q3_ns": 15022.786376953125,
+          "loops": 1024,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-12x12-s1",
+      "m": 12,
+      "n": 12,
+      "seed": 1,
+      "status": "optimal",
+      "pivots": 6,
+      "engines": {
+        "reference": {
+          "median_ns": 105548.1796875,
+          "q1_ns": 105090.984375,
+          "q3_ns": 106096.029296875,
+          "loops": 128,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 16121.74462890625,
+          "q1_ns": 15899.66796875,
+          "q3_ns": 16406.127685546875,
+          "loops": 1024,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 2665.6951904296875,
+          "q1_ns": 2641.3828735351562,
+          "q3_ns": 2693.3032836914062,
+          "loops": 4096,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 26997.884765625,
+          "q1_ns": 26432.80078125,
+          "q3_ns": 27370.97119140625,
+          "loops": 512,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-12x12-s2",
+      "m": 12,
+      "n": 12,
+      "seed": 2,
+      "status": "optimal",
+      "pivots": 5,
+      "engines": {
+        "reference": {
+          "median_ns": 91695.9609375,
+          "q1_ns": 90839.275390625,
+          "q3_ns": 92969.32421875,
+          "loops": 128,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 15786.11279296875,
+          "q1_ns": 15645.37548828125,
+          "q3_ns": 15944.76318359375,
+          "loops": 1024,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 2305.6233520507812,
+          "q1_ns": 2285.28466796875,
+          "q3_ns": 2325.0718994140625,
+          "loops": 8192,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 26701.4970703125,
+          "q1_ns": 26632.97509765625,
+          "q3_ns": 26788.47216796875,
+          "loops": 512,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-12x12-s3",
+      "m": 12,
+      "n": 12,
+      "seed": 3,
+      "status": "optimal",
+      "pivots": 5,
+      "engines": {
+        "reference": {
+          "median_ns": 91773.6015625,
+          "q1_ns": 90469.56640625,
+          "q3_ns": 92293.0546875,
+          "loops": 128,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 15759.07421875,
+          "q1_ns": 15568.318115234375,
+          "q3_ns": 15844.583984375,
+          "loops": 1024,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 2312.6932373046875,
+          "q1_ns": 2303.9842834472656,
+          "q3_ns": 2327.22216796875,
+          "loops": 8192,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 26279.052734375,
+          "q1_ns": 25322.51025390625,
+          "q3_ns": 26616.2099609375,
+          "loops": 512,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-16x16-s1",
+      "m": 16,
+      "n": 16,
+      "seed": 1,
+      "status": "optimal",
+      "pivots": 6,
+      "engines": {
+        "reference": {
+          "median_ns": 155222.33203125,
+          "q1_ns": 154690.025390625,
+          "q3_ns": 156038.736328125,
+          "loops": 128,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 22242.26953125,
+          "q1_ns": 21994.0595703125,
+          "q3_ns": 22343.62744140625,
+          "loops": 512,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 3711.82763671875,
+          "q1_ns": 3702.9063110351562,
+          "q3_ns": 3725.580810546875,
+          "loops": 4096,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 38818.1552734375,
+          "q1_ns": 38643.7783203125,
+          "q3_ns": 40952.98193359375,
+          "loops": 512,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-16x16-s2",
+      "m": 16,
+      "n": 16,
+      "seed": 2,
+      "status": "optimal",
+      "pivots": 6,
+      "engines": {
+        "reference": {
+          "median_ns": 158496.2578125,
+          "q1_ns": 157908.361328125,
+          "q3_ns": 159058.025390625,
+          "loops": 128,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 21953.1240234375,
+          "q1_ns": 21898.8447265625,
+          "q3_ns": 22123.35205078125,
+          "loops": 512,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 3706.9549560546875,
+          "q1_ns": 3672.0274658203125,
+          "q3_ns": 3738.99853515625,
+          "loops": 4096,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 41144.61328125,
+          "q1_ns": 40003.4990234375,
+          "q3_ns": 41553.181640625,
+          "loops": 256,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-16x16-s3",
+      "m": 16,
+      "n": 16,
+      "seed": 3,
+      "status": "optimal",
+      "pivots": 8,
+      "engines": {
+        "reference": {
+          "median_ns": 197636.0703125,
+          "q1_ns": 196243.98828125,
+          "q3_ns": 198998.2109375,
+          "loops": 64,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 22980.875,
+          "q1_ns": 22736.61279296875,
+          "q3_ns": 23223.30810546875,
+          "loops": 512,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 4564.5140380859375,
+          "q1_ns": 4554.832458496094,
+          "q3_ns": 4593.897644042969,
+          "loops": 4096,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 42398.845703125,
+          "q1_ns": 41804.8076171875,
+          "q3_ns": 42463.9501953125,
+          "loops": 256,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-24x24-s1",
+      "m": 24,
+      "n": 24,
+      "seed": 1,
+      "status": "optimal",
+      "pivots": 20,
+      "engines": {
+        "reference": {
+          "median_ns": 867462.25,
+          "q1_ns": 863970.03125,
+          "q3_ns": 872517.5625,
+          "loops": 16,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 45804.0390625,
+          "q1_ns": 45482.9912109375,
+          "q3_ns": 46196.3701171875,
+          "loops": 256,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 16280.02978515625,
+          "q1_ns": 16240.3564453125,
+          "q3_ns": 16340.37255859375,
+          "loops": 1024,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 92956.70703125,
+          "q1_ns": 92374.431640625,
+          "q3_ns": 93333.984375,
+          "loops": 128,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-24x24-s2",
+      "m": 24,
+      "n": 24,
+      "seed": 2,
+      "status": "optimal",
+      "pivots": 9,
+      "engines": {
+        "reference": {
+          "median_ns": 414447.921875,
+          "q1_ns": 412446.3046875,
+          "q3_ns": 417800.78125,
+          "loops": 32,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 37638.6728515625,
+          "q1_ns": 37335.20556640625,
+          "q3_ns": 37939.3310546875,
+          "loops": 512,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 8425.994873046875,
+          "q1_ns": 8385.4013671875,
+          "q3_ns": 8493.189453125,
+          "loops": 2048,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 81927.572265625,
+          "q1_ns": 81572.6728515625,
+          "q3_ns": 82238.7705078125,
+          "loops": 256,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-24x24-s3",
+      "m": 24,
+      "n": 24,
+      "seed": 3,
+      "status": "optimal",
+      "pivots": 15,
+      "engines": {
+        "reference": {
+          "median_ns": 661664.09375,
+          "q1_ns": 654823.578125,
+          "q3_ns": 666759.734375,
+          "loops": 16,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 42057.6171875,
+          "q1_ns": 41814.8603515625,
+          "q3_ns": 42467.6923828125,
+          "loops": 256,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 12986.4296875,
+          "q1_ns": 12927.225341796875,
+          "q3_ns": 13061.95068359375,
+          "loops": 1024,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 84391.11328125,
+          "q1_ns": 83139.572265625,
+          "q3_ns": 87594.724609375,
+          "loops": 128,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-32x32-s1",
+      "m": 32,
+      "n": 32,
+      "seed": 1,
+      "status": "optimal",
+      "pivots": 10,
+      "engines": {
+        "reference": {
+          "median_ns": 783420.59375,
+          "q1_ns": 780489.5625,
+          "q3_ns": 787261.71875,
+          "loops": 16,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 55117.513671875,
+          "q1_ns": 55015.91015625,
+          "q3_ns": 55192.544921875,
+          "loops": 256,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 14099.16162109375,
+          "q1_ns": 13910.685302734375,
+          "q3_ns": 14211.64990234375,
+          "loops": 1024,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 132742.02734375,
+          "q1_ns": 132559.8125,
+          "q3_ns": 133103.841796875,
+          "loops": 128,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-32x32-s2",
+      "m": 32,
+      "n": 32,
+      "seed": 2,
+      "status": "optimal",
+      "pivots": 14,
+      "engines": {
+        "reference": {
+          "median_ns": 1072772.125,
+          "q1_ns": 1064839.828125,
+          "q3_ns": 1075968.765625,
+          "loops": 16,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 60198.73046875,
+          "q1_ns": 59875.6923828125,
+          "q3_ns": 60688.59765625,
+          "loops": 256,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 18568.94921875,
+          "q1_ns": 18358.3173828125,
+          "q3_ns": 18658.94580078125,
+          "loops": 1024,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 139078.61328125,
+          "q1_ns": 136148.603515625,
+          "q3_ns": 139473.6328125,
+          "loops": 128,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-32x32-s3",
+      "m": 32,
+      "n": 32,
+      "seed": 3,
+      "status": "optimal",
+      "pivots": 20,
+      "engines": {
+        "reference": {
+          "median_ns": 1514153.6875,
+          "q1_ns": 1500540.3125,
+          "q3_ns": 1518515.65625,
+          "loops": 8,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 67732.748046875,
+          "q1_ns": 67351.51953125,
+          "q3_ns": 68080.3623046875,
+          "loops": 256,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 25501.2197265625,
+          "q1_ns": 25379.41552734375,
+          "q3_ns": 25816.9755859375,
+          "loops": 512,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 147875.8125,
+          "q1_ns": 147167.234375,
+          "q3_ns": 149399.578125,
+          "loops": 128,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-48x48-s1",
+      "m": 48,
+      "n": 48,
+      "seed": 1,
+      "status": "optimal",
+      "pivots": 28,
+      "engines": {
+        "reference": {
+          "median_ns": 4509890.5,
+          "q1_ns": 4478471.4375,
+          "q3_ns": 4540364.625,
+          "loops": 4,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 143457.1953125,
+          "q1_ns": 142929.69140625,
+          "q3_ns": 145095.943359375,
+          "loops": 128,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 65481.8515625,
+          "q1_ns": 65353.517578125,
+          "q3_ns": 65826.3349609375,
+          "loops": 256,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 310843.4296875,
+          "q1_ns": 308845.8671875,
+          "q3_ns": 322200.84765625,
+          "loops": 64,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-48x48-s2",
+      "m": 48,
+      "n": 48,
+      "seed": 2,
+      "status": "optimal",
+      "pivots": 37,
+      "engines": {
+        "reference": {
+          "median_ns": 5974979.25,
+          "q1_ns": 5943166.75,
+          "q3_ns": 6055041.625,
+          "loops": 2,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 165452.46875,
+          "q1_ns": 164083.49609375,
+          "q3_ns": 166645.5,
+          "loops": 64,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 85798.66796875,
+          "q1_ns": 85592.529296875,
+          "q3_ns": 85893.314453125,
+          "loops": 128,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 335444.015625,
+          "q1_ns": 334287.78125,
+          "q3_ns": 345150.0625,
+          "loops": 32,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-48x48-s3",
+      "m": 48,
+      "n": 48,
+      "seed": 3,
+      "status": "optimal",
+      "pivots": 27,
+      "engines": {
+        "reference": {
+          "median_ns": 4421026.125,
+          "q1_ns": 4373312.375,
+          "q3_ns": 4448718.8125,
+          "loops": 4,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 141134.6015625,
+          "q1_ns": 140333.33203125,
+          "q3_ns": 143277.423828125,
+          "loops": 128,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 63410.888671875,
+          "q1_ns": 63289.755859375,
+          "q3_ns": 63718.1826171875,
+          "loops": 256,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 315771.484375,
+          "q1_ns": 307586.91796875,
+          "q3_ns": 324728.359375,
+          "loops": 64,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-64x64-s1",
+      "m": 64,
+      "n": 64,
+      "seed": 1,
+      "status": "optimal",
+      "pivots": 22,
+      "engines": {
+        "reference": {
+          "median_ns": 6344968.75,
+          "q1_ns": 6275109.375,
+          "q3_ns": 6378677.125,
+          "loops": 2,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 214284.8359375,
+          "q1_ns": 213066.8984375,
+          "q3_ns": 217271.81640625,
+          "loops": 64,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 94633.46484375,
+          "q1_ns": 94525.796875,
+          "q3_ns": 95230.224609375,
+          "loops": 128,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 515227.203125,
+          "q1_ns": 513966.46875,
+          "q3_ns": 517070.6328125,
+          "loops": 32,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-64x64-s2",
+      "m": 64,
+      "n": 64,
+      "seed": 2,
+      "status": "optimal",
+      "pivots": 35,
+      "engines": {
+        "reference": {
+          "median_ns": 9986938,
+          "q1_ns": 9840270.75,
+          "q3_ns": 10029989.75,
+          "loops": 1,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 265198.2421875,
+          "q1_ns": 262923.34375,
+          "q3_ns": 267751.13671875,
+          "loops": 64,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 147391.11328125,
+          "q1_ns": 147207.677734375,
+          "q3_ns": 147667.724609375,
+          "loops": 128,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 575161.453125,
+          "q1_ns": 573345.0625,
+          "q3_ns": 576404.3125,
+          "loops": 32,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-64x64-s3",
+      "m": 64,
+      "n": 64,
+      "seed": 3,
+      "status": "optimal",
+      "pivots": 37,
+      "engines": {
+        "reference": {
+          "median_ns": 10805500,
+          "q1_ns": 10599281,
+          "q3_ns": 10830333.25,
+          "loops": 1,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 275425.125,
+          "q1_ns": 273551.10546875,
+          "q3_ns": 278885.734375,
+          "loops": 64,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 155361.4921875,
+          "q1_ns": 155100.912109375,
+          "q3_ns": 155718.994140625,
+          "loops": 128,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 586119.796875,
+          "q1_ns": 583824.5625,
+          "q3_ns": 588916.015625,
+          "loops": 32,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-96x96-s1",
+      "m": 96,
+      "n": 96,
+      "seed": 1,
+      "status": "optimal",
+      "pivots": 69,
+      "engines": {
+        "reference": {
+          "median_ns": 42882312.5,
+          "q1_ns": 42377833.5,
+          "q3_ns": 43075520.75,
+          "loops": 1,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 833235.6875,
+          "q1_ns": 829899.765625,
+          "q3_ns": 868790.359375,
+          "loops": 16,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 614940.09375,
+          "q1_ns": 612275.71875,
+          "q3_ns": 620332.6796875,
+          "loops": 32,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 1551473.875,
+          "q1_ns": 1546295.59375,
+          "q3_ns": 1574804.71875,
+          "loops": 8,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-96x96-s2",
+      "m": 96,
+      "n": 96,
+      "seed": 2,
+      "status": "optimal",
+      "pivots": 48,
+      "engines": {
+        "reference": {
+          "median_ns": 28930708.5,
+          "q1_ns": 28782760.5,
+          "q3_ns": 29230458.5,
+          "loops": 1,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 655451.84375,
+          "q1_ns": 653487.625,
+          "q3_ns": 661330.75,
+          "loops": 16,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 429670.5625,
+          "q1_ns": 427722.6640625,
+          "q3_ns": 433340.4765625,
+          "loops": 32,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 1355695.25,
+          "q1_ns": 1348970,
+          "q3_ns": 1369522.15625,
+          "loops": 8,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-96x96-s3",
+      "m": 96,
+      "n": 96,
+      "seed": 3,
+      "status": "optimal",
+      "pivots": 65,
+      "engines": {
+        "reference": {
+          "median_ns": 39494208.5,
+          "q1_ns": 39035854,
+          "q3_ns": 39671416.75,
+          "loops": 1,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 800920.5625,
+          "q1_ns": 798594.40625,
+          "q3_ns": 805967.453125,
+          "loops": 16,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 581828.125,
+          "q1_ns": 577501.3125,
+          "q3_ns": 588218.765625,
+          "loops": 32,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 1517888.0625,
+          "q1_ns": 1512091.1875,
+          "q3_ns": 1529760.46875,
+          "loops": 8,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-128x128-s1",
+      "m": 128,
+      "n": 128,
+      "seed": 1,
+      "status": "optimal",
+      "pivots": 138,
+      "engines": {
+        "reference": {
+          "median_ns": 146124042,
+          "q1_ns": 145501416.5,
+          "q3_ns": 146820875.5,
+          "loops": 1,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 2487307.375,
+          "q1_ns": 2484481.75,
+          "q3_ns": 2494130.0625,
+          "loops": 4,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 2120119.8125,
+          "q1_ns": 2115954.4375,
+          "q3_ns": 2136997.375,
+          "loops": 8,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 3882130.375,
+          "q1_ns": 3865369.8125,
+          "q3_ns": 3913302.0625,
+          "loops": 4,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-128x128-s2",
+      "m": 128,
+      "n": 128,
+      "seed": 2,
+      "status": "optimal",
+      "pivots": 94,
+      "engines": {
+        "reference": {
+          "median_ns": 99390083.5,
+          "q1_ns": 98635437.5,
+          "q3_ns": 99809385,
+          "loops": 1,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 1850106.75,
+          "q1_ns": 1831955.78125,
+          "q3_ns": 1877386.65625,
+          "loops": 8,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 1443057.25,
+          "q1_ns": 1438749.96875,
+          "q3_ns": 1451938.8125,
+          "loops": 8,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 3119244.75,
+          "q1_ns": 3110052.0625,
+          "q3_ns": 3157989.5,
+          "loops": 4,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-128x128-s3",
+      "m": 128,
+      "n": 128,
+      "seed": 3,
+      "status": "optimal",
+      "pivots": 83,
+      "engines": {
+        "reference": {
+          "median_ns": 87827208.5,
+          "q1_ns": 87204926.5,
+          "q3_ns": 89606489.75,
+          "loops": 1,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 1637914.0625,
+          "q1_ns": 1626156.28125,
+          "q3_ns": 1662992.15625,
+          "loops": 8,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 1281718.6875,
+          "q1_ns": 1276496.09375,
+          "q3_ns": 1295903.59375,
+          "loops": 8,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 2966474,
+          "q1_ns": 2929078.125,
+          "q3_ns": 3020432.25,
+          "loops": 4,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-160x160-s1",
+      "m": 160,
+      "n": 160,
+      "seed": 1,
+      "status": "optimal",
+      "pivots": 115,
+      "engines": {
+        "reference": {
+          "median_ns": 193497104.5,
+          "q1_ns": 192292312.5,
+          "q3_ns": 194276698.25,
+          "loops": 1,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 3208682.25,
+          "q1_ns": 3205846.5,
+          "q3_ns": 3218489.4375,
+          "loops": 4,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 2659630.25,
+          "q1_ns": 2654731.8125,
+          "q3_ns": 2674078.0625,
+          "loops": 4,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 5294479,
+          "q1_ns": 5279203,
+          "q3_ns": 5330291.875,
+          "loops": 2,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-160x160-s2",
+      "m": 160,
+      "n": 160,
+      "seed": 2,
+      "status": "optimal",
+      "pivots": 105,
+      "engines": {
+        "reference": {
+          "median_ns": 176761083.5,
+          "q1_ns": 175015114.5,
+          "q3_ns": 180140625,
+          "loops": 1,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 3069067.75,
+          "q1_ns": 3045953.125,
+          "q3_ns": 3126479.125,
+          "loops": 4,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 2411164.0625,
+          "q1_ns": 2400605.5,
+          "q3_ns": 2443171.84375,
+          "loops": 8,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 5055291.5,
+          "q1_ns": 5029427,
+          "q3_ns": 5074661.625,
+          "loops": 2,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-160x160-s3",
+      "m": 160,
+      "n": 160,
+      "seed": 3,
+      "status": "optimal",
+      "pivots": 110,
+      "engines": {
+        "reference": {
+          "median_ns": 185306854,
+          "q1_ns": 184135698.25,
+          "q3_ns": 185603542,
+          "loops": 1,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 3109828.125,
+          "q1_ns": 3101263,
+          "q3_ns": 3127632.6875,
+          "loops": 4,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 2533296.875,
+          "q1_ns": 2526351.625,
+          "q3_ns": 2548687.5,
+          "loops": 4,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 5180760.5,
+          "q1_ns": 5125171.875,
+          "q3_ns": 5233307.25,
+          "loops": 2,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-192x192-s1",
+      "m": 192,
+      "n": 192,
+      "seed": 1,
+      "status": "optimal",
+      "pivots": 177,
+      "engines": {
+        "reference": {
+          "median_ns": 436055708,
+          "q1_ns": 432981479.5,
+          "q3_ns": 442521854.5,
+          "loops": 1,
+          "samples": 9
+        },
+        "native": {
+          "median_ns": 6864802.25,
+          "q1_ns": 6759125.125,
+          "q3_ns": 6892348.75,
+          "loops": 2,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 5728625,
+          "q1_ns": 5714474.125,
+          "q3_ns": 5781822.625,
+          "loops": 2,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 9850333.25,
+          "q1_ns": 9815260.25,
+          "q3_ns": 9899031.125,
+          "loops": 2,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-192x192-s2",
+      "m": 192,
+      "n": 192,
+      "seed": 2,
+      "status": "optimal",
+      "pivots": 189,
+      "engines": {
+        "reference": {
+          "median_ns": 461225041.5,
+          "q1_ns": 458795458.5,
+          "q3_ns": 462733865,
+          "loops": 1,
+          "samples": 8
+        },
+        "native": {
+          "median_ns": 6930104.25,
+          "q1_ns": 6899859.375,
+          "q3_ns": 6976302,
+          "loops": 2,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 6153656.25,
+          "q1_ns": 6100650.75,
+          "q3_ns": 6256750,
+          "loops": 2,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 10273458.5,
+          "q1_ns": 10206271,
+          "q3_ns": 10426707.75,
+          "loops": 1,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "random-192x192-s3",
+      "m": 192,
+      "n": 192,
+      "seed": 3,
+      "status": "optimal",
+      "pivots": 192,
+      "engines": {
+        "reference": {
+          "median_ns": 462466938,
+          "q1_ns": 461930136,
+          "q3_ns": 468235000,
+          "loops": 1,
+          "samples": 8
+        },
+        "native": {
+          "median_ns": 7339770.75,
+          "q1_ns": 7295078,
+          "q3_ns": 7425515.375,
+          "loops": 2,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 6289385.25,
+          "q1_ns": 6212755.25,
+          "q3_ns": 6393520.75,
+          "loops": 2,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 10687021,
+          "q1_ns": 10611458.25,
+          "q3_ns": 10736906.5,
+          "loops": 1,
+          "samples": 20
+        }
+      }
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "topic21",
+      "m": 5,
+      "n": 3,
+      "status": "optimal",
+      "pivots": 4,
+      "engines": {
+        "reference": {
+          "median_ns": 23285.15625,
+          "q1_ns": 22983.78564453125,
+          "q3_ns": 23617.3505859375,
+          "loops": 512,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 7741.56689453125,
+          "q1_ns": 7690.4652099609375,
+          "q3_ns": 7837.127685546875,
+          "loops": 2048,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 911.8449096679688,
+          "q1_ns": 905.2480163574219,
+          "q3_ns": 918.3088989257812,
+          "loops": 16384,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 6802.06298828125,
+          "q1_ns": 6717.92578125,
+          "q3_ns": 6883.7279052734375,
+          "loops": 2048,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "statquest",
+      "m": 2,
+      "n": 2,
+      "status": "optimal",
+      "pivots": 1,
+      "engines": {
+        "reference": {
+          "median_ns": 8125.67138671875,
+          "q1_ns": 8107.9813232421875,
+          "q3_ns": 8190.449951171875,
+          "loops": 2048,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 4979.1259765625,
+          "q1_ns": 4878.23486328125,
+          "q3_ns": 5019.16015625,
+          "loops": 2048,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 470.2841339111328,
+          "q1_ns": 466.5943603515625,
+          "q3_ns": 475.5557403564453,
+          "loops": 32768,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 3993.8658447265625,
+          "q1_ns": 3972.0203857421875,
+          "q3_ns": 4021.769287109375,
+          "loops": 4096,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "kleeminty3",
+      "m": 3,
+      "n": 3,
+      "status": "optimal",
+      "pivots": 7,
+      "engines": {
+        "reference": {
+          "median_ns": 25505.65625,
+          "q1_ns": 25445.984375,
+          "q3_ns": 25591.98046875,
+          "loops": 512,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 6206.573486328125,
+          "q1_ns": 6143.59033203125,
+          "q3_ns": 6218.6484375,
+          "loops": 2048,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 988.3905944824219,
+          "q1_ns": 968.0074157714844,
+          "q3_ns": 998.7640686035156,
+          "loops": 16384,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 5500.173095703125,
+          "q1_ns": 5451.9296875,
+          "q3_ns": 5570.9683837890625,
+          "loops": 2048,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "degenerate1",
+      "m": 3,
+      "n": 4,
+      "status": "optimal",
+      "pivots": 7,
+      "engines": {
+        "reference": {
+          "median_ns": 27343.9130859375,
+          "q1_ns": 27240.53955078125,
+          "q3_ns": 27530.86328125,
+          "loops": 512,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 6402.649169921875,
+          "q1_ns": 6367.8792724609375,
+          "q3_ns": 6432.2357177734375,
+          "loops": 2048,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 952.1306457519531,
+          "q1_ns": 949.4075927734375,
+          "q3_ns": 965.1679992675781,
+          "loops": 16384,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 5979.949951171875,
+          "q1_ns": 5922.8212890625,
+          "q3_ns": 6001.480224609375,
+          "loops": 2048,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "unbounded1",
+      "m": 2,
+      "n": 2,
+      "status": "unbounded",
+      "pivots": 1,
+      "engines": {
+        "reference": {
+          "median_ns": 6745.19873046875,
+          "q1_ns": 6662.0076904296875,
+          "q3_ns": 6942.245361328125,
+          "loops": 2048,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 4865.814208984375,
+          "q1_ns": 4828.4251708984375,
+          "q3_ns": 4896.2861328125,
+          "loops": 2048,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 432.6051025390625,
+          "q1_ns": 422.52381896972656,
+          "q3_ns": 435.34151458740234,
+          "loops": 32768,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 3333.1298828125,
+          "q1_ns": 3295.003173828125,
+          "q3_ns": 3394.561767578125,
+          "loops": 4096,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "infeasible1",
+      "m": 2,
+      "n": 2,
+      "status": "infeasible",
+      "pivots": 1,
+      "engines": {
+        "reference": {
+          "median_ns": 7355.865478515625,
+          "q1_ns": 7308.029296875,
+          "q3_ns": 7376.760009765625,
+          "loops": 2048,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 4817.413330078125,
+          "q1_ns": 4782.837158203125,
+          "q3_ns": 4866.195556640625,
+          "loops": 2048,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 440.8550262451172,
+          "q1_ns": 436.33970642089844,
+          "q3_ns": 446.12279510498047,
+          "loops": 32768,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 3318.1304931640625,
+          "q1_ns": 3312.5152587890625,
+          "q3_ns": 3332.2957763671875,
+          "loops": 4096,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "shortestpath",
+      "m": 5,
+      "n": 3,
+      "status": "optimal",
+      "pivots": 3,
+      "engines": {
+        "reference": {
+          "median_ns": 19496.052734375,
+          "q1_ns": 19312.62158203125,
+          "q3_ns": 19608.21484375,
+          "loops": 512,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 7904.083251953125,
+          "q1_ns": 7816.0400390625,
+          "q3_ns": 7973.3634033203125,
+          "loops": 2048,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 832.6632080078125,
+          "q1_ns": 820.452392578125,
+          "q3_ns": 840.2754211425781,
+          "loops": 16384,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 6784.891845703125,
+          "q1_ns": 6735.8348388671875,
+          "q3_ns": 6812.5560302734375,
+          "loops": 2048,
+          "samples": 20
+        }
+      }
+    },
+    {
+      "name": "maxflow",
+      "m": 12,
+      "n": 8,
+      "status": "optimal",
+      "pivots": 7,
+      "engines": {
+        "reference": {
+          "median_ns": 66572.751953125,
+          "q1_ns": 66421.5087890625,
+          "q3_ns": 67031.6171875,
+          "loops": 256,
+          "samples": 20
+        },
+        "native": {
+          "median_ns": 15374.125,
+          "q1_ns": 15322.89599609375,
+          "q3_ns": 15488.4541015625,
+          "loops": 1024,
+          "samples": 20
+        },
+        "rust": {
+          "median_ns": 2175.4251708984375,
+          "q1_ns": 2162.361083984375,
+          "q3_ns": 2193.9595642089844,
+          "loops": 8192,
+          "samples": 20
+        },
+        "wasm": {
+          "median_ns": 16385.4775390625,
+          "q1_ns": 16319.112548828125,
+          "q3_ns": 16454.823974609375,
+          "loops": 1024,
+          "samples": 20
+        }
+      }
+    }
+  ]
+}
