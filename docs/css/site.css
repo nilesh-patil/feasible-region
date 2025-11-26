@@ -2451,6 +2451,77 @@ a:focus-visible { outline-offset: 3px; }
   }
 }
 
+/* fig:bench  (S7, Figures 11 and 12; static, no JS mount)  --------------- */
+/* Same chart conventions as the Klee-Minty panel: hairline grid, faint sans
+   ticks. One hue per runtime, held across both figures: ocean blue for the
+   pure-Python reference, vermillion for the Rust core (dashed when the call
+   crosses the PyO3 border, solid in process), teal for the browser build,
+   trail grey for the border share of a call. */
+.bench-gridline { stroke: var(--hairline); stroke-width: 1; }
+.bench-axis-line, .bench-tick-mark { stroke: var(--hairline-strong); stroke-width: 1; }
+.bench-tick-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  fill: var(--faint);
+}
+.bench-tick-y { text-anchor: end; }
+.bench-tick-x { text-anchor: middle; }
+.bench-axis-title {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  fill: var(--faint);
+  text-anchor: middle;
+}
+.bench-band { fill: var(--wash); }
+.bench-band-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  fill: var(--faint);
+  text-anchor: middle;
+}
+.bench-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.bench-line-py { stroke: var(--constraint-2); }
+.bench-line-wasm { stroke: var(--constraint-3); }
+.bench-line-native { stroke: var(--constraint-1); stroke-dasharray: 6 3.5; }
+.bench-line-rust { stroke: var(--constraint-1); }
+.bench-legend-swatch { fill: none; stroke-width: 2.5; stroke-linecap: round; }
+/* Raised to (0,2,1) like the km labels: these beat the global `.fig-svg text`
+   fill so the legend and the gap bracket keep their own ink. */
+.bench-chart-svg text.bench-legend-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  fill: var(--ink-soft);
+}
+.bench-gap { stroke: var(--ink-soft); stroke-width: 1; }
+.bench-chart-svg text.bench-gap-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--ink-soft);
+  text-anchor: end;
+}
+/* Figure 12 bars: the toll recedes to the trail grey so the thin solid
+   core-solve sliver reads as the payload it is. */
+.bench-chart-svg text.bench-row-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  fill: var(--ink-soft);
+  text-anchor: end;
+}
+.bench-bar-py { fill: var(--constraint-2); opacity: 0.82; }
+.bench-bar-solve { fill: var(--constraint-1); }
+.bench-bar-toll { fill: var(--trail); opacity: 0.45; }
+.bench-bar-note {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  fill: var(--faint);
+}
+
 /* ===================================================================== */
 /* One instrument, two column tiers now. Hold every in-SVG label in       */
 /* an 11 to 13px rendered band at the classic centered column, and in an  */
@@ -2477,6 +2548,7 @@ a:focus-visible { outline-offset: 3px; }
 .figure-box[data-figure="maxflow"] { max-width: 460px; margin-inline: auto; }
 .sp-graph-box { max-width: 350px; margin-inline: auto; }
 .race-box { max-width: 470px; margin-inline: auto; }
+.bench-box { max-width: 520px; margin-inline: auto; }
 .dv-stair-svg { max-width: 335px; margin-inline: auto; display: block; }
 
 /* Font overrides for the inline-styled figures. Hero and formulation carry
@@ -2640,6 +2712,7 @@ svg.vf-still text { font-size: 10px !important; }
   .figure-box[data-figure="maxflow"] { max-width: 645px; }
   .sp-graph-box { max-width: 490px; }
   .race-box { max-width: 660px; }
+  .bench-box { max-width: 545px; }
   .dv-stair-svg { max-width: 470px; }
 
   /* Font compensation. Each rule trims the authored label so the render lands

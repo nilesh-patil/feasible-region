@@ -231,6 +231,8 @@
           <span class="toc-tags"><span class="toc-tag">complexity</span></span></li>
         <li><a href="#s6">6. Networks and the race</a>
           <span class="toc-tags"><span class="toc-tag">reductions</span> <span class="toc-tag">duality</span></span></li>
+        <li><a href="#s7">7. The same walk, twice</a>
+          <span class="toc-tags"><span class="toc-tag">measurement</span></span></li>
         <li><a href="#references">References</a></li>
         <li><a href="#glossary">Appendix A: Glossary</a></li>
         <li><a href="#concept-map">Appendix B: Concept index</a></li>
@@ -247,7 +249,8 @@
         <aside class="frame-note"><p>One cargo bay problem carries Sections 01 to 04,
           growing from two products in a plane to three under five limits; Section 05
           builds a hostile bay on purpose, and Section 06 reads networks as the same
-          mathematics before racing two solvers home. Start with the figures: drag the
+          mathematics before racing two solvers home. Section 07 prices the page's own
+          machinery: the same walk, timed in every runtime that runs it. Start with the figures: drag the
           constraint lines, work the scrubbers, and hover or focus to link details. Some
           figures re-solve live in your browser; each figure's badge says whether it is
           live, replaying a recorded trace, or drawn from geometry. Dotted underlines
@@ -1867,6 +1870,317 @@
       </div>
     </section>
 
+    <!-- ================= S7: THE SAME WALK, TWICE ================= -->
+    <section id="s7" aria-labelledby="s7-h">
+      <div class="l-body">
+        <p class="eyebrow">Section 07 &middot; The engine room</p>
+        <h2 id="s7-h">The same walk, twice</h2>
+      </div>
+
+      <div class="l-body">
+        <p>Everything above ran twice before it reached this page. A pure-Python reference
+          wrote the traces the figures replay; the same solver, written again in Rust, re-solves
+          live in the browser when a constraint is dragged; and the parity suite pins the two to
+          identical pivot sequences, corner for corner. With the mathematics settled between
+          them, one engineering question is left: what does the identical walk cost in each?
+          For every program on this page, the answer is nothing a reader could feel. The
+          fab-bay program costs <b>8.1 microseconds</b> in pure Python and Klee-Minty's little
+          cube costs <b>25.5</b>; the Rust core does the fab bay's work in half a microsecond,
+          and nobody watching this page can tell those apart.</p>
+        <p>The difference is real; it lives at sizes this page never visits. To measure it
+          without fooling anyone, the harness draws seeded product-mix programs, every
+          coefficient positive and every row a le limit, so the origin is feasible and the
+          region is bounded by construction, in squares from 4&times;4 up to 192&times;192.
+          Each instance passes a parity gate before any clock starts: same status, same pivot
+          count, objectives within 1e-6 across engines, so a timing difference can only be a
+          runtime difference. Times are medians over batched samples with the warmup discarded
+          and the garbage collector left on, all on one disclosed machine, an Apple M4 Max. The
+          whole run is committed to the repository as
+          <span class="code-inline">bench/results.json</span>, which is what the badge under
+          each chart means: the numbers replay that committed record.</p>
+      </div>
+
+      <div class="l-page">
+        <figure id="fig-bench-scaling">
+          <p class="notice">One walk, four runtimes; the pivot sequences are identical by
+            construction, so the vertical gaps are pure implementation cost.</p>
+
+          <!-- Static chart, no JS mount: every coordinate below is baked from
+               bench/results.json (cross-seed medians). Regenerate the record with
+               `pixi run bench` and `pixi run bench-wasm`; the geometry is
+               hand-mapped the way the Klee-Minty chart's is. -->
+          <div class="figure-box bench-box" style="--fig-ar: 480 / 330;">
+            <svg class="fig-svg bench-chart-svg" viewBox="0 0 480 330"
+                 preserveAspectRatio="xMidYMid meet" role="img"
+                 aria-label="Median solve time in four runtimes on identical pivots: pure Python's gap over the native call grows from 3 times to 66 times by 192 by 192.">
+              <rect class="bench-band" x="56" y="20" width="115.2" height="264"></rect>
+              <g class="bench-grid">
+                <line class="bench-gridline" x1="56" y1="267.0" x2="462" y2="267.0"></line>
+                <line class="bench-gridline" x1="56" y1="224.2" x2="462" y2="224.2"></line>
+                <line class="bench-gridline" x1="56" y1="181.5" x2="462" y2="181.5"></line>
+                <line class="bench-gridline" x1="56" y1="138.8" x2="462" y2="138.8"></line>
+                <line class="bench-gridline" x1="56" y1="96.0" x2="462" y2="96.0"></line>
+                <line class="bench-gridline" x1="56" y1="53.3" x2="462" y2="53.3"></line>
+              </g>
+              <g class="bench-axis">
+                <line class="bench-axis-line" x1="56" y1="20" x2="56" y2="284"></line>
+                <line class="bench-axis-line" x1="56" y1="284" x2="462" y2="284"></line>
+              </g>
+              <g class="bench-ticks">
+                <text class="bench-tick-label bench-tick-y" x="50" y="270.5">1 &micro;s</text>
+                <text class="bench-tick-label bench-tick-y" x="50" y="227.7">10 &micro;s</text>
+                <text class="bench-tick-label bench-tick-y" x="50" y="185.0">100 &micro;s</text>
+                <text class="bench-tick-label bench-tick-y" x="50" y="142.3">1 ms</text>
+                <text class="bench-tick-label bench-tick-y" x="50" y="99.5">10 ms</text>
+                <text class="bench-tick-label bench-tick-y" x="50" y="56.8">100 ms</text>
+                <line class="bench-tick-mark" x1="56" y1="284" x2="56" y2="288"></line>
+                <text class="bench-tick-label bench-tick-x" x="56" y="301">4</text>
+                <line class="bench-tick-mark" x1="128.7" y1="284" x2="128.7" y2="288"></line>
+                <text class="bench-tick-label bench-tick-x" x="128.7" y="301">8</text>
+                <line class="bench-tick-mark" x1="201.4" y1="284" x2="201.4" y2="288"></line>
+                <text class="bench-tick-label bench-tick-x" x="201.4" y="301">16</text>
+                <line class="bench-tick-mark" x1="274.1" y1="284" x2="274.1" y2="288"></line>
+                <text class="bench-tick-label bench-tick-x" x="274.1" y="301">32</text>
+                <line class="bench-tick-mark" x1="346.8" y1="284" x2="346.8" y2="288"></line>
+                <text class="bench-tick-label bench-tick-x" x="346.8" y="301">64</text>
+                <line class="bench-tick-mark" x1="419.5" y1="284" x2="419.5" y2="288"></line>
+                <text class="bench-tick-label bench-tick-x" x="419.5" y="301">128</text>
+                <line class="bench-tick-mark" x1="462" y1="284" x2="462" y2="288"></line>
+                <text class="bench-tick-label bench-tick-x" x="462" y="301">192</text>
+              </g>
+              <text class="bench-axis-title" x="259" y="322">problem size, constraints = variables (log)</text>
+              <text class="bench-axis-title" x="12" y="152" transform="rotate(-90 12 152)">median solve time (log)</text>
+              <text class="bench-band-label" x="113" y="279">this page's programs</text>
+              <polyline class="bench-line bench-line-py" points="56.0,211.3 128.7,193.5 171.2,183.1 201.4,172.9 243.9,146.4 274.1,137.4 316.6,110.8 346.8,96.0 389.3,70.5 419.5,53.4 442.9,41.8 462.0,24.9"></polyline>
+              <polyline class="bench-line bench-line-wasm" points="56.0,230.2 128.7,216.7 171.2,206.0 201.4,198.0 243.9,184.6 274.1,175.4 316.6,160.2 346.8,149.0 389.3,131.0 419.5,117.6 442.9,108.2 462.0,95.5"></polyline>
+              <polyline class="bench-line bench-line-native" points="56.0,231.5 128.7,222.8 171.2,215.8 201.4,209.4 243.9,197.6 274.1,190.9 316.6,174.8 346.8,163.4 389.3,142.9 419.5,127.3 442.9,117.7 462.0,102.8"></polyline>
+              <polyline class="bench-line bench-line-rust" points="56.0,272.2 128.7,259.1 171.2,251.4 201.4,242.6 243.9,219.4 274.1,212.8 316.6,189.4 346.8,174.3 389.3,148.8 419.5,131.9 442.9,121.5 462.0,105.0"></polyline>
+              <g class="bench-legend">
+                <line class="bench-legend-swatch bench-line-py" x1="70" y1="36" x2="92" y2="36"></line>
+                <text class="bench-legend-label" x="98" y="40">pure Python (reference)</text>
+                <line class="bench-legend-swatch bench-line-wasm" x1="70" y1="53" x2="92" y2="53"></line>
+                <text class="bench-legend-label" x="98" y="57">browser build, JSON border</text>
+                <line class="bench-legend-swatch bench-line-native" x1="70" y1="70" x2="92" y2="70"></line>
+                <text class="bench-legend-label" x="98" y="74">native core, PyO3 border</text>
+                <line class="bench-legend-swatch bench-line-rust" x1="70" y1="87" x2="92" y2="87"></line>
+                <text class="bench-legend-label" x="98" y="91">Rust core, in process</text>
+              </g>
+              <g class="bench-gap-mark" aria-hidden="true">
+                <line class="bench-gap" x1="470" y1="24.9" x2="470" y2="102.8"></line>
+                <line class="bench-gap" x1="466" y1="24.9" x2="474" y2="24.9"></line>
+                <line class="bench-gap" x1="466" y1="102.8" x2="474" y2="102.8"></line>
+                <text class="bench-gap-label" x="466" y="67">66&times;</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="badge-row">
+            <span class="pill engine-badge" data-engine="trace" title="The badge names the engine behind this figure's numbers: a committed benchmark record, bench/results.json, replayed into the chart. Nothing here times your machine.">replaying recorded run</span>
+            <span class="fig-sub">Medians of batched samples from one committed run: CPython
+              3.11, rustc 1.97 on the workspace's size-tuned release profile, and Node 22's V8
+              driving the browser build. The parity gate held each engine to the same pivots
+              before a single sample counted.</span>
+          </div>
+
+          <p class="readout">
+            At 192&times;192 the same walk costs <b>461 ms</b> in pure Python, <b>6.9 ms</b>
+            through the native call, <b>6.2 ms</b> for the core alone, and <b>10.3 ms</b> in the
+            browser build, medians across three seeded instances.
+          </p>
+          <figcaption>
+            <span class="fig-num">Figure 11.</span> Median solve time against problem size,
+            both axes log, for the same seeded product-mix walks. Pure Python and the native
+            call start <b>3&times;</b> apart at 4&times;4 and end <b>66&times;</b> apart at
+            192&times;192; the in-process core and the browser build converge toward the native
+            line as the tableau outgrows their border costs. The shaded band marks the sizes
+            every figure on this page actually solves.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="l-body">
+        <p>Both engines walk the same corners, so both lines climb together; what grows is the
+          space between them. The mechanism fits in a sentence: a pivot touches every cell of
+          the tableau, an interpreter charges tens of nanoseconds per touch to unbox, dispatch,
+          and rebox each float, and a compiled loop charges about one. Cells grow quadratically
+          while the charges hold, so the ratio climbs toward the raw per-cell gap. The two Rust
+          curves tell the opposite story: they start almost <b>9&times;</b> apart and end
+          <b>13 percent</b> apart, because what separates them is not work but a border, and
+          the border grows far more slowly than the solve it wraps.</p>
+        <p>That border deserves its own figure. The native call reads the
+          <span class="code-inline">LinearProgram</span> dataclass attribute by attribute,
+          converts each row, and builds a real <span class="code-inline">Solution</span>
+          object on the way back. That toll grows with the payload, <b>4.5 microseconds</b> on
+          the fab bay, <b>13</b> on max flow's twelve rows, near <b>800</b> at 192&times;192,
+          but it grows like the problem's size while the solve grows like the problem's work,
+          so the crossing dominates small calls and fades inside big ones; PyO3's guide gives
+          the same advice from the other side, cross the boundary rarely and carry more per
+          crossing<a class="cite" href="#ref-7" aria-label="Reference 7: PyO3 performance guide">[7]<span class="cite-tip" aria-hidden="true">The PyO3 user guide, "Performance." pyo3.rs.</span></a>.
+          On the fab bay the full native call is <b>5.0 microseconds</b>: <b>0.5</b> of solve
+          wrapped in <b>4.5</b> of border. At this page's scale you are timing the border, not
+          the solver.</p>
+      </div>
+
+      <div class="l-page">
+        <figure id="fig-bench-border">
+          <p class="notice">Every program on this page, timed; the native bar is almost
+            entirely border crossing.</p>
+
+          <!-- Static chart, no JS mount; same recorded run as Figure 11. Bar
+               geometry is baked from the fixtures block of bench/results.json,
+               linear microseconds, 70 across the panel. -->
+          <div class="figure-box bench-box" style="--fig-ar: 480 / 424;">
+            <svg class="fig-svg bench-chart-svg" viewBox="0 0 480 424"
+                 preserveAspectRatio="xMidYMid meet" role="img"
+                 aria-label="Paired bars for eight programs: pure Python beside the native call, whose bar is 84 to 91 percent border crossing rather than solve.">
+              <g class="bench-legend">
+                <rect class="bench-bar-py" x="150" y="12" width="14" height="9"></rect>
+                <text class="bench-legend-label" x="170" y="20.5">pure Python</text>
+                <rect class="bench-bar-solve" x="258" y="12" width="14" height="9"></rect>
+                <text class="bench-legend-label" x="278" y="20.5">core solve</text>
+                <rect class="bench-bar-toll" x="358" y="12" width="14" height="9"></rect>
+                <text class="bench-legend-label" x="378" y="20.5">border crossing</text>
+              </g>
+              <g class="bench-grid">
+                <line class="bench-gridline" x1="194.9" y1="28" x2="194.9" y2="366"></line>
+                <line class="bench-gridline" x1="239.7" y1="28" x2="239.7" y2="366"></line>
+                <line class="bench-gridline" x1="284.6" y1="28" x2="284.6" y2="366"></line>
+                <line class="bench-gridline" x1="329.4" y1="28" x2="329.4" y2="366"></line>
+                <line class="bench-gridline" x1="374.3" y1="28" x2="374.3" y2="366"></line>
+                <line class="bench-gridline" x1="419.1" y1="28" x2="419.1" y2="366"></line>
+                <line class="bench-gridline" x1="464" y1="28" x2="464" y2="366"></line>
+              </g>
+              <g class="bench-axis">
+                <line class="bench-axis-line" x1="150" y1="28" x2="150" y2="366"></line>
+                <line class="bench-axis-line" x1="150" y1="366" x2="464" y2="366"></line>
+              </g>
+
+              <g class="bench-row">
+                <text class="bench-row-label" x="142" y="51">fab bay (2&times;2)</text>
+                <rect class="bench-bar-py" x="150" y="36" width="36.4" height="9"></rect>
+                <text class="bench-bar-note" x="191.4" y="43.5">8.1 &micro;s</text>
+                <rect class="bench-bar-solve" x="150" y="49" width="2.1" height="9"></rect>
+                <rect class="bench-bar-toll" x="152.1" y="49" width="20.2" height="9"></rect>
+                <text class="bench-bar-note" x="177.3" y="56.5">5.0 &micro;s, 91% border</text>
+              </g>
+              <g class="bench-row">
+                <text class="bench-row-label" x="142" y="95">unbounded (2&times;2)</text>
+                <rect class="bench-bar-py" x="150" y="80" width="30.3" height="9"></rect>
+                <text class="bench-bar-note" x="185.3" y="87.5">6.7 &micro;s</text>
+                <rect class="bench-bar-solve" x="150" y="93" width="1.9" height="9"></rect>
+                <rect class="bench-bar-toll" x="151.9" y="93" width="19.9" height="9"></rect>
+                <text class="bench-bar-note" x="176.8" y="100.5">4.9 &micro;s, 91% border</text>
+              </g>
+              <g class="bench-row">
+                <text class="bench-row-label" x="142" y="139">infeasible (2&times;2)</text>
+                <rect class="bench-bar-py" x="150" y="124" width="33.0" height="9"></rect>
+                <text class="bench-bar-note" x="188" y="131.5">7.4 &micro;s</text>
+                <rect class="bench-bar-solve" x="150" y="137" width="2.0" height="9"></rect>
+                <rect class="bench-bar-toll" x="152" y="137" width="19.6" height="9"></rect>
+                <text class="bench-bar-note" x="176.6" y="144.5">4.8 &micro;s, 91% border</text>
+              </g>
+              <g class="bench-row">
+                <text class="bench-row-label" x="142" y="183">Klee-Minty (3&times;3)</text>
+                <rect class="bench-bar-py" x="150" y="168" width="114.4" height="9"></rect>
+                <text class="bench-bar-note" x="269.4" y="175.5">25.5 &micro;s</text>
+                <rect class="bench-bar-solve" x="150" y="181" width="4.4" height="9"></rect>
+                <rect class="bench-bar-toll" x="154.4" y="181" width="23.4" height="9"></rect>
+                <text class="bench-bar-note" x="182.8" y="188.5">6.2 &micro;s, 84% border</text>
+              </g>
+              <g class="bench-row">
+                <text class="bench-row-label" x="142" y="227">cycling LP (3&times;4)</text>
+                <rect class="bench-bar-py" x="150" y="212" width="122.7" height="9"></rect>
+                <text class="bench-bar-note" x="277.7" y="219.5">27.3 &micro;s</text>
+                <rect class="bench-bar-solve" x="150" y="225" width="4.3" height="9"></rect>
+                <rect class="bench-bar-toll" x="154.3" y="225" width="24.4" height="9"></rect>
+                <text class="bench-bar-note" x="183.7" y="232.5">6.4 &micro;s, 85% border</text>
+              </g>
+              <g class="bench-row">
+                <text class="bench-row-label" x="142" y="271">cargo hold (5&times;3)</text>
+                <rect class="bench-bar-py" x="150" y="256" width="104.5" height="9"></rect>
+                <text class="bench-bar-note" x="259.5" y="263.5">23.3 &micro;s</text>
+                <rect class="bench-bar-solve" x="150" y="269" width="4.1" height="9"></rect>
+                <rect class="bench-bar-toll" x="154.1" y="269" width="30.6" height="9"></rect>
+                <text class="bench-bar-note" x="189.7" y="276.5">7.7 &micro;s, 88% border</text>
+              </g>
+              <g class="bench-row">
+                <text class="bench-row-label" x="142" y="315">shortest path (5&times;3)</text>
+                <rect class="bench-bar-py" x="150" y="300" width="87.5" height="9"></rect>
+                <text class="bench-bar-note" x="242.5" y="307.5">19.5 &micro;s</text>
+                <rect class="bench-bar-solve" x="150" y="313" width="3.7" height="9"></rect>
+                <rect class="bench-bar-toll" x="153.7" y="313" width="31.7" height="9"></rect>
+                <text class="bench-bar-note" x="190.4" y="320.5">7.9 &micro;s, 89% border</text>
+              </g>
+              <g class="bench-row">
+                <text class="bench-row-label" x="142" y="359">max flow (12&times;8)</text>
+                <rect class="bench-bar-py" x="150" y="344" width="298.6" height="9"></rect>
+                <text class="bench-bar-note" x="448.6" y="340" text-anchor="end">66.6 &micro;s</text>
+                <rect class="bench-bar-solve" x="150" y="357" width="9.8" height="9"></rect>
+                <rect class="bench-bar-toll" x="159.8" y="357" width="59.2" height="9"></rect>
+                <text class="bench-bar-note" x="224" y="364.5">15.4 &micro;s, 86% border</text>
+              </g>
+
+              <g class="bench-ticks">
+                <text class="bench-tick-label bench-tick-x" x="150" y="380">0</text>
+                <text class="bench-tick-label bench-tick-x" x="194.9" y="380">10</text>
+                <text class="bench-tick-label bench-tick-x" x="239.7" y="380">20</text>
+                <text class="bench-tick-label bench-tick-x" x="284.6" y="380">30</text>
+                <text class="bench-tick-label bench-tick-x" x="329.4" y="380">40</text>
+                <text class="bench-tick-label bench-tick-x" x="374.3" y="380">50</text>
+                <text class="bench-tick-label bench-tick-x" x="419.1" y="380">60</text>
+                <text class="bench-tick-label bench-tick-x" x="464" y="380">70</text>
+              </g>
+              <text class="bench-axis-title" x="307" y="404">median time per solve, microseconds (linear)</text>
+            </svg>
+          </div>
+
+          <div class="badge-row">
+            <span class="pill engine-badge" data-engine="trace" title="The badge names the engine behind this figure's numbers: a committed benchmark record, bench/results.json, replayed into the chart. Nothing here times your machine.">replaying recorded run</span>
+            <span class="fig-sub">One committed record backs both figures. Each border share
+              is the native call minus the in-process core time for that program; the browser
+              build pays a comparable toll in JSON, 3.3 to 16.4 microseconds per call on these
+              fixtures.</span>
+          </div>
+
+          <p class="readout">
+            The walk inside never reaches <b>3 microseconds</b> on any program this page poses;
+            everything else in the native bar is the crossing.
+          </p>
+          <figcaption>
+            <span class="fig-num">Figure 12.</span> The page's own programs on the two engines
+            the Python package ships. Each native bar splits into the core's solve and the
+            border crossing, reading the dataclasses in and building a Solution back out; the
+            border is 84 to 91 percent of the call on every one.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="l-body">
+        <p>The browser pays the same kind of toll in a different currency.
+          <span class="code-inline">solve_json</span> crosses its border as JSON text,
+          serialized both ways on every call, and still lands within <b>1.7&times;</b> of the
+          in-process core at 192&times;192, in line with the 1.45&times; to 1.55&times; average
+          measured for WebAssembly against native code<a class="cite" href="#ref-8" aria-label="Reference 8: Jangda et al. 2019">[8]<span class="cite-tip" aria-hidden="true">A. Jangda, B. Powers, E. D. Berger, and A. Guha, "Not So Fast: Analyzing the Performance of WebAssembly vs. Native Code." USENIX ATC, 2019.</span></a>,
+          with the JSON on top. Three fences belong around these numbers. They come from one
+          machine and one instance family, dense phase-2-only walks; a program that needs
+          artificial variables would tax every engine more, in roughly the same proportions.
+          The Rust times come from the shipped build, whose release profile is sized for the
+          500 KB wasm budget (<span class="code-inline">opt-level = "z"</span>). And none of
+          it touches Section 05's lesson: sixty-six times faster is six more dimensions of the
+          hostile bay, 2&#8310; is 64, before the walk is exactly as lost as before. The escape
+          there came from a better pivot rule; a faster hull just moves the same wall six
+          dimensions out. So choose the engine the way this page does, the reference for reading, the
+          core for volume, and either one for anything a human is watching, because at human
+          scale both finished long before the frame drew.</p>
+        <aside class="signal" aria-label="Signal traffic between the two ships">
+          <p class="signal-msg"><span class="signal-head"><svg class="signal-mark" viewBox="0 0 16 16" aria-hidden="true" fill="var(--trail)"><circle cx="3" cy="8" r="1.4"></circle><circle cx="8" cy="8" r="1.1"></circle><circle cx="13" cy="8" r="0.8"></circle></svg>(tight beam, M32.9)<br>xGCU Strictly Feasible<br>oGSV Marginal Utility</span>
+          <span class="signal-body">You raced yourself while I was away. Which of you won?</span></p>
+          <p class="signal-msg"><span class="signal-head">xGSV Marginal Utility<br>oGCU Strictly Feasible</span>
+          <span class="signal-body">Both of me docked at the same corner. One paid for the trip in border stamps. The walk was never the expensive part.</span></p>
+        </aside>
+      </div>
+    </section>
+
     <!-- ================= REFERENCES ================= -->
     <section id="references" class="backmatter backmatter-open" aria-labelledby="references-h">
       <div class="l-body">
@@ -1904,6 +2218,8 @@
           <li id="ref-4"><span class="ref-tag">V. Klee and G. Minty</span>, "How good is the simplex algorithm?," in <em>Inequalities III</em>, O. Shisha, Ed. Academic Press, 1972. The skewed cube of Section 05, whose corners a greedy pivot rule is lured through in full.</li>
           <li id="ref-5"><span class="ref-tag">V. Chvatal</span>, <em>Linear Programming</em>. W. H. Freeman, 1983. The small degenerate program of Section 05 whose naive tie-break cycles, and Bland's rule as the finite escape.</li>
           <li id="ref-6"><span class="ref-tag">minilp</span>: a pure-Rust linear programming solver. crates.io. Prior art for a small, embeddable simplex, and a useful cross-reference for this core. <a href="https://crates.io/crates/minilp">minilp on crates.io</a>.</li>
+          <li id="ref-7"><span class="ref-tag">PyO3 Contributors</span>, "Performance," <em>The PyO3 user guide</em>. Source for the roughly fixed per-call cost of crossing the Python-Rust boundary that Section 07's border figure measures. <a href="https://pyo3.rs/main/performance">pyo3.rs/main/performance</a>.</li>
+          <li id="ref-8"><span class="ref-tag">A. Jangda, B. Powers, E. D. Berger, and A. Guha</span>, "Not So Fast: Analyzing the Performance of WebAssembly vs. Native Code," USENIX Annual Technical Conference, 2019. Source for the 1.45&times; to 1.55&times; average WebAssembly-against-native slowdown Section 07 compares its browser build to. <a href="https://www.usenix.org/conference/atc19/presentation/jangda">USENIX ATC '19</a>.</li>
         </ol>
         <p>Figures draw with d3 version 7, and with scripts on KaTeX 0.16 typesets the static display
           blocks and the identity above while the interactive panels write plain text so they can rewrite
@@ -2119,6 +2435,14 @@
               <span class="concept-links"><a href="#s6">Sec. 06</a> <a href="#fig-network">Fig. 9</a></span>
             </div>
             <span class="concept-def">Section 04's strong duality on a network, where the largest flow equals the lightest cut.</span>
+          </li>
+          <li class="concept-row">
+            <div class="concept-head">
+              <span class="concept-name">Border crossing</span>
+              <span class="concept-leader" aria-hidden="true"></span>
+              <span class="concept-links"><a href="#s7">Sec. 07</a> <a href="#fig-bench-border">Fig. 12</a></span>
+            </div>
+            <span class="concept-def">The fixed cost of moving a problem between runtimes, paid in attribute reads at the PyO3 boundary and in JSON at the browser's, and the whole bill on a small program.</span>
           </li>
         </ol>
       </div>

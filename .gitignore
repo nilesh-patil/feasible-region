@@ -28,6 +28,10 @@ python/feasible_region/_core*.pyd
 # wasm build intermediates (final wasm in docs/wasm/ IS committed for Pages)
 crates/feasible-core/pkg/
 
+# bench intermediates (bench/results.json IS committed: it is the recorded
+# run the bench figures replay; problems.json regenerates from the seeds)
+bench/problems.json
+
 # local tooling
 .claude/
 

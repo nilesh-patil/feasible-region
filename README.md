@@ -29,6 +29,12 @@ against. Three things read from that core:
 The reference solver is also what records those traces, so the Python side ends
 up being both the checker for the Rust core and the thing that draws the figures.
 
+Section 07 of the site compares the implementations against each other: the
+bench harness (`python/feasible_region/bench.py`, plus an in-process Rust leg
+and a Node-driven WASM leg) times the same parity-gated walks on every engine
+and records one run to `bench/results.json`, which the section's two figures
+replay.
+
 ## running it
 
 Everything goes through [pixi](https://pixi.sh):
@@ -38,6 +44,8 @@ pixi run test        # python + rust test suites
 pixi run traces      # regenerate the pivot traces (fixtures + site fallback)
 pixi run serve       # serve the site at http://localhost:8137
 pixi run build-wasm  # compile the solver into docs/wasm/
+pixi run bench       # re-record bench/results.json on your machine
+pixi run bench-wasm  # add the browser build's numbers (needs node)
 ```
 
 The WASM build is pinned to Rust 1.67.1. wasm-bindgen 0.2.84 refuses anything
