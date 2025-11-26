@@ -2218,7 +2218,7 @@
           <li id="ref-4"><span class="ref-tag">V. Klee and G. Minty</span>, "How good is the simplex algorithm?," in <em>Inequalities III</em>, O. Shisha, Ed. Academic Press, 1972. The skewed cube of Section 05, whose corners a greedy pivot rule is lured through in full.</li>
           <li id="ref-5"><span class="ref-tag">V. Chvatal</span>, <em>Linear Programming</em>. W. H. Freeman, 1983. The small degenerate program of Section 05 whose naive tie-break cycles, and Bland's rule as the finite escape.</li>
           <li id="ref-6"><span class="ref-tag">minilp</span>: a pure-Rust linear programming solver. crates.io. Prior art for a small, embeddable simplex, and a useful cross-reference for this core. <a href="https://crates.io/crates/minilp">minilp on crates.io</a>.</li>
-          <li id="ref-7"><span class="ref-tag">PyO3 Contributors</span>, "Performance," <em>The PyO3 user guide</em>. Source for the roughly fixed per-call cost of crossing the Python-Rust boundary that Section 07's border figure measures. <a href="https://pyo3.rs/main/performance">pyo3.rs/main/performance</a>.</li>
+          <li id="ref-7"><span class="ref-tag">PyO3 Contributors</span>, "Performance," <em>The PyO3 user guide</em>. Source for the costs of crossing the Python-Rust boundary and the advice Section 07 quotes: cross rarely, carry more per crossing. <a href="https://pyo3.rs/main/performance">pyo3.rs/main/performance</a>.</li>
           <li id="ref-8"><span class="ref-tag">A. Jangda, B. Powers, E. D. Berger, and A. Guha</span>, "Not So Fast: Analyzing the Performance of WebAssembly vs. Native Code," USENIX Annual Technical Conference, 2019. Source for the 1.45&times; to 1.55&times; average WebAssembly-against-native slowdown Section 07 compares its browser build to. <a href="https://www.usenix.org/conference/atc19/presentation/jangda">USENIX ATC '19</a>.</li>
         </ol>
         <p>Figures draw with d3 version 7, and with scripts on KaTeX 0.16 typesets the static display
@@ -2442,7 +2442,7 @@
               <span class="concept-leader" aria-hidden="true"></span>
               <span class="concept-links"><a href="#s7">Sec. 07</a> <a href="#fig-bench-border">Fig. 12</a></span>
             </div>
-            <span class="concept-def">The fixed cost of moving a problem between runtimes, paid in attribute reads at the PyO3 boundary and in JSON at the browser's, and the whole bill on a small program.</span>
+            <span class="concept-def">The toll a problem pays to move between runtimes, in attribute reads at the PyO3 boundary and in JSON at the browser's, and nearly the whole bill on a small program.</span>
           </li>
         </ol>
       </div>
